@@ -1,4 +1,4 @@
-import { FaEdit, FaTicketAlt, FaCreditCard, FaCheck } from "react-icons/fa";
+import { Edit, Ticket, CreditCard, Check } from "lucide-react";
 
 export default function HowItWorks() {
   const steps = [
@@ -7,7 +7,7 @@ export default function HowItWorks() {
       title: "Create Event",
       description:
         "Set up your event details, pricing, and mint NFT tickets on Solana",
-      icon: FaEdit,
+      icon: Edit,
       color: "from-purple-500 to-pink-500",
     },
     {
@@ -15,14 +15,14 @@ export default function HowItWorks() {
       title: "List & Sell",
       description:
         "Publish your event and receive instant SOL payments for each ticket sold",
-      icon: FaTicketAlt,
+      icon: Ticket,
       color: "from-green-400 to-cyan-500",
     },
     {
       number: "03",
       title: "Attendees Purchase",
       description: "Buyers get NFT tickets directly in their Solana wallet",
-      icon: FaCreditCard,
+      icon: CreditCard,
       color: "from-blue-500 to-purple-600",
     },
     {
@@ -30,7 +30,7 @@ export default function HowItWorks() {
       title: "Signature Check-in",
       description:
         "Verify attendance with wallet signature at your event entrance",
-      icon: FaCheck,
+      icon: Check,
       color: "from-yellow-400 to-orange-500",
     },
   ];

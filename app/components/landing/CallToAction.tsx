@@ -1,4 +1,4 @@
-import { FaRocket, FaTicketAlt, FaStar } from "react-icons/fa";
+import { Rocket, Ticket, Star } from "lucide-react";
 
 export default function CallToAction() {
   return (
@@ -56,7 +56,7 @@ export default function CallToAction() {
           {/* Trust Indicators */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8 mt-16 max-w-3xl mx-auto">
             <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-              <FaRocket className="text-3xl mb-2 text-white" />
+              <Rocket className="text-3xl mb-2 text-white" />
               <div className="text-2xl md:text-3xl font-bold text-white mb-1">
                 1000+
               </div>
@@ -64,7 +64,7 @@ export default function CallToAction() {
             </div>
 
             <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-              <FaTicketAlt className="text-3xl mb-2 text-white" />
+              <Ticket className="text-3xl mb-2 text-white" />
               <div className="text-2xl md:text-3xl font-bold text-white mb-1">
                 50K+
               </div>
@@ -72,7 +72,7 @@ export default function CallToAction() {
             </div>
 
             <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-              <FaStar className="text-3xl mb-2 text-white" />
+              <Star className="text-3xl mb-2 text-white" />
               <div className="text-2xl md:text-3xl font-bold text-white mb-1">
                 4.9/5
               </div>

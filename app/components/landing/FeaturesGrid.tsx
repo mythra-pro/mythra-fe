@@ -1,30 +1,30 @@
-import { FaPen, FaMoneyBillWave, FaLink, FaPalette } from "react-icons/fa";
+import { Pen, DollarSign, Link, Palette } from "lucide-react";
 
 export default function FeaturesGrid() {
   const features = [
     {
-      icon: FaPen,
+      icon: Pen,
       title: "Signature-based Check-in",
       description:
         "Verify ticket ownership with wallet signatures. No more fake tickets or paper checks.",
       gradient: "from-purple-500 to-pink-500",
     },
     {
-      icon: FaMoneyBillWave,
+      icon: DollarSign,
       title: "Instant SOL Payments",
       description:
         "Get paid immediately in SOL. No waiting, no intermediaries, no high fees.",
       gradient: "from-green-400 to-cyan-500",
     },
     {
-      icon: FaLink,
+      icon: Link,
       title: "On-chain Transparency",
       description:
         "Every transaction recorded on Solana blockchain. Full audit trail and accountability.",
       gradient: "from-blue-500 to-purple-600",
     },
     {
-      icon: FaPalette,
+      icon: Palette,
       title: "NFT Digital Souvenirs",
       description:
         "Attendees keep their tickets as collectible NFTs. Memories that last forever.",

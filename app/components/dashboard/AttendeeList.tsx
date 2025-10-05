@@ -3,14 +3,14 @@
 import { useState } from "react";
 import { TicketData, TicketStatus } from "@/app/types/event";
 import {
-  FaSearch,
-  FaFilter,
-  FaCheckCircle,
-  FaTimesCircle,
-  FaClock,
-  FaDownload,
-  FaQrcode,
-} from "react-icons/fa";
+  Search,
+  Filter,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Download,
+  QrCode,
+} from "lucide-react";
 
 interface AttendeeListProps {
   tickets: TicketData[];
@@ -66,21 +66,21 @@ export default function AttendeeList({
       case TicketStatus.CHECKED_IN:
         return (
           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-            <FaCheckCircle className="mr-1" />
+            <CheckCircle className="mr-1" />
             Checked In
           </span>
         );
       case TicketStatus.SOLD:
         return (
           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-            <FaClock className="mr-1" />
+            <Clock className="mr-1" />
             Pending
           </span>
         );
       case TicketStatus.CANCELLED:
         return (
           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-            <FaTimesCircle className="mr-1" />
+            <XCircle className="mr-1" />
             Cancelled
           </span>
         );
@@ -137,7 +137,7 @@ export default function AttendeeList({
             onClick={exportToCSV}
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-green-500 text-white rounded-lg hover:shadow-lg transition-all"
           >
-            <FaDownload />
+            <Download />
             Export CSV
           </button>
         </div>
@@ -170,7 +170,7 @@ export default function AttendeeList({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Search */}
           <div className="relative">
-            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <input
               type="text"
               placeholder="Search by name, email, or wallet..."
@@ -182,7 +182,7 @@ export default function AttendeeList({
 
           {/* Status Filter */}
           <div className="relative">
-            <FaFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <select
               value={filterStatus}
               onChange={(e) =>
@@ -295,7 +295,7 @@ export default function AttendeeList({
                           className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
                           title="View QR Code"
                         >
-                          <FaQrcode />
+                          <QrCode />
                         </button>
                       )}
                     </div>

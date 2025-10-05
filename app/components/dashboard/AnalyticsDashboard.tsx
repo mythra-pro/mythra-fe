@@ -1,7 +1,7 @@
 "use client";
 
 import { EventAnalytics } from "@/app/types/event";
-import { FaTicketAlt, FaCoins, FaUserCheck, FaChartLine } from "react-icons/fa";
+import { Ticket, Coins, UserCheck, TrendingUp } from "lucide-react";
 
 interface AnalyticsDashboardProps {
   analytics: EventAnalytics;
@@ -46,7 +46,7 @@ export default function AnalyticsDashboard({
         <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500">
           <div className="flex items-center justify-between mb-4">
             <div className="bg-purple-100 p-3 rounded-lg">
-              <FaTicketAlt className="text-2xl text-purple-600" />
+              <Ticket className="text-2xl text-purple-600" />
             </div>
             <span className="text-xs font-medium text-gray-500">TICKETS</span>
           </div>
@@ -71,7 +71,7 @@ export default function AnalyticsDashboard({
         <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
           <div className="flex items-center justify-between mb-4">
             <div className="bg-green-100 p-3 rounded-lg">
-              <FaCoins className="text-2xl text-green-600" />
+              <Coins className="text-2xl text-green-600" />
             </div>
             <span className="text-xs font-medium text-gray-500">REVENUE</span>
           </div>
@@ -93,7 +93,7 @@ export default function AnalyticsDashboard({
         <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
           <div className="flex items-center justify-between mb-4">
             <div className="bg-blue-100 p-3 rounded-lg">
-              <FaUserCheck className="text-2xl text-blue-600" />
+              <UserCheck className="text-2xl text-blue-600" />
             </div>
             <span className="text-xs font-medium text-gray-500">CHECK-IN</span>
           </div>
@@ -117,7 +117,7 @@ export default function AnalyticsDashboard({
         <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-orange-500">
           <div className="flex items-center justify-between mb-4">
             <div className="bg-orange-100 p-3 rounded-lg">
-              <FaChartLine className="text-2xl text-orange-600" />
+              <TrendingUp className="text-2xl text-orange-600" />
             </div>
             <span className="text-xs font-medium text-gray-500">AVG PRICE</span>
           </div>

@@ -1,4 +1,4 @@
-import { FaTicketAlt, FaBolt, FaShieldAlt, FaGem } from "react-icons/fa";
+import { Ticket, Zap, Shield, Gem } from "lucide-react";
 
 export default function HeroSection() {
   return (
@@ -28,7 +28,7 @@ export default function HeroSection() {
           {/* Value Props */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-12">
             <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300">
-              <FaTicketAlt className="text-3xl mb-3 text-white" />
+              <Ticket className="text-3xl mb-3 text-white" />
               <h3 className="text-white font-semibold text-lg mb-2">
                 NFT Tickets
               </h3>
@@ -38,7 +38,7 @@ export default function HeroSection() {
             </div>
 
             <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300">
-              <FaBolt className="text-3xl mb-3 text-white" />
+              <Zap className="text-3xl mb-3 text-white" />
               <h3 className="text-white font-semibold text-lg mb-2">
                 Lightning Fast
               </h3>
@@ -48,7 +48,7 @@ export default function HeroSection() {
             </div>
 
             <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300">
-              <FaShieldAlt className="text-3xl mb-3 text-white" />
+              <Shield className="text-3xl mb-3 text-white" />
               <h3 className="text-white font-semibold text-lg mb-2">Secure</h3>
               <p className="text-white/80 text-sm">
                 Fraud-proof with blockchain verification
@@ -56,7 +56,7 @@ export default function HeroSection() {
             </div>
 
             <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300">
-              <FaGem className="text-3xl mb-3 text-white" />
+              <Gem className="text-3xl mb-3 text-white" />
               <h3 className="text-white font-semibold text-lg mb-2">
                 Collectible
               </h3>

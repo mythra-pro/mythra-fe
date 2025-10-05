@@ -1,7 +1,7 @@
 "use client";
 
 import { TicketData } from "@/app/types/event";
-import { FaDownload, FaTimes, FaQrcode } from "react-icons/fa";
+import { Download, X, QrCode } from "lucide-react";
 
 interface QRCodeDisplayProps {
   ticket: TicketData;
@@ -81,13 +81,13 @@ export default function QRCodeDisplay({
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
         >
-          <FaTimes className="text-2xl" />
+          <X className="text-2xl" />
         </button>
 
         {/* Header */}
         <div className="text-center mb-6">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-500 to-green-500 rounded-full mb-4">
-            <FaQrcode className="text-3xl text-white" />
+            <QrCode className="text-3xl text-white" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900">{eventName}</h2>
           <p className="text-gray-600 mt-1">Ticket #{ticket.ticketNumber}</p>
@@ -136,7 +136,7 @@ export default function QRCodeDisplay({
             {/* Placeholder for actual QR code - in production, use qrcode.react or similar */}
             <div className="w-full h-full flex items-center justify-center">
               <div className="text-center">
-                <FaQrcode className="text-8xl text-purple-500 mx-auto mb-4" />
+                <QrCode className="text-8xl text-purple-500 mx-auto mb-4" />
                 <p className="text-sm text-gray-600">
                   QR Code for Ticket #{ticket.ticketNumber}
                 </p>
@@ -162,7 +162,7 @@ export default function QRCodeDisplay({
             onClick={downloadQRCode}
             className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-green-500 text-white rounded-lg hover:shadow-lg transition-all font-medium"
           >
-            <FaDownload />
+            <Download />
             Download QR Code
           </button>
         </div>

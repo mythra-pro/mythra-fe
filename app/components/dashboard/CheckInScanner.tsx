@@ -2,13 +2,7 @@
 
 import { useState } from "react";
 import { CheckInData, TicketData } from "@/app/types/event";
-import {
-  FaQrcode,
-  FaCheckCircle,
-  FaTimesCircle,
-  FaCamera,
-  FaKeyboard,
-} from "react-icons/fa";
+import { QrCode, CheckCircle, XCircle, Camera, Keyboard } from "lucide-react";
 
 interface CheckInScannerProps {
   eventId: string;
@@ -153,7 +147,7 @@ export default function CheckInScanner({
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
-            <FaCamera className="text-2xl" />
+            <Camera className="text-2xl" />
             QR Scanner
           </button>
           <button
@@ -164,7 +158,7 @@ export default function CheckInScanner({
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
-            <FaKeyboard className="text-2xl" />
+            <Keyboard className="text-2xl" />
             Manual Entry
           </button>
         </div>
@@ -178,7 +172,7 @@ export default function CheckInScanner({
               {isScanning ? (
                 <div className="text-center">
                   <div className="animate-pulse">
-                    <FaQrcode className="text-8xl text-purple-500 mx-auto mb-4" />
+                    <QrCode className="text-8xl text-purple-500 mx-auto mb-4" />
                   </div>
                   <p className="text-lg font-medium text-gray-700">
                     Scanning...
@@ -186,7 +180,7 @@ export default function CheckInScanner({
                 </div>
               ) : (
                 <div className="text-center">
-                  <FaQrcode className="text-8xl text-gray-300 mx-auto mb-4" />
+                  <QrCode className="text-8xl text-gray-300 mx-auto mb-4" />
                   <p className="text-lg font-medium text-gray-700 mb-2">
                     Ready to Scan
                   </p>
@@ -247,9 +241,9 @@ export default function CheckInScanner({
               }`}
             >
               {lastScanResult.success ? (
-                <FaCheckCircle className="text-2xl text-green-600" />
+                <CheckCircle className="text-2xl text-green-600" />
               ) : (
-                <FaTimesCircle className="text-2xl text-red-600" />
+                <XCircle className="text-2xl text-red-600" />
               )}
             </div>
             <div className="flex-1">
@@ -309,9 +303,9 @@ export default function CheckInScanner({
               >
                 <div className="flex items-center gap-3">
                   {entry.success ? (
-                    <FaCheckCircle className="text-green-500" />
+                    <CheckCircle className="text-green-500" />
                   ) : (
-                    <FaTimesCircle className="text-red-500" />
+                    <XCircle className="text-red-500" />
                   )}
                   <div>
                     <p className="text-sm font-medium text-gray-900">

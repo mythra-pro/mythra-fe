@@ -22,15 +22,15 @@ import QRCodeDisplay from "./QRCodeDisplay";
 import CheckInScanner from "./CheckInScanner";
 import PayoutManagement from "./PayoutManagement";
 import {
-  FaPlus,
-  FaChartBar,
-  FaUsers,
-  FaQrcode,
-  FaWallet,
-  FaCalendarAlt,
-  FaBars,
-  FaTimes,
-} from "react-icons/fa";
+  Plus,
+  BarChart3,
+  Users,
+  QrCode,
+  Wallet,
+  Calendar,
+  Menu,
+  X,
+} from "lucide-react";
 
 type TabType =
   | "overview"
@@ -102,11 +102,11 @@ export default function EventOrganizerDashboard() {
   };
 
   const tabs = [
-    { id: "overview" as TabType, label: "Overview", icon: FaCalendarAlt },
-    { id: "analytics" as TabType, label: "Analytics", icon: FaChartBar },
-    { id: "attendees" as TabType, label: "Attendees", icon: FaUsers },
-    { id: "checkin" as TabType, label: "Check-in", icon: FaQrcode },
-    { id: "payout" as TabType, label: "Payout", icon: FaWallet },
+    { id: "overview" as TabType, label: "Overview", icon: Calendar },
+    { id: "analytics" as TabType, label: "Analytics", icon: BarChart3 },
+    { id: "attendees" as TabType, label: "Attendees", icon: Users },
+    { id: "checkin" as TabType, label: "Check-in", icon: QrCode },
+    { id: "payout" as TabType, label: "Payout", icon: Wallet },
   ];
 
   return (
@@ -120,7 +120,7 @@ export default function EventOrganizerDashboard() {
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 className="lg:hidden text-gray-600 hover:text-gray-900"
               >
-                {sidebarOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+                {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
               <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-green-500 bg-clip-text text-transparent">
                 Event Organizer Dashboard
@@ -133,7 +133,7 @@ export default function EventOrganizerDashboard() {
               }}
               className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-green-500 text-white rounded-lg hover:shadow-lg transition-all font-medium"
             >
-              <FaPlus />
+              <Plus />
               <span className="hidden sm:inline">Create Event</span>
             </button>
           </div>
@@ -294,7 +294,7 @@ export default function EventOrganizerDashboard() {
                       onClick={() => setActiveTab("analytics")}
                       className="bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all"
                     >
-                      <FaChartBar className="text-3xl text-purple-600 mb-3" />
+                      <BarChart3 className="text-3xl text-purple-600 mb-3" />
                       <h3 className="font-bold text-gray-900 mb-2">
                         View Analytics
                       </h3>
@@ -307,7 +307,7 @@ export default function EventOrganizerDashboard() {
                       onClick={() => setActiveTab("attendees")}
                       className="bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all"
                     >
-                      <FaUsers className="text-3xl text-green-600 mb-3" />
+                      <Users className="text-3xl text-green-600 mb-3" />
                       <h3 className="font-bold text-gray-900 mb-2">
                         Manage Attendees
                       </h3>
@@ -320,7 +320,7 @@ export default function EventOrganizerDashboard() {
                       onClick={() => setActiveTab("checkin")}
                       className="bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all"
                     >
-                      <FaQrcode className="text-3xl text-blue-600 mb-3" />
+                      <QrCode className="text-3xl text-blue-600 mb-3" />
                       <h3 className="font-bold text-gray-900 mb-2">
                         Check-in Scanner
                       </h3>

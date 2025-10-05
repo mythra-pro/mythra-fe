@@ -3,13 +3,13 @@
 import { useState } from "react";
 import { CreateEventFormData } from "@/app/types/event";
 import {
-  FaCalendar,
-  FaTicketAlt,
-  FaDollarSign,
-  FaInfoCircle,
-  FaMapMarkerAlt,
-  FaImage,
-} from "react-icons/fa";
+  Calendar,
+  Ticket,
+  DollarSign,
+  Info,
+  MapPin,
+  Image,
+} from "lucide-react";
 
 interface EventCreationWizardProps {
   onSubmit: (data: CreateEventFormData) => void;
@@ -99,9 +99,9 @@ export default function EventCreationWizard({
   };
 
   const steps = [
-    { number: 1, title: "Basic Info", icon: FaInfoCircle },
-    { number: 2, title: "Date & Location", icon: FaCalendar },
-    { number: 3, title: "Pricing & Tickets", icon: FaTicketAlt },
+    { number: 1, title: "Basic Info", icon: Info },
+    { number: 2, title: "Date & Location", icon: Calendar },
+    { number: 3, title: "Pricing & Tickets", icon: Ticket },
   ];
 
   return (
@@ -222,7 +222,7 @@ export default function EventCreationWizard({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              <FaCalendar className="inline mr-2" />
+              <Calendar className="inline mr-2" />
               Start Date & Time *
             </label>
             <input
@@ -240,7 +240,7 @@ export default function EventCreationWizard({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              <FaCalendar className="inline mr-2" />
+              <Calendar className="inline mr-2" />
               End Date & Time (Optional)
             </label>
             <input
@@ -253,7 +253,7 @@ export default function EventCreationWizard({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              <FaMapMarkerAlt className="inline mr-2" />
+              <MapPin className="inline mr-2" />
               Location *
             </label>
             <input
@@ -281,7 +281,7 @@ export default function EventCreationWizard({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              <FaDollarSign className="inline mr-2" />
+              <DollarSign className="inline mr-2" />
               Price per Ticket (SOL) *
             </label>
             <input
@@ -304,7 +304,7 @@ export default function EventCreationWizard({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              <FaTicketAlt className="inline mr-2" />
+              <Ticket className="inline mr-2" />
               Maximum Tickets *
             </label>
             <input

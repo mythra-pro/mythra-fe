@@ -3,13 +3,13 @@
 import { useState } from "react";
 import { PayoutData } from "@/app/types/event";
 import {
-  FaCoins,
-  FaWallet,
-  FaCheckCircle,
-  FaClock,
-  FaExclamationTriangle,
-  FaExternalLinkAlt,
-} from "react-icons/fa";
+  Coins,
+  Wallet,
+  CheckCircle,
+  Clock,
+  AlertTriangle,
+  ExternalLink,
+} from "lucide-react";
 
 interface PayoutManagementProps {
   eventId: string;
@@ -63,13 +63,13 @@ export default function PayoutManagement({
   const getStatusIcon = (status: PayoutData["status"]) => {
     switch (status) {
       case "completed":
-        return <FaCheckCircle className="text-green-500" />;
+        return <CheckCircle className="text-green-500" />;
       case "processing":
-        return <FaClock className="text-blue-500 animate-spin" />;
+        return <Clock className="text-blue-500 animate-spin" />;
       case "pending":
-        return <FaClock className="text-yellow-500" />;
+        return <Clock className="text-yellow-500" />;
       case "failed":
-        return <FaExclamationTriangle className="text-red-500" />;
+        return <AlertTriangle className="text-red-500" />;
     }
   };
 
@@ -105,7 +105,7 @@ export default function PayoutManagement({
         <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500">
           <div className="flex items-center gap-3 mb-3">
             <div className="bg-purple-100 p-3 rounded-lg">
-              <FaCoins className="text-2xl text-purple-600" />
+              <Coins className="text-2xl text-purple-600" />
             </div>
             <span className="text-xs font-medium text-gray-500">
               TOTAL REVENUE
@@ -121,7 +121,7 @@ export default function PayoutManagement({
         <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
           <div className="flex items-center gap-3 mb-3">
             <div className="bg-green-100 p-3 rounded-lg">
-              <FaWallet className="text-2xl text-green-600" />
+              <Wallet className="text-2xl text-green-600" />
             </div>
             <span className="text-xs font-medium text-gray-500">
               YOUR SHARE (95%)
@@ -137,7 +137,7 @@ export default function PayoutManagement({
         <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
           <div className="flex items-center gap-3 mb-3">
             <div className="bg-blue-100 p-3 rounded-lg">
-              <FaCheckCircle className="text-2xl text-blue-600" />
+              <CheckCircle className="text-2xl text-blue-600" />
             </div>
             <span className="text-xs font-medium text-gray-500">PAID OUT</span>
           </div>
@@ -151,7 +151,7 @@ export default function PayoutManagement({
         <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-orange-500">
           <div className="flex items-center gap-3 mb-3">
             <div className="bg-orange-100 p-3 rounded-lg">
-              <FaCoins className="text-2xl text-orange-600" />
+              <Coins className="text-2xl text-orange-600" />
             </div>
             <span className="text-xs font-medium text-gray-500">AVAILABLE</span>
           </div>
@@ -269,7 +269,7 @@ export default function PayoutManagement({
                           className="inline-flex items-center gap-1 text-purple-600 hover:text-purple-700 text-sm"
                         >
                           View
-                          <FaExternalLinkAlt className="text-xs" />
+                          <ExternalLink className="text-xs" />
                         </a>
                       ) : (
                         <span className="text-gray-400 text-sm">-</span>
@@ -282,7 +282,7 @@ export default function PayoutManagement({
           </div>
         ) : (
           <div className="p-12 text-center">
-            <FaWallet className="text-6xl text-gray-300 mx-auto mb-4" />
+            <Wallet className="text-6xl text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500">No payout history yet</p>
           </div>
         )}
@@ -294,7 +294,7 @@ export default function PayoutManagement({
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
             <div className="text-center mb-6">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-500 to-green-500 rounded-full mb-4">
-                <FaWallet className="text-3xl text-white" />
+                <Wallet className="text-3xl text-white" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">
                 Confirm Payout
