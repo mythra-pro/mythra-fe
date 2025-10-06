@@ -17,10 +17,10 @@ import {
 } from "@/components/ui/card";
 import { mockEvents, mockTickets, mockAnalytics } from "@/app/data/mockData";
 import { Calendar, MapPin, DollarSign, Ticket } from "lucide-react";
-import EventCreationWizard from "@/app/components/dashboard/EventCreationWizard";
-import CheckInScanner from "@/app/components/dashboard/CheckInScanner";
-import PayoutManagement from "@/app/components/dashboard/PayoutManagement";
-import QRCodeDisplay from "@/app/components/dashboard/QRCodeDisplay";
+import EventCreationWizard from "@/app/_components/dashboard/EventCreationWizard";
+import CheckInScanner from "@/app/_components/dashboard/CheckInScanner";
+import PayoutManagement from "@/app/_components/dashboard/PayoutManagement";
+import QRCodeDisplay from "@/app/_components/dashboard/QRCodeDisplay";
 import {
   CheckInData,
   CreateEventFormData,

@@ -1,7 +1,7 @@
-import HeroSection from "./components/landing/HeroSection";
-import FeaturesGrid from "./components/landing/FeaturesGrid";
-import HowItWorks from "./components/landing/HowItWorks";
-import CallToAction from "./components/landing/CallToAction";
+import HeroSection from "./_components/landing/HeroSection";
+import FeaturesGrid from "./_components/landing/FeaturesGrid";
+import HowItWorks from "./_components/landing/HowItWorks";
+import CallToAction from "./_components/landing/CallToAction";
 
 export default function Home() {
   return (
