@@ -31,16 +31,16 @@ export function DashboardLayout({
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#CAF0F8] via-[#90E0EF] to-[#48CAE4]">
+    <div className="min-h-screen bg-white">
       {/* Topbar */}
-      <header className="sticky top-0 z-40 w-full bg-[#03045E] shadow-lg">
+      <header className="sticky top-0 z-40 w-full bg-white border-b border-gray-200 shadow-sm">
         <div className="flex h-16 items-center justify-between px-4 lg:px-6">
           {/* Left side */}
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
               size="icon"
-              className="text-white hover:bg-[#0077B6]"
+              className="text-gray-700 hover:bg-gray-100"
               onClick={() => {
                 setSidebarOpen(!sidebarOpen);
                 setMobileSidebarOpen(!mobileSidebarOpen);
@@ -54,8 +54,8 @@ export function DashboardLayout({
             </Button>
 
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#0077B6] to-[#48CAE4]" />
-              <span className="text-xl font-bold text-white">Mythra</span>
+              <div className="h-8 w-8 rounded-lg bg-blue-600" />
+              <span className="text-xl font-bold text-gray-900">Mythra</span>
             </div>
           </div>
 
@@ -65,7 +65,7 @@ export function DashboardLayout({
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <Input
                 placeholder="Search events, tickets..."
-                className="pl-10 bg-[#0077B6] border-[#0096C7] text-white placeholder:text-gray-300"
+                className="pl-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500"
               />
             </div>
           </div>
@@ -75,21 +75,21 @@ export function DashboardLayout({
             <Button
               variant="ghost"
               size="icon"
-              className="text-white hover:bg-[#0077B6] relative"
+              className="text-gray-700 hover:bg-gray-100 relative"
             >
               <Bell className="h-5 w-5" />
-              <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-[#48CAE4]" />
+              <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-blue-600" />
             </Button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="relative h-10 gap-2 px-2 text-white hover:bg-[#0077B6]"
+                  className="relative h-10 gap-2 px-2 text-gray-700 hover:bg-gray-100"
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback className="bg-[#0077B6]">
+                    <AvatarFallback className="bg-blue-600 text-white">
                       {user.name
                         .split(" ")
                         .map((n) => n[0])
@@ -108,7 +108,7 @@ export function DashboardLayout({
                     <p className="text-xs text-muted-foreground">
                       {user.email}
                     </p>
-                    <p className="text-xs font-mono text-[#0077B6]">
+                    <p className="text-xs font-mono text-blue-600">
                       {user.walletAddress}
                     </p>
                   </div>
@@ -135,7 +135,7 @@ export function DashboardLayout({
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -300, opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="hidden lg:block w-64 bg-[#03045E] min-h-[calc(100vh-4rem)] shadow-xl"
+              className="hidden lg:block w-64 bg-white border-r border-gray-200 min-h-[calc(100vh-4rem)] shadow-sm"
             >
               {sidebar}
             </motion.aside>
@@ -158,7 +158,7 @@ export function DashboardLayout({
                 animate={{ x: 0 }}
                 exit={{ x: -300 }}
                 transition={{ duration: 0.3 }}
-                className="fixed left-0 top-16 z-40 w-64 bg-[#03045E] h-[calc(100vh-4rem)] shadow-xl lg:hidden overflow-y-auto"
+                className="fixed left-0 top-16 z-40 w-64 bg-white h-[calc(100vh-4rem)] shadow-xl lg:hidden overflow-y-auto"
               >
                 {sidebar}
               </motion.aside>
@@ -167,7 +167,7 @@ export function DashboardLayout({
         </AnimatePresence>
 
         {/* Main Content */}
-        <main className="flex-1 p-4 lg:p-8 min-h-[calc(100vh-4rem)]">
+        <main className="flex-1 p-4 lg:p-8 min-h-[calc(100vh-4rem)] bg-gray-50">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

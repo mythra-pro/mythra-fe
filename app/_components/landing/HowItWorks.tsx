@@ -8,7 +8,7 @@ export default function HowItWorks() {
       description:
         "Set up your event details, pricing, and mint NFT tickets on blockchain",
       icon: Edit,
-      color: "from-[#0077B6] to-[#0096C7]",
+      color: "bg-blue-600",
     },
     {
       number: "02",
@@ -16,14 +16,14 @@ export default function HowItWorks() {
       description:
         "Secure funding for your event and start selling NFT tickets instantly",
       icon: Ticket,
-      color: "from-[#0096C7] to-[#48CAE4]",
+      color: "bg-blue-500",
     },
     {
       number: "03",
       title: "Attendees Purchase",
       description: "Buyers get NFT tickets directly in their wallet",
       icon: CreditCard,
-      color: "from-[#03045E] to-[#0077B6]",
+      color: "bg-blue-700",
     },
     {
       number: "04",
@@ -31,16 +31,16 @@ export default function HowItWorks() {
       description:
         "Verify attendance with wallet signature at your event entrance",
       icon: Check,
-      color: "from-[#48CAE4] to-[#90E0EF]",
+      color: "bg-blue-400",
     },
   ];
 
   return (
-    <section className="py-20 md:py-32 bg-gradient-to-b from-white to-gray-50 relative overflow-hidden">
+    <section className="py-20 md:py-32 bg-white relative overflow-hidden">
       {/* Background Decoration */}
       <div className="absolute top-0 left-0 w-full h-full opacity-5">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-[#0077B6] rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#48CAE4] rounded-full blur-3xl"></div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-600 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-400 rounded-full blur-3xl"></div>
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -58,23 +58,21 @@ export default function HowItWorks() {
         <div className="hidden lg:block max-w-7xl mx-auto">
           <div className="relative">
             {/* Connection Line */}
-            <div className="absolute top-32 left-0 right-0 h-1 bg-gradient-to-r from-[#0077B6] via-[#0096C7] to-[#48CAE4] opacity-20"></div>
+            <div className="absolute top-32 left-0 right-0 h-1 bg-blue-500 opacity-20"></div>
 
             <div className="grid grid-cols-4 gap-8">
               {steps.map((step, index) => (
                 <div key={index} className="relative">
                   {/* Number Badge */}
                   <div
-                    className={`w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br ${step.color} flex items-center justify-center text-white font-bold text-2xl shadow-lg relative z-10`}
+                    className={`w-20 h-20 mx-auto mb-6 rounded-full ${step.color} flex items-center justify-center text-white font-bold text-2xl shadow-lg relative z-10`}
                   >
                     <step.icon />
                   </div>
 
                   {/* Step Number */}
                   <div className="text-center mb-4">
-                    <span
-                      className={`text-5xl font-bold bg-gradient-to-br ${step.color} bg-clip-text text-transparent`}
-                    >
+                    <span className={`text-5xl font-bold text-blue-600`}>
                       {step.number}
                     </span>
                   </div>
@@ -107,14 +105,12 @@ export default function HowItWorks() {
                 {/* Icon and Number */}
                 <div className="flex-shrink-0">
                   <div
-                    className={`w-20 h-20 rounded-full bg-gradient-to-br ${step.color} flex items-center justify-center text-3xl shadow-lg relative z-10`}
+                    className={`w-20 h-20 rounded-full ${step.color} flex items-center justify-center text-3xl shadow-lg relative z-10`}
                   >
                     <step.icon />
                   </div>
                   <div className="text-center mt-2">
-                    <span
-                      className={`text-2xl font-bold bg-gradient-to-br ${step.color} bg-clip-text text-transparent`}
-                    >
+                    <span className={`text-2xl font-bold text-blue-600`}>
                       {step.number}
                     </span>
                   </div>
@@ -141,7 +137,7 @@ export default function HowItWorks() {
           <p className="text-gray-600 mb-6">
             Ready to revolutionize your events?
           </p>
-          <button className="px-8 py-4 bg-gradient-to-r from-[#0077B6] to-[#0096C7] text-white font-bold rounded-full hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+          <button className="px-8 py-4 bg-blue-600 text-white font-bold rounded-full hover:bg-blue-700 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
             Start Your First Event
           </button>
         </div>

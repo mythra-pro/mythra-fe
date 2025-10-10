@@ -7,33 +7,33 @@ export default function FeaturesGrid() {
       title: "Signature-based Check-in",
       description:
         "Verify ticket ownership with wallet signatures. No more fake tickets or paper checks.",
-      gradient: "from-[#0077B6] to-[#0096C7]",
+      color: "bg-blue-600",
     },
     {
       icon: DollarSign,
       title: "Next-Level Funding",
       description:
         "Access advanced funding options for your events. Crowdfunding, sponsorships, and instant payouts.",
-      gradient: "from-[#0096C7] to-[#48CAE4]",
+      color: "bg-blue-500",
     },
     {
       icon: Link,
       title: "On-chain Transparency",
       description:
         "Every transaction recorded on blockchain. Full audit trail and accountability.",
-      gradient: "from-[#03045E] to-[#0077B6]",
+      color: "bg-blue-700",
     },
     {
       icon: Palette,
       title: "NFT Digital Souvenirs",
       description:
         "Attendees keep their tickets as collectible NFTs. Memories that last forever.",
-      gradient: "from-[#48CAE4] to-[#90E0EF]",
+      color: "bg-blue-400",
     },
   ];
 
   return (
-    <section className="py-20 md:py-32 bg-gradient-to-b from-gray-50 to-white">
+    <section className="py-20 md:py-32 bg-gray-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
@@ -52,15 +52,15 @@ export default function FeaturesGrid() {
               key={index}
               className="group relative bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-transparent overflow-hidden"
             >
-              {/* Gradient Background on Hover */}
+              {/* Background on Hover */}
               <div
-                className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}
+                className={`absolute inset-0 ${feature.color} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}
               ></div>
 
               <div className="relative z-10">
                 {/* Icon */}
                 <div
-                  className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.gradient} mb-6 text-3xl`}
+                  className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl ${feature.color} mb-6 text-3xl`}
                 >
                   <feature.icon className="text-white" />
                 </div>
@@ -78,7 +78,7 @@ export default function FeaturesGrid() {
 
               {/* Decorative Element */}
               <div
-                className={`absolute -bottom-2 -right-2 w-24 h-24 bg-gradient-to-br ${feature.gradient} opacity-10 rounded-full blur-2xl group-hover:opacity-20 transition-opacity duration-300`}
+                className={`absolute -bottom-2 -right-2 w-24 h-24 ${feature.color} opacity-10 rounded-full blur-2xl group-hover:opacity-20 transition-opacity duration-300`}
               ></div>
             </div>
           ))}
@@ -86,13 +86,13 @@ export default function FeaturesGrid() {
         {/* Stats Section */}
         <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
           <div className="text-center">
-            <div className="text-3xl md:text-4xl font-bold text-[#0077B6] mb-2">
+            <div className="text-3xl md:text-4xl font-bold text-blue-600 mb-2">
               99.9%
             </div>
             <div className="text-gray-600 text-sm md:text-base">Uptime</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl md:text-4xl font-bold text-[#0096C7] mb-2">
+            <div className="text-3xl md:text-4xl font-bold text-blue-500 mb-2">
               &lt;1s
             </div>
             <div className="text-gray-600 text-sm md:text-base">
@@ -100,13 +100,13 @@ export default function FeaturesGrid() {
             </div>
           </div>
           <div className="text-center">
-            <div className="text-3xl md:text-4xl font-bold text-[#48CAE4] mb-2">
+            <div className="text-3xl md:text-4xl font-bold text-blue-400 mb-2">
               $0.00025
             </div>
             <div className="text-gray-600 text-sm md:text-base">Avg. Fee</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl md:text-4xl font-bold text-[#0077B6] mb-2">
+            <div className="text-3xl md:text-4xl font-bold text-blue-700 mb-2">
               100%
             </div>
             <div className="text-gray-600 text-sm md:text-base">Secure</div>

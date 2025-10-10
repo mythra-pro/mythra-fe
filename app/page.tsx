@@ -17,9 +17,7 @@ export default function Home() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div>
-              <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-[#0077B6] to-[#48CAE4] bg-clip-text text-transparent">
-                Mythra
-              </h3>
+              <h3 className="text-2xl font-bold mb-4 text-blue-600">Mythra</h3>
               <p className="text-gray-400">
                 Next level funding and NFT E-Ticketing powered by Web3
                 blockchain
@@ -29,34 +27,22 @@ export default function Home() {
               <h4 className="font-semibold mb-4">Quick Links</h4>
               <ul className="space-y-2 text-gray-400">
                 <li>
-                  <a
-                    href="#"
-                    className="hover:text-[#48CAE4] transition-colors"
-                  >
+                  <a href="#" className="hover:text-blue-400 transition-colors">
                     About
                   </a>
                 </li>
                 <li>
-                  <a
-                    href="#"
-                    className="hover:text-[#48CAE4] transition-colors"
-                  >
+                  <a href="#" className="hover:text-blue-400 transition-colors">
                     Features
                   </a>
                 </li>
                 <li>
-                  <a
-                    href="#"
-                    className="hover:text-[#48CAE4] transition-colors"
-                  >
+                  <a href="#" className="hover:text-blue-400 transition-colors">
                     How It Works
                   </a>
                 </li>
                 <li>
-                  <a
-                    href="#"
-                    className="hover:text-[#48CAE4] transition-colors"
-                  >
+                  <a href="#" className="hover:text-blue-400 transition-colors">
                     Support
                   </a>
                 </li>
@@ -66,26 +52,17 @@ export default function Home() {
               <h4 className="font-semibold mb-4">Connect</h4>
               <ul className="space-y-2 text-gray-400">
                 <li>
-                  <a
-                    href="#"
-                    className="hover:text-[#48CAE4] transition-colors"
-                  >
+                  <a href="#" className="hover:text-blue-400 transition-colors">
                     Twitter
                   </a>
                 </li>
                 <li>
-                  <a
-                    href="#"
-                    className="hover:text-[#48CAE4] transition-colors"
-                  >
+                  <a href="#" className="hover:text-blue-400 transition-colors">
                     Discord
                   </a>
                 </li>
                 <li>
-                  <a
-                    href="#"
-                    className="hover:text-[#48CAE4] transition-colors"
-                  >
+                  <a href="#" className="hover:text-blue-400 transition-colors">
                     GitHub
                   </a>
                 </li>

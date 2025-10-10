@@ -112,7 +112,7 @@ export default function EventOrganizerDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top Navigation */}
-      <nav className="bg-white shadow-lg sticky top-0 z-40">
+      <nav className="bg-white shadow-sm sticky top-0 z-40 border-b border-gray-200">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
@@ -122,7 +122,7 @@ export default function EventOrganizerDashboard() {
               >
                 {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
-              <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-green-500 bg-clip-text text-transparent">
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900">
                 Event Organizer Dashboard
               </h1>
             </div>
@@ -131,7 +131,7 @@ export default function EventOrganizerDashboard() {
                 setShowWizard(true);
                 setActiveTab("create");
               }}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-green-500 text-white rounded-lg hover:shadow-lg transition-all font-medium"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 hover:shadow-md transition-all font-medium"
             >
               <Plus />
               <span className="hidden sm:inline">Create Event</span>
@@ -148,7 +148,7 @@ export default function EventOrganizerDashboard() {
               sidebarOpen ? "block" : "hidden lg:block"
             } space-y-6`}
           >
-            <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
               <h2 className="text-lg font-bold text-gray-900 mb-4">
                 Your Events
               </h2>
@@ -162,7 +162,7 @@ export default function EventOrganizerDashboard() {
                     }}
                     className={`w-full text-left p-4 rounded-lg transition-all ${
                       selectedEvent.id === event.id
-                        ? "bg-gradient-to-r from-purple-600 to-green-500 text-white shadow-lg"
+                        ? "bg-blue-600 text-white shadow-md"
                         : "bg-gray-50 hover:bg-gray-100 text-gray-900"
                     }`}
                   >
@@ -170,7 +170,7 @@ export default function EventOrganizerDashboard() {
                     <p
                       className={`text-xs ${
                         selectedEvent.id === event.id
-                          ? "text-purple-100"
+                          ? "text-blue-100"
                           : "text-gray-500"
                       }`}
                     >
@@ -193,7 +193,7 @@ export default function EventOrganizerDashboard() {
             </div>
 
             {/* Quick Stats */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
               <h3 className="text-lg font-bold text-gray-900 mb-4">
                 Quick Stats
               </h3>
@@ -206,11 +206,11 @@ export default function EventOrganizerDashboard() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">Active Events</span>
-                  <span className="font-bold text-green-600">2</span>
+                  <span className="font-bold text-blue-600">2</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">Total Revenue</span>
-                  <span className="font-bold text-purple-600">858 SOL</span>
+                  <span className="font-bold text-blue-600">858 SOL</span>
                 </div>
               </div>
             </div>
@@ -220,7 +220,7 @@ export default function EventOrganizerDashboard() {
           <main className="flex-1">
             {/* Tabs */}
             {!showWizard && (
-              <div className="bg-white rounded-xl shadow-lg mb-6 overflow-x-auto">
+              <div className="bg-white rounded-xl shadow-sm mb-6 overflow-x-auto border border-gray-200">
                 <div className="flex border-b border-gray-200">
                   {tabs.map((tab) => (
                     <button
@@ -228,7 +228,7 @@ export default function EventOrganizerDashboard() {
                       onClick={() => setActiveTab(tab.id)}
                       className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors whitespace-nowrap ${
                         activeTab === tab.id
-                          ? "border-b-2 border-purple-600 text-purple-600"
+                          ? "border-b-2 border-blue-600 text-blue-600"
                           : "text-gray-600 hover:text-gray-900"
                       }`}
                     >
@@ -255,32 +255,32 @@ export default function EventOrganizerDashboard() {
               {!showWizard && activeTab === "overview" && (
                 <div className="space-y-6">
                   {/* Event Header Card */}
-                  <div className="bg-gradient-to-r from-purple-600 to-green-500 rounded-2xl p-8 text-white">
+                  <div className="bg-blue-600 rounded-2xl p-8 text-white">
                     <h2 className="text-3xl font-bold mb-2">
                       {selectedEvent.name}
                     </h2>
-                    <p className="text-purple-100 mb-4">
+                    <p className="text-blue-100 mb-4">
                       {selectedEvent.description}
                     </p>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div>
-                        <p className="text-purple-100 text-sm">Date</p>
+                        <p className="text-blue-100 text-sm">Date</p>
                         <p className="font-bold">
                           {selectedEvent.date.toLocaleDateString()}
                         </p>
                       </div>
                       <div>
-                        <p className="text-purple-100 text-sm">Location</p>
+                        <p className="text-blue-100 text-sm">Location</p>
                         <p className="font-bold">{selectedEvent.location}</p>
                       </div>
                       <div>
-                        <p className="text-purple-100 text-sm">Tickets Sold</p>
+                        <p className="text-blue-100 text-sm">Tickets Sold</p>
                         <p className="font-bold">
                           {selectedEvent.ticketsSold}/{selectedEvent.maxTickets}
                         </p>
                       </div>
                       <div>
-                        <p className="text-purple-100 text-sm">Price</p>
+                        <p className="text-blue-100 text-sm">Price</p>
                         <p className="font-bold">
                           {selectedEvent.priceInSOL} SOL
                         </p>
@@ -292,9 +292,9 @@ export default function EventOrganizerDashboard() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <button
                       onClick={() => setActiveTab("analytics")}
-                      className="bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all"
+                      className="bg-white rounded-xl shadow-sm p-6 text-left hover:shadow-md transition-all border border-gray-200"
                     >
-                      <BarChart3 className="text-3xl text-purple-600 mb-3" />
+                      <BarChart3 className="text-3xl text-blue-600 mb-3" />
                       <h3 className="font-bold text-gray-900 mb-2">
                         View Analytics
                       </h3>
@@ -305,9 +305,9 @@ export default function EventOrganizerDashboard() {
 
                     <button
                       onClick={() => setActiveTab("attendees")}
-                      className="bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all"
+                      className="bg-white rounded-xl shadow-sm p-6 text-left hover:shadow-md transition-all border border-gray-200"
                     >
-                      <Users className="text-3xl text-green-600 mb-3" />
+                      <Users className="text-3xl text-blue-600 mb-3" />
                       <h3 className="font-bold text-gray-900 mb-2">
                         Manage Attendees
                       </h3>
@@ -318,7 +318,7 @@ export default function EventOrganizerDashboard() {
 
                     <button
                       onClick={() => setActiveTab("checkin")}
-                      className="bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all"
+                      className="bg-white rounded-xl shadow-sm p-6 text-left hover:shadow-md transition-all border border-gray-200"
                     >
                       <QrCode className="text-3xl text-blue-600 mb-3" />
                       <h3 className="font-bold text-gray-900 mb-2">
