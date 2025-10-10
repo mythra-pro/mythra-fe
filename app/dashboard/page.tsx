@@ -1,13 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { EventOrganizerSidebar } from "@/components/event-organizer-sidebar";
-import { EventHeader } from "@/components/event-header";
-import { EventMetricsCards } from "@/components/event-metrics-cards";
-import { EventCharts } from "@/components/event-charts";
-import { AttendeeDataTable } from "@/components/attendee-data-table";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -15,203 +8,153 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { mockEvents, mockTickets, mockAnalytics } from "@/app/data/mockData";
-import { Calendar, MapPin, DollarSign, Ticket } from "lucide-react";
-import EventCreationWizard from "@/app/_components/dashboard/EventCreationWizard";
-import CheckInScanner from "@/app/_components/dashboard/CheckInScanner";
-import PayoutManagement from "@/app/_components/dashboard/PayoutManagement";
-import QRCodeDisplay from "@/app/_components/dashboard/QRCodeDisplay";
+import { Button } from "@/components/ui/button";
 import {
-  CheckInData,
-  CreateEventFormData,
-  TicketData,
-} from "@/app/types/event";
+  LayoutDashboard,
+  Users,
+  Settings,
+  Calendar,
+  TrendingUp,
+} from "lucide-react";
 
-export default function Page() {
-  const [selectedEventId, setSelectedEventId] = useState(mockEvents[0].id);
-  const [activeTab, setActiveTab] = useState("overview");
-  const [showWizard, setShowWizard] = useState(false);
-  const [selectedTicketForQR, setSelectedTicketForQR] =
-    useState<TicketData | null>(null);
-
-  const selectedEvent =
-    mockEvents.find((e) => e.id === selectedEventId) || mockEvents[0];
-  const eventTickets = mockTickets.filter((t) => t.eventId === selectedEventId);
-  const eventAnalytics = mockAnalytics[selectedEventId];
-
-  const handleCreateEvent = (data: CreateEventFormData) => {
-    console.log("Creating event:", data);
-    setShowWizard(false);
-  };
-
-  const handleCheckIn = async (data: CheckInData): Promise<boolean> => {
-    console.log("Check-in data:", data);
-    return Math.random() > 0.3;
-  };
-
-  const handleRequestPayout = async (): Promise<boolean> => {
-    console.log("Requesting payout...");
-    return true;
-  };
-
-  const handleViewQR = (ticketId: string) => {
-    const ticket = eventTickets.find((t) => t.id === ticketId);
-    if (ticket) setSelectedTicketForQR(ticket);
-  };
-
+export default function DashboardPage() {
   return (
-    <SidebarProvider>
-      <EventOrganizerSidebar
-        selectedEventId={selectedEventId}
-        onEventSelect={setSelectedEventId}
-      />
-      <SidebarInset>
-        <EventHeader
-          eventName={selectedEvent.name}
-          onCreateEvent={() => setShowWizard(true)}
-        />
-
-        <div className="flex flex-1 flex-col p-4 md:p-6 gap-4">
-          {showWizard ? (
-            <EventCreationWizard
-              onSubmit={handleCreateEvent}
-              onCancel={() => setShowWizard(false)}
-            />
-          ) : (
-            <Tabs
-              value={activeTab}
-              onValueChange={setActiveTab}
-              className="space-y-4"
-            >
-              <TabsList>
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="analytics">Analytics</TabsTrigger>
-                <TabsTrigger value="attendees">Attendees</TabsTrigger>
-                <TabsTrigger value="checkin">Check-in</TabsTrigger>
-                <TabsTrigger value="payout">Payout</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="overview" className="space-y-4">
-                {/* Event Info Card */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>{selectedEvent.name}</CardTitle>
-                    <CardDescription>
-                      {selectedEvent.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <div>
-                          <p className="text-sm font-medium">Date</p>
-                          <p className="text-sm text-muted-foreground">
-                            {selectedEvent.date.toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                        <div>
-                          <p className="text-sm font-medium">Location</p>
-                          <p className="text-sm text-muted-foreground">
-                            {selectedEvent.location}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4 text-muted-foreground" />
-                        <div>
-                          <p className="text-sm font-medium">Price</p>
-                          <p className="text-sm text-muted-foreground">
-                            {selectedEvent.priceInSOL} SOL
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Ticket className="h-4 w-4 text-muted-foreground" />
-                        <div>
-                          <p className="text-sm font-medium">Tickets</p>
-                          <p className="text-sm text-muted-foreground">
-                            {selectedEvent.ticketsSold} /{" "}
-                            {selectedEvent.maxTickets}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {eventAnalytics && (
-                  <>
-                    <EventMetricsCards
-                      analytics={eventAnalytics}
-                      priceInSOL={selectedEvent.priceInSOL}
-                    />
-                    <EventCharts analytics={eventAnalytics} />
-                  </>
-                )}
-              </TabsContent>
-
-              <TabsContent value="analytics" className="space-y-4">
-                {eventAnalytics && (
-                  <>
-                    <EventMetricsCards
-                      analytics={eventAnalytics}
-                      priceInSOL={selectedEvent.priceInSOL}
-                    />
-                    <EventCharts analytics={eventAnalytics} />
-                  </>
-                )}
-              </TabsContent>
-
-              <TabsContent value="attendees">
-                <AttendeeDataTable
-                  tickets={eventTickets}
-                  onViewQR={handleViewQR}
-                  onCheckIn={(ticketId) =>
-                    console.log("Manual check-in:", ticketId)
-                  }
-                />
-              </TabsContent>
-
-              <TabsContent value="checkin">
-                <CheckInScanner
-                  eventId={selectedEvent.id}
-                  eventName={selectedEvent.name}
-                  onCheckIn={handleCheckIn}
-                  onLookupTicket={async (ticketId) =>
-                    eventTickets.find((t) => t.id === ticketId) || null
-                  }
-                />
-              </TabsContent>
-
-              <TabsContent value="payout">
-                {eventAnalytics && (
-                  <PayoutManagement
-                    eventId={selectedEvent.id}
-                    eventName={selectedEvent.name}
-                    totalRevenue={eventAnalytics.totalRevenue}
-                    organizerWallet={selectedEvent.creatorWallet}
-                    payouts={[]}
-                    onRequestPayout={handleRequestPayout}
-                  />
-                )}
-              </TabsContent>
-            </Tabs>
-          )}
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Mythra Dashboard
+          </h1>
+          <p className="text-xl text-gray-600">
+            Welcome to your event management platform
+          </p>
         </div>
-      </SidebarInset>
 
-      {/* QR Code Modal */}
-      {selectedTicketForQR && (
-        <QRCodeDisplay
-          ticket={selectedTicketForQR}
-          eventName={selectedEvent.name}
-          onClose={() => setSelectedTicketForQR(null)}
-        />
-      )}
-    </SidebarProvider>
+        {/* Role Selection Cards */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-4xl mx-auto">
+          <Card className="bg-white border border-gray-200 hover:shadow-lg transition-shadow">
+            <CardHeader className="text-center">
+              <div className="mx-auto mb-4 h-12 w-12 rounded-lg bg-blue-600 flex items-center justify-center">
+                <Users className="h-6 w-6 text-white" />
+              </div>
+              <CardTitle className="text-gray-900">
+                Customer Dashboard
+              </CardTitle>
+              <CardDescription>
+                Browse and purchase event tickets
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <Link href="/dashboard/customer">
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                  Go to Customer Dashboard
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white border border-gray-200 hover:shadow-lg transition-shadow">
+            <CardHeader className="text-center">
+              <div className="mx-auto mb-4 h-12 w-12 rounded-lg bg-blue-600 flex items-center justify-center">
+                <Calendar className="h-6 w-6 text-white" />
+              </div>
+              <CardTitle className="text-gray-900">
+                Organizer Dashboard
+              </CardTitle>
+              <CardDescription>Create and manage your events</CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <Link href="/dashboard/organizer">
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                  Go to Organizer Dashboard
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white border border-gray-200 hover:shadow-lg transition-shadow">
+            <CardHeader className="text-center">
+              <div className="mx-auto mb-4 h-12 w-12 rounded-lg bg-blue-600 flex items-center justify-center">
+                <Settings className="h-6 w-6 text-white" />
+              </div>
+              <CardTitle className="text-gray-900">Admin Dashboard</CardTitle>
+              <CardDescription>
+                Platform administration and oversight
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <Link href="/dashboard/admin">
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                  Go to Admin Dashboard
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white border border-gray-200 hover:shadow-lg transition-shadow">
+            <CardHeader className="text-center">
+              <div className="mx-auto mb-4 h-12 w-12 rounded-lg bg-blue-600 flex items-center justify-center">
+                <TrendingUp className="h-6 w-6 text-white" />
+              </div>
+              <CardTitle className="text-gray-900">
+                Investor Dashboard
+              </CardTitle>
+              <CardDescription>
+                Investment opportunities and analytics
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <Link href="/dashboard/investor">
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                  Go to Investor Dashboard
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white border border-gray-200 hover:shadow-lg transition-shadow">
+            <CardHeader className="text-center">
+              <div className="mx-auto mb-4 h-12 w-12 rounded-lg bg-blue-600 flex items-center justify-center">
+                <LayoutDashboard className="h-6 w-6 text-white" />
+              </div>
+              <CardTitle className="text-gray-900">Staff Dashboard</CardTitle>
+              <CardDescription>
+                Event staff management and operations
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <Link href="/dashboard/staff">
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                  Go to Staff Dashboard
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Links */}
+        <div className="mt-12 text-center">
+          <div className="inline-flex items-center gap-4">
+            <Link href="/events">
+              <Button
+                variant="outline"
+                className="border-gray-200 hover:bg-blue-600 hover:text-white hover:border-blue-600"
+              >
+                Browse All Events
+              </Button>
+            </Link>
+            <Link href="/login">
+              <Button
+                variant="outline"
+                className="border-gray-200 hover:bg-blue-600 hover:text-white hover:border-blue-600"
+              >
+                Login
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
