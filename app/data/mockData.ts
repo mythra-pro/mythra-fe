@@ -16,7 +16,7 @@ export const mockEvents: EventData[] = [
     description:
       "The biggest Web3 conference of the year featuring top speakers from the blockchain industry",
     organizerId: "org_001",
-    organizerName: "Solana Foundation",
+    organizerName: "Web3 Foundation",
     date: new Date("2025-11-15T09:00:00"),
     endDate: new Date("2025-11-15T18:00:00"),
     location: "Jakarta Convention Center",

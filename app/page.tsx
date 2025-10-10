@@ -17,11 +17,12 @@ export default function Home() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div>
-              <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-[#14F195] to-[#9945FF] bg-clip-text text-transparent">
+              <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-[#0077B6] to-[#48CAE4] bg-clip-text text-transparent">
                 Mythra
               </h3>
               <p className="text-gray-400">
-                NFT E-Ticketing powered by Solana blockchain
+                Next level funding and NFT E-Ticketing powered by Web3
+                blockchain
               </p>
             </div>
             <div>
@@ -30,7 +31,7 @@ export default function Home() {
                 <li>
                   <a
                     href="#"
-                    className="hover:text-[#14F195] transition-colors"
+                    className="hover:text-[#48CAE4] transition-colors"
                   >
                     About
                   </a>
@@ -38,7 +39,7 @@ export default function Home() {
                 <li>
                   <a
                     href="#"
-                    className="hover:text-[#14F195] transition-colors"
+                    className="hover:text-[#48CAE4] transition-colors"
                   >
                     Features
                   </a>
@@ -46,7 +47,7 @@ export default function Home() {
                 <li>
                   <a
                     href="#"
-                    className="hover:text-[#14F195] transition-colors"
+                    className="hover:text-[#48CAE4] transition-colors"
                   >
                     How It Works
                   </a>
@@ -54,7 +55,7 @@ export default function Home() {
                 <li>
                   <a
                     href="#"
-                    className="hover:text-[#14F195] transition-colors"
+                    className="hover:text-[#48CAE4] transition-colors"
                   >
                     Support
                   </a>
@@ -67,7 +68,7 @@ export default function Home() {
                 <li>
                   <a
                     href="#"
-                    className="hover:text-[#14F195] transition-colors"
+                    className="hover:text-[#48CAE4] transition-colors"
                   >
                     Twitter
                   </a>
@@ -75,7 +76,7 @@ export default function Home() {
                 <li>
                   <a
                     href="#"
-                    className="hover:text-[#14F195] transition-colors"
+                    className="hover:text-[#48CAE4] transition-colors"
                   >
                     Discord
                   </a>
@@ -83,7 +84,7 @@ export default function Home() {
                 <li>
                   <a
                     href="#"
-                    className="hover:text-[#14F195] transition-colors"
+                    className="hover:text-[#48CAE4] transition-colors"
                   >
                     GitHub
                   </a>
@@ -92,7 +93,7 @@ export default function Home() {
             </div>
           </div>
           <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 Mythra. Built on Solana. All rights reserved.</p>
+            <p>&copy; 2025 Mythra. All rights reserved</p>
           </div>
         </div>
       </footer>

@@ -24,6 +24,9 @@ export interface EventData {
   date: Date;
   endDate?: Date;
   location: string;
+  venue?: string;
+  startTime?: string;
+  endTime?: string;
   priceInSOL: number;
   maxTickets: number;
   ticketsSold: number;
@@ -35,6 +38,22 @@ export interface EventData {
   // Solana blockchain data
   mintAddress?: string;
   creatorWallet: string;
+  // Extended fields for enhanced dashboard
+  totalTickets?: number;
+  soldTickets?: number;
+  revenue?: number;
+  poolBalance?: number;
+  staffIds?: string[];
+  ticketTypes?: Array<{
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    totalSupply: number;
+    sold: number;
+    available: number;
+    benefits: string[];
+  }>;
 }
 
 export interface TicketData {

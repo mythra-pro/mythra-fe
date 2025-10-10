@@ -49,7 +49,7 @@ export default function QRCodeDisplay({
     ctx.fillText(ticket.ownerName || "Anonymous", 200, 90);
 
     // QR Code placeholder (in production, use actual QR generation)
-    ctx.fillStyle = "#9945FF";
+    ctx.fillStyle = "#0077B6";
     ctx.fillRect(50, 120, 300, 300);
     ctx.fillStyle = "#ffffff";
     ctx.font = "16px Arial";
@@ -86,7 +86,7 @@ export default function QRCodeDisplay({
 
         {/* Header */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-500 to-green-500 rounded-full mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-[#0077B6] to-[#48CAE4] rounded-full mb-4">
             <QrCode className="text-3xl text-white" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900">{eventName}</h2>
@@ -94,7 +94,7 @@ export default function QRCodeDisplay({
         </div>
 
         {/* Ticket Info */}
-        <div className="bg-gradient-to-br from-purple-50 to-green-50 rounded-xl p-4 mb-6">
+        <div className="bg-gradient-to-br from-[#CAF0F8] to-[#0096C7]/10 rounded-xl p-4 mb-6">
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-600">Owner:</span>
@@ -132,11 +132,11 @@ export default function QRCodeDisplay({
 
         {/* QR Code Display */}
         <div className="bg-white border-4 border-gray-200 rounded-xl p-6 mb-6">
-          <div className="aspect-square bg-gradient-to-br from-purple-100 via-white to-green-100 rounded-lg flex items-center justify-center">
+          <div className="aspect-square bg-gradient-to-br from-[#CAF0F8] via-white to-[#0096C7]/20 rounded-lg flex items-center justify-center">
             {/* Placeholder for actual QR code - in production, use qrcode.react or similar */}
             <div className="w-full h-full flex items-center justify-center">
               <div className="text-center">
-                <QrCode className="text-8xl text-purple-500 mx-auto mb-4" />
+                <QrCode className="text-8xl text-[#0077B6] mx-auto mb-4" />
                 <p className="text-sm text-gray-600">
                   QR Code for Ticket #{ticket.ticketNumber}
                 </p>
@@ -160,7 +160,7 @@ export default function QRCodeDisplay({
         <div className="flex gap-3">
           <button
             onClick={downloadQRCode}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-green-500 text-white rounded-lg hover:shadow-lg transition-all font-medium"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-[#0077B6] to-[#48CAE4] text-white rounded-lg hover:shadow-lg transition-all font-medium"
           >
             <Download />
             Download QR Code

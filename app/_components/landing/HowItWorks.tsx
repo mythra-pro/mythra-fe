@@ -6,24 +6,24 @@ export default function HowItWorks() {
       number: "01",
       title: "Create Event",
       description:
-        "Set up your event details, pricing, and mint NFT tickets on Solana",
+        "Set up your event details, pricing, and mint NFT tickets on blockchain",
       icon: Edit,
-      color: "from-purple-500 to-pink-500",
+      color: "from-[#0077B6] to-[#0096C7]",
     },
     {
       number: "02",
-      title: "List & Sell",
+      title: "Fund & Sell",
       description:
-        "Publish your event and receive instant SOL payments for each ticket sold",
+        "Secure funding for your event and start selling NFT tickets instantly",
       icon: Ticket,
-      color: "from-green-400 to-cyan-500",
+      color: "from-[#0096C7] to-[#48CAE4]",
     },
     {
       number: "03",
       title: "Attendees Purchase",
-      description: "Buyers get NFT tickets directly in their Solana wallet",
+      description: "Buyers get NFT tickets directly in their wallet",
       icon: CreditCard,
-      color: "from-blue-500 to-purple-600",
+      color: "from-[#03045E] to-[#0077B6]",
     },
     {
       number: "04",
@@ -31,7 +31,7 @@ export default function HowItWorks() {
       description:
         "Verify attendance with wallet signature at your event entrance",
       icon: Check,
-      color: "from-yellow-400 to-orange-500",
+      color: "from-[#48CAE4] to-[#90E0EF]",
     },
   ];
 
@@ -39,8 +39,8 @@ export default function HowItWorks() {
     <section className="py-20 md:py-32 bg-gradient-to-b from-white to-gray-50 relative overflow-hidden">
       {/* Background Decoration */}
       <div className="absolute top-0 left-0 w-full h-full opacity-5">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-green-400 rounded-full blur-3xl"></div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-[#0077B6] rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#48CAE4] rounded-full blur-3xl"></div>
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -50,7 +50,7 @@ export default function HowItWorks() {
             How It Works
           </h2>
           <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-            From event creation to check-in, powered by Solana blockchain
+            From funding to check-in, powered by Web3 blockchain
           </p>
         </div>
 
@@ -58,7 +58,7 @@ export default function HowItWorks() {
         <div className="hidden lg:block max-w-7xl mx-auto">
           <div className="relative">
             {/* Connection Line */}
-            <div className="absolute top-32 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-green-400 to-orange-500 opacity-20"></div>
+            <div className="absolute top-32 left-0 right-0 h-1 bg-gradient-to-r from-[#0077B6] via-[#0096C7] to-[#48CAE4] opacity-20"></div>
 
             <div className="grid grid-cols-4 gap-8">
               {steps.map((step, index) => (
@@ -141,7 +141,7 @@ export default function HowItWorks() {
           <p className="text-gray-600 mb-6">
             Ready to revolutionize your events?
           </p>
-          <button className="px-8 py-4 bg-gradient-to-r from-[#9945FF] to-[#14F195] text-white font-bold rounded-full hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+          <button className="px-8 py-4 bg-gradient-to-r from-[#0077B6] to-[#0096C7] text-white font-bold rounded-full hover:shadow-xl transition-all duration-300 transform hover:scale-105">
             Start Your First Event
           </button>
         </div>

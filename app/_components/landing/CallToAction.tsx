@@ -2,12 +2,12 @@ import { Rocket, Ticket, Star } from "lucide-react";
 
 export default function CallToAction() {
   return (
-    <section className="py-20 md:py-32 bg-gradient-to-br from-[#9945FF] via-purple-600 to-[#14F195] relative overflow-hidden">
+    <section className="py-20 md:py-32 bg-gradient-to-br from-[#03045E] via-[#0077B6] to-[#0096C7] relative overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-10 left-10 w-64 h-64 bg-white rounded-full blur-3xl animate-pulse"></div>
         <div
-          className="absolute bottom-10 right-10 w-96 h-96 bg-[#14F195] rounded-full blur-3xl animate-pulse"
+          className="absolute bottom-10 right-10 w-96 h-96 bg-[#48CAE4] rounded-full blur-3xl animate-pulse"
           style={{ animationDelay: "1s" }}
         ></div>
         <div
@@ -25,13 +25,13 @@ export default function CallToAction() {
 
           {/* Subheading */}
           <p className="text-lg sm:text-xl md:text-2xl text-white/90 mb-12 max-w-2xl mx-auto">
-            Join the future of ticketing with Mythra. Create memorable
-            experiences with the power of blockchain.
+            Join the next level funding and ticketing with Mythra. Create
+            memorable experiences with the power of blockchain.
           </p>
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center mb-12">
-            <button className="group w-full sm:w-auto px-8 md:px-10 py-4 md:py-5 bg-white text-[#9945FF] font-bold text-lg rounded-full hover:bg-gray-100 transition-all duration-300 shadow-2xl hover:shadow-3xl transform hover:scale-105 flex items-center justify-center gap-2">
+            <button className="group w-full sm:w-auto px-8 md:px-10 py-4 md:py-5 bg-white text-[#0077B6] font-bold text-lg rounded-full hover:bg-gray-100 transition-all duration-300 shadow-2xl hover:shadow-3xl transform hover:scale-105 flex items-center justify-center gap-2">
               <span>Create Event</span>
               <svg
                 className="w-5 h-5 group-hover:translate-x-1 transition-transform"
@@ -84,7 +84,7 @@ export default function CallToAction() {
           <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-white/80 text-sm">
             <div className="flex items-center gap-2">
               <svg
-                className="w-5 h-5 text-[#14F195]"
+                className="w-5 h-5 text-[#48CAE4]"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -98,7 +98,7 @@ export default function CallToAction() {
             </div>
             <div className="flex items-center gap-2">
               <svg
-                className="w-5 h-5 text-[#14F195]"
+                className="w-5 h-5 text-[#48CAE4]"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -112,7 +112,7 @@ export default function CallToAction() {
             </div>
             <div className="flex items-center gap-2">
               <svg
-                className="w-5 h-5 text-[#14F195]"
+                className="w-5 h-5 text-[#48CAE4]"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
