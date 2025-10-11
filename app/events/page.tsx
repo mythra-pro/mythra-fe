@@ -45,13 +45,13 @@ export default function EventsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#CAF0F8] via-[#90E0EF] to-[#48CAE4]">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-[#03045E] shadow-lg">
+      <header className="bg-sky-800 shadow-lg">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
-              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-[#0077B6] to-[#48CAE4]" />
+              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-sky-500 to-sky-700" />
               <span className="text-2xl font-bold text-white">Mythra</span>
             </Link>
             <div className="flex items-center gap-4">
@@ -194,7 +194,7 @@ export default function EventsPage() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-[#03045E] text-white mt-20 py-12">
+      <footer className="bg-sky-800 text-white mt-20 py-12">
         <div className="container mx-auto px-4">
           <div className="grid gap-8 md:grid-cols-4">
             <div>
