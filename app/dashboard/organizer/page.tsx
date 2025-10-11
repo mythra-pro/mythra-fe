@@ -35,7 +35,7 @@ export default function OrganizerDashboard() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-4xl font-bold text-gray-900">
-              Welcome back, {user.name.split(" ")[0]}! 👋
+              Welcome back, {user.name.split(" ")[0]}!
             </h1>
             <p className="text-gray-600 mt-2">
               Here's what's happening with your events today.

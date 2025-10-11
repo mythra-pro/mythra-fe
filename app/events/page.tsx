@@ -47,24 +47,24 @@ export default function EventsPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-sky-800 shadow-lg">
+      <header className="bg-white border-b border-gray-200 shadow-sm">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
-              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-sky-500 to-sky-700" />
-              <span className="text-2xl font-bold text-white">Mythra</span>
+              <div className="h-10 w-10 rounded-lg bg-blue-600" />
+              <span className="text-2xl font-bold text-gray-900">Mythra</span>
             </Link>
             <div className="flex items-center gap-4">
               <Link href="/login">
                 <Button
                   variant="ghost"
-                  className="text-white hover:bg-[#0077B6]"
+                  className="text-gray-700 hover:bg-gray-100"
                 >
                   Sign In
                 </Button>
               </Link>
               <Link href="/login">
-                <Button className="bg-[#0077B6] hover:bg-[#0096C7] text-white">
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white">
                   Connect Wallet
                 </Button>
               </Link>
@@ -81,10 +81,10 @@ export default function EventsPage() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <h1 className="text-5xl md:text-6xl font-bold text-[#03045E] mb-4">
-            Discover Amazing Events 🎉
+          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4">
+            Discover Amazing Events
           </h1>
-          <p className="text-xl text-gray-700 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Browse and purchase NFT tickets for exclusive events
           </p>
         </motion.div>
@@ -95,7 +95,7 @@ export default function EventsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.6 }}
         >
-          <Card className="p-6 mb-8 bg-white/90 backdrop-blur border-[#48CAE4] shadow-lg">
+          <Card className="p-6 mb-8 bg-white border border-gray-200 shadow-sm">
             <div className="grid gap-4 md:grid-cols-12">
               {/* Search */}
               <div className="md:col-span-5">
@@ -105,7 +105,7 @@ export default function EventsPage() {
                     placeholder="Search events..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 border-[#48CAE4]"
+                    className="pl-10 border-gray-200"
                   />
                 </div>
               </div>
@@ -113,7 +113,7 @@ export default function EventsPage() {
               {/* Category Filter */}
               <div className="md:col-span-3">
                 <Select value={category} onValueChange={setCategory}>
-                  <SelectTrigger className="border-[#48CAE4]">
+                  <SelectTrigger className="border-gray-200">
                     <Filter className="h-4 w-4 mr-2" />
                     <SelectValue placeholder="Category" />
                   </SelectTrigger>
@@ -130,7 +130,7 @@ export default function EventsPage() {
               {/* Sort */}
               <div className="md:col-span-3">
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="border-[#48CAE4]">
+                  <SelectTrigger className="border-gray-200">
                     <Calendar className="h-4 w-4 mr-2" />
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
@@ -143,7 +143,7 @@ export default function EventsPage() {
 
               {/* Filter Button (Mobile) */}
               <div className="md:col-span-1">
-                <Button className="w-full bg-[#0077B6] hover:bg-[#0096C7] text-white">
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                   <Filter className="h-4 w-4" />
                 </Button>
               </div>
@@ -153,7 +153,7 @@ export default function EventsPage() {
 
         {/* Results Count */}
         <div className="mb-6">
-          <p className="text-lg text-[#03045E] font-semibold">
+          <p className="text-lg text-gray-900 font-semibold">
             {filteredEvents.length}{" "}
             {filteredEvents.length === 1 ? "event" : "events"} found
           </p>
@@ -185,7 +185,7 @@ export default function EventsPage() {
                 setSearchQuery("");
                 setCategory("all");
               }}
-              className="bg-[#0077B6] hover:bg-[#0096C7] text-white"
+              className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               Clear Filters
             </Button>
@@ -194,54 +194,90 @@ export default function EventsPage() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-sky-800 text-white mt-20 py-12">
+      <footer className="bg-gray-900 text-white mt-20 py-12">
         <div className="container mx-auto px-4">
           <div className="grid gap-8 md:grid-cols-4">
             <div>
-              <h3 className="text-xl font-bold mb-4">Mythra</h3>
-              <p className="text-[#CAF0F8]">
+              <h3 className="text-xl font-bold mb-4 text-blue-600">Mythra</h3>
+              <p className="text-gray-400">
                 Next-generation Web3 event ticketing platform powered by
                 blockchain.
               </p>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Platform</h4>
-              <ul className="space-y-2 text-[#CAF0F8]">
+              <ul className="space-y-2 text-gray-400">
                 <li>
-                  <Link href="/events">Browse Events</Link>
+                  <Link
+                    href="/events"
+                    className="hover:text-blue-400 transition-colors"
+                  >
+                    Browse Events
+                  </Link>
                 </li>
                 <li>
-                  <Link href="/login">Create Event</Link>
+                  <Link
+                    href="/login"
+                    className="hover:text-blue-400 transition-colors"
+                  >
+                    Create Event
+                  </Link>
                 </li>
                 <li>
-                  <Link href="/login">Invest</Link>
+                  <Link
+                    href="/login"
+                    className="hover:text-blue-400 transition-colors"
+                  >
+                    Invest
+                  </Link>
                 </li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Support</h4>
-              <ul className="space-y-2 text-[#CAF0F8]">
+              <ul className="space-y-2 text-gray-400">
                 <li>
-                  <Link href="#">Help Center</Link>
+                  <Link
+                    href="#"
+                    className="hover:text-blue-400 transition-colors"
+                  >
+                    Help Center
+                  </Link>
                 </li>
                 <li>
-                  <Link href="#">Terms of Service</Link>
+                  <Link
+                    href="#"
+                    className="hover:text-blue-400 transition-colors"
+                  >
+                    Terms of Service
+                  </Link>
                 </li>
                 <li>
-                  <Link href="#">Privacy Policy</Link>
+                  <Link
+                    href="#"
+                    className="hover:text-blue-400 transition-colors"
+                  >
+                    Privacy Policy
+                  </Link>
                 </li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Connect</h4>
-              <ul className="space-y-2 text-[#CAF0F8]">
-                <li>Twitter</li>
-                <li>Discord</li>
-                <li>Telegram</li>
+              <ul className="space-y-2 text-gray-400">
+                <li className="hover:text-blue-400 transition-colors cursor-pointer">
+                  Twitter
+                </li>
+                <li className="hover:text-blue-400 transition-colors cursor-pointer">
+                  Discord
+                </li>
+                <li className="hover:text-blue-400 transition-colors cursor-pointer">
+                  Telegram
+                </li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-[#0077B6] mt-8 pt-8 text-center text-[#CAF0F8]">
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
             <p>&copy; 2025 Mythra. All rights reserved.</p>
           </div>
         </div>

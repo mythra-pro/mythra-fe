@@ -30,7 +30,7 @@ export default function CustomerDashboard() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-4xl font-bold text-[#03045E]">
-              Welcome, {user.name.split(" ")[0]}! 🎫
+              Welcome, {user.name.split(" ")[0]}!
             </h1>
             <p className="text-gray-600 mt-2">
               Manage your NFT tickets and explore upcoming events.

@@ -1,4 +1,5 @@
-import { Ticket, Zap, Shield, Gem } from "lucide-react";
+import { Ticket, Zap, Shield, Gem} from "lucide-react";
+import Link from "next/link";
 
 export default function HeroSection() {
   return (
@@ -66,12 +67,16 @@ export default function HeroSection() {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <button className="w-full sm:w-auto px-8 py-4 bg-white text-blue-600 font-bold rounded-full hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
-              Get Started
-            </button>
-            <button className="w-full sm:w-auto px-8 py-4 bg-blue-500 text-white font-bold rounded-full border-2 border-blue-400 hover:bg-blue-700 transition-all duration-300">
-              Learn More
-            </button>
+            <Link href="/login" >
+              <button className="w-full sm:w-auto px-8 py-4 bg-white text-blue-600 font-bold rounded-full hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                Get Started
+              </button>
+            </Link>
+            <Link href="/learn-more">
+              <button className="w-full sm:w-auto px-8 py-4 bg-blue-500 text-white font-bold rounded-full border-2 border-blue-400 hover:bg-blue-700 transition-all duration-300">
+                Learn More
+              </button>
+            </Link>
           </div>
         </div>
       </div>

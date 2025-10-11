@@ -46,9 +46,9 @@ export function EventCard({
       transition={{ duration: 0.3, delay }}
       whileHover={{ y: -5 }}
     >
-      <Card className="overflow-hidden bg-white shadow-lg hover:shadow-xl transition-all border-[#48CAE4]">
+      <Card className="overflow-hidden bg-white shadow-lg hover:shadow-xl transition-all border border-gray-200">
         <CardHeader className="p-0">
-          <div className="relative h-48 w-full overflow-hidden bg-gradient-to-br from-[#0077B6] to-[#48CAE4]">
+          <div className="relative h-48 w-full overflow-hidden bg-blue-600">
             {event.coverImage ? (
               <Image
                 src={event.coverImage}
@@ -72,7 +72,7 @@ export function EventCard({
               </Badge>
             </div>
             <div className="absolute top-3 left-3">
-              <Badge className="bg-[#03045E] text-white border-0">
+              <Badge className="bg-gray-900 text-white border-0">
                 {event.category}
               </Badge>
             </div>
@@ -80,7 +80,7 @@ export function EventCard({
         </CardHeader>
 
         <CardContent className="p-4">
-          <h3 className="text-xl font-bold text-[#03045E] mb-2 line-clamp-1">
+          <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-1">
             {event.name}
           </h3>
 
@@ -90,7 +90,7 @@ export function EventCard({
 
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Calendar className="h-4 w-4 text-[#0077B6]" />
+              <Calendar className="h-4 w-4 text-blue-600" />
               <span>
                 {new Date(event.date).toLocaleDateString("en-US", {
                   year: "numeric",
@@ -101,12 +101,12 @@ export function EventCard({
             </div>
 
             <div className="flex items-center gap-2 text-sm text-gray-600">
-              <MapPin className="h-4 w-4 text-[#0077B6]" />
+              <MapPin className="h-4 w-4 text-blue-600" />
               <span className="line-clamp-1">{event.location}</span>
             </div>
 
             <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Ticket className="h-4 w-4 text-[#0077B6]" />
+              <Ticket className="h-4 w-4 text-blue-600" />
               <span>
                 {event.soldTickets} / {event.totalTickets} tickets sold
               </span>
@@ -114,8 +114,8 @@ export function EventCard({
 
             {event.revenue && (
               <div className="flex items-center gap-2 text-sm text-gray-600">
-                <TrendingUp className="h-4 w-4 text-[#0077B6]" />
-                <span className="font-semibold text-[#0077B6]">
+                <TrendingUp className="h-4 w-4 text-blue-600" />
+                <span className="font-semibold text-blue-600">
                   ${event.revenue.toLocaleString()} revenue
                 </span>
               </div>
@@ -130,7 +130,7 @@ export function EventCard({
             </div>
             <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
               <motion.div
-                className="h-full bg-gradient-to-r from-[#0077B6] to-[#48CAE4]"
+                className="h-full bg-blue-600"
                 initial={{ width: 0 }}
                 animate={{ width: `${soldPercentage}%` }}
                 transition={{ duration: 1, delay: delay + 0.2 }}
@@ -141,7 +141,7 @@ export function EventCard({
 
         <CardFooter className="p-4 pt-0 flex gap-2">
           <Link href={`/events/${event.id}`} className="flex-1">
-            <Button className="w-full bg-[#0077B6] hover:bg-[#0096C7] text-white">
+            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
               View Details
             </Button>
           </Link>
@@ -149,7 +149,7 @@ export function EventCard({
             <Link href={`/dashboard/organizer/events/${event.id}/edit`}>
               <Button
                 variant="outline"
-                className="border-[#0077B6] text-[#0077B6] hover:bg-[#0077B6] hover:text-white"
+                className="border-gray-200 text-gray-700 hover:bg-blue-600 hover:text-white hover:border-blue-600"
               >
                 Edit
               </Button>

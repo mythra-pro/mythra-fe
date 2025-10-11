@@ -39,7 +39,7 @@ export default function StaffDashboard() {
         {/* Header */}
         <div>
           <h1 className="text-4xl font-bold text-[#03045E]">
-            Staff Dashboard 🎟️
+            Staff Dashboard
           </h1>
           <p className="text-gray-600 mt-2">
             Manage check-ins and attendees for your assigned events.

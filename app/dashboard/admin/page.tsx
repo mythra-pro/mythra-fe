@@ -27,7 +27,7 @@ export default function AdminDashboard() {
         {/* Header */}
         <div>
           <h1 className="text-4xl font-bold text-[#03045E]">
-            Admin Control Panel 🛡️
+            Admin Control Panel
           </h1> 
           <p className="text-gray-600 mt-2">
             Manage platform operations, events, and users.
