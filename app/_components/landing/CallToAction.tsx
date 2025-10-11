@@ -54,29 +54,35 @@ export default function CallToAction() {
           </div>
 
           {/* Trust Indicators */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8 mt-16 max-w-3xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8 mt-16 max-w-3xl mx-auto items-center">
             <div className="bg-blue-500 rounded-2xl p-6 border border-blue-400">
-              <Rocket className="text-3xl mb-2 text-white" />
+              <Rocket className="text-3xl mb-2 text-white mx-auto block" />
               <div className="text-2xl md:text-3xl font-bold text-white mb-1">
                 1000+
               </div>
-              <div className="text-blue-100 text-sm">Events Created</div>
+              <div className="text-blue-100 text-sm">
+                Events Created
+              </div>
             </div>
 
             <div className="bg-blue-500 rounded-2xl p-6 border border-blue-400">
-              <Ticket className="text-3xl mb-2 text-white" />
+              <Ticket className="text-3xl mb-2 text-white mx-auto block" />
               <div className="text-2xl md:text-3xl font-bold text-white mb-1">
                 50K+
               </div>
-              <div className="text-blue-100 text-sm">Tickets Sold</div>
+              <div className="text-blue-100 text-sm">
+                Tickets Sold
+              </div>
             </div>
 
             <div className="bg-blue-500 rounded-2xl p-6 border border-blue-400">
-              <Star className="text-3xl mb-2 text-white" />
+              <Star className="text-3xl mb-2 text-white mx-auto block" />
               <div className="text-2xl md:text-3xl font-bold text-white mb-1">
                 4.9/5
               </div>
-              <div className="text-blue-100 text-sm">User Rating</div>
+              <div className="text-blue-100 text-sm">
+                User Rating
+              </div>
             </div>
           </div>
 

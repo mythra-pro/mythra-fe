@@ -57,8 +57,6 @@ export default function HowItWorks() {
         {/* Desktop Timeline */}
         <div className="hidden lg:block max-w-7xl mx-auto">
           <div className="relative">
-            {/* Connection Line */}
-            <div className="absolute top-32 left-0 right-0 h-1 bg-blue-500 opacity-20"></div>
 
             <div className="grid grid-cols-4 gap-8">
               {steps.map((step, index) => (

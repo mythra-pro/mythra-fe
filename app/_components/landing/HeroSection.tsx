@@ -1,4 +1,4 @@
-import { Ticket, Zap, Shield, Gem} from "lucide-react";
+import { Ticket, Zap, Shield, Gem } from "lucide-react";
 import Link from "next/link";
 
 export default function HeroSection() {
@@ -25,9 +25,9 @@ export default function HeroSection() {
           </p>
 
           {/* Value Props */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-12 items-center">
             <div className="bg-blue-500 rounded-2xl p-6 border border-blue-400 hover:bg-blue-700 transition-all duration-300">
-              <Ticket className="text-3xl mb-3 text-white" />
+              <Ticket className="text-3xl mb-3 text-white mx-auto block" />
               <h3 className="text-white font-semibold text-lg mb-2">
                 NFT Tickets
               </h3>
@@ -37,7 +37,7 @@ export default function HeroSection() {
             </div>
 
             <div className="bg-blue-500 rounded-2xl p-6 border border-blue-400 hover:bg-blue-700 transition-all duration-300">
-              <Zap className="text-3xl mb-3 text-white" />
+              <Zap className="text-3xl mb-3 text-white mx-auto block" />
               <h3 className="text-white font-semibold text-lg mb-2">
                 Lightning Fast
               </h3>
@@ -47,7 +47,7 @@ export default function HeroSection() {
             </div>
 
             <div className="bg-blue-500 rounded-2xl p-6 border border-blue-400 hover:bg-blue-700 transition-all duration-300">
-              <Shield className="text-3xl mb-3 text-white" />
+              <Shield className="text-3xl mb-3 text-white mx-auto block" />
               <h3 className="text-white font-semibold text-lg mb-2">Secure</h3>
               <p className="text-blue-100 text-sm">
                 Fraud-proof with blockchain verification
@@ -55,7 +55,7 @@ export default function HeroSection() {
             </div>
 
             <div className="bg-blue-500 rounded-2xl p-6 border border-blue-400 hover:bg-blue-700 transition-all duration-300">
-              <Gem className="text-3xl mb-3 text-white" />
+              <Gem className="text-3xl mb-3 text-white mx-auto block" />
               <h3 className="text-white font-semibold text-lg mb-2">
                 Collectible
               </h3>
@@ -67,7 +67,7 @@ export default function HeroSection() {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link href="/login" >
+            <Link href="/login">
               <button className="w-full sm:w-auto px-8 py-4 bg-white text-blue-600 font-bold rounded-full hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
                 Get Started
               </button>
