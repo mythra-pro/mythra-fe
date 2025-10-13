@@ -57,7 +57,6 @@ export default function HowItWorks() {
         {/* Desktop Timeline */}
         <div className="hidden lg:block max-w-7xl mx-auto">
           <div className="relative">
-
             <div className="grid grid-cols-4 gap-8">
               {steps.map((step, index) => (
                 <div key={index} className="relative">
@@ -135,7 +134,7 @@ export default function HowItWorks() {
           <p className="text-gray-600 mb-6">
             Ready to revolutionize your events?
           </p>
-          <button className="px-8 py-4 bg-blue-600 text-white font-bold rounded-full hover:bg-blue-700 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+          <button className="px-8 py-4 bg-blue-600 text-white font-bold rounded-full hover:bg-blue-700 hover:shadow-xl transition-all duration-300 transform hover:scale-105 cursor-pointer">
             Start Your First Event
           </button>
         </div>

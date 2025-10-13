@@ -1,7 +1,6 @@
 "use client";
 
 import { ReactNode, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Bell, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,8 +26,7 @@ export function DashboardLayout({
   sidebar,
   user,
 }: DashboardLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   return (
     <div className="min-h-screen bg-white">
@@ -40,13 +38,10 @@ export function DashboardLayout({
             <Button
               variant="ghost"
               size="icon"
-              className="text-gray-700 hover:bg-gray-100"
-              onClick={() => {
-                setSidebarOpen(!sidebarOpen);
-                setMobileSidebarOpen(!mobileSidebarOpen);
-              }}
+              className="text-gray-700 hover:bg-gray-100 cursor-pointer"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             >
-              {sidebarOpen || mobileSidebarOpen ? (
+              {isSidebarOpen ? (
                 <X className="h-5 w-5" />
               ) : (
                 <Menu className="h-5 w-5" />
@@ -75,7 +70,7 @@ export function DashboardLayout({
             <Button
               variant="ghost"
               size="icon"
-              className="text-gray-700 hover:bg-gray-100 relative"
+              className="text-gray-700 hover:bg-gray-100 relative cursor-pointer"
             >
               <Bell className="h-5 w-5" />
               <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-blue-600" />
@@ -85,7 +80,7 @@ export function DashboardLayout({
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="relative h-10 gap-2 px-2 text-gray-700 hover:bg-gray-100"
+                  className="relative h-10 gap-2 px-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={user.avatar} alt={user.name} />
@@ -128,53 +123,28 @@ export function DashboardLayout({
 
       <div className="flex">
         {/* Desktop Sidebar */}
-        <AnimatePresence mode="wait">
-          {sidebarOpen && (
-            <motion.aside
-              initial={{ x: -300, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -300, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="hidden lg:block w-64 bg-white border-r border-gray-200 min-h-[calc(100vh-4rem)] shadow-sm"
-            >
-              {sidebar}
-            </motion.aside>
-          )}
-        </AnimatePresence>
+        {isSidebarOpen && (
+          <aside className="hidden lg:block w-64 bg-white border-r border-gray-200 min-h-[calc(100vh-4rem)] shadow-sm">
+            {sidebar}
+          </aside>
+        )}
 
         {/* Mobile Sidebar */}
-        <AnimatePresence>
-          {mobileSidebarOpen && (
-            <>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 z-30 bg-black/50 lg:hidden"
-                onClick={() => setMobileSidebarOpen(false)}
-              />
-              <motion.aside
-                initial={{ x: -300 }}
-                animate={{ x: 0 }}
-                exit={{ x: -300 }}
-                transition={{ duration: 0.3 }}
-                className="fixed left-0 top-16 z-40 w-64 bg-white h-[calc(100vh-4rem)] shadow-xl lg:hidden overflow-y-auto"
-              >
-                {sidebar}
-              </motion.aside>
-            </>
-          )}
-        </AnimatePresence>
+        {isSidebarOpen && (
+          <>
+            <div
+              className="fixed inset-0 z-30 bg-black/50 lg:hidden"
+              onClick={() => setIsSidebarOpen(false)}
+            />
+            <aside className="fixed left-0 top-16 z-40 w-64 bg-white h-[calc(100vh-4rem)] shadow-xl lg:hidden overflow-y-auto">
+              {sidebar}
+            </aside>
+          </>
+        )}
 
         {/* Main Content */}
         <main className="flex-1 p-4 lg:p-8 min-h-[calc(100vh-4rem)] bg-gray-50">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            {children}
-          </motion.div>
+          {children}
         </main>
       </div>
     </div>

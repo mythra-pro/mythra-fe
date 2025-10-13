@@ -58,13 +58,13 @@ export default function EventsPage() {
               <Link href="/login">
                 <Button
                   variant="ghost"
-                  className="text-gray-700 hover:bg-gray-100"
+                  className="text-gray-700 hover:bg-gray-100 cursor-pointer"
                 >
                   Sign In
                 </Button>
               </Link>
               <Link href="/login">
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer">
                   Connect Wallet
                 </Button>
               </Link>
@@ -95,17 +95,17 @@ export default function EventsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.6 }}
         >
-          <Card className="p-6 mb-8 bg-white border border-gray-200 shadow-sm">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-gray-100 shadow-lg">
             <div className="grid gap-4 md:grid-cols-12">
               {/* Search */}
               <div className="md:col-span-5">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                  <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
                   <Input
-                    placeholder="Search events..."
+                    placeholder="🔍 Search events..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 border-gray-200"
+                    className="h-12 border-0 bg-gray-50 rounded-xl text-lg placeholder:text-gray-400 focus:bg-white focus:ring-2 focus:ring-blue-600/20 transition-all pl-12"
                   />
                 </div>
               </div>
@@ -113,13 +113,13 @@ export default function EventsPage() {
               {/* Category Filter */}
               <div className="md:col-span-3">
                 <Select value={category} onValueChange={setCategory}>
-                  <SelectTrigger className="border-gray-200">
+                  <SelectTrigger className="h-12 border-0 bg-gray-50 rounded-xl text-lg focus:bg-white focus:ring-2 focus:ring-blue-600/20 transition-all">
                     <Filter className="h-4 w-4 mr-2" />
                     <SelectValue placeholder="Category" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="rounded-xl border-0 shadow-xl">
                     {categories.map((cat) => (
-                      <SelectItem key={cat} value={cat}>
+                      <SelectItem key={cat} value={cat} className="rounded-lg">
                         {cat.charAt(0).toUpperCase() + cat.slice(1)}
                       </SelectItem>
                     ))}
@@ -130,33 +130,45 @@ export default function EventsPage() {
               {/* Sort */}
               <div className="md:col-span-3">
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="border-gray-200">
+                  <SelectTrigger className="h-12 border-0 bg-gray-50 rounded-xl text-lg focus:bg-white focus:ring-2 focus:ring-blue-600/20 transition-all">
                     <Calendar className="h-4 w-4 mr-2" />
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="date">Date</SelectItem>
-                    <SelectItem value="price">Price</SelectItem>
+                  <SelectContent className="rounded-xl border-0 shadow-xl">
+                    <SelectItem value="date" className="rounded-lg">
+                      Date
+                    </SelectItem>
+                    <SelectItem value="price" className="rounded-lg">
+                      Price
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               {/* Filter Button (Mobile) */}
               <div className="md:col-span-1">
-                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                <Button className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-all cursor-pointer">
                   <Filter className="h-4 w-4" />
                 </Button>
               </div>
             </div>
-          </Card>
+          </div>
         </motion.div>
 
         {/* Results Count */}
-        <div className="mb-6">
-          <p className="text-lg text-gray-900 font-semibold">
-            {filteredEvents.length}{" "}
-            {filteredEvents.length === 1 ? "event" : "events"} found
-          </p>
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+                <Calendar className="h-6 w-6 text-blue-600" />
+                Upcoming Events
+              </h2>
+              <p className="text-gray-500 mt-1">
+                {filteredEvents.length}{" "}
+                {filteredEvents.length === 1 ? "event" : "events"} found
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Events Grid */}
@@ -171,9 +183,11 @@ export default function EventsPage() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-center py-20"
+            className="bg-white rounded-2xl border border-gray-100 p-16 text-center"
           >
-            <Calendar className="h-20 w-20 mx-auto text-gray-400 mb-4" />
+            <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <Calendar className="h-10 w-10 text-gray-400" />
+            </div>
             <h3 className="text-2xl font-bold text-gray-700 mb-2">
               No events found
             </h3>
@@ -185,7 +199,7 @@ export default function EventsPage() {
                 setSearchQuery("");
                 setCategory("all");
               }}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-all px-6 py-3 cursor-pointer"
             >
               Clear Filters
             </Button>

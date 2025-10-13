@@ -1,4 +1,5 @@
 import { Rocket, Ticket, Star } from "lucide-react";
+import Link from "next/link";
 
 export default function CallToAction() {
   return (
@@ -31,26 +32,29 @@ export default function CallToAction() {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center mb-12">
-            <button className="group w-full sm:w-auto px-8 md:px-10 py-4 md:py-5 bg-white text-blue-600 font-bold text-lg rounded-full hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center gap-2">
-              <span>Create Event</span>
-              <svg
-                className="w-5 h-5 group-hover:translate-x-1 transition-transform"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 7l5 5m0 0l-5 5m5-5H6"
-                />
-              </svg>
-            </button>
-
-            <button className="w-full sm:w-auto px-8 md:px-10 py-4 md:py-5 bg-blue-500 text-white font-bold text-lg rounded-full border-2 border-blue-400 hover:bg-blue-700 transition-all duration-300 hover:border-blue-300">
-              Browse Events
-            </button>
+            <Link href="/login">
+              <button className="group w-full sm:w-auto px-8 md:px-10 py-4 md:py-5 bg-white text-blue-600 font-bold text-lg rounded-full hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center gap-2 cursor-pointer">
+                <span>Create Event</span>
+                <svg
+                  className="w-5 h-5 group-hover:translate-x-1 transition-transform"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 7l5 5m0 0l-5 5m5-5H6"
+                  />
+                </svg>
+              </button>
+            </Link>
+            <Link href="/events">
+              <button className="w-full sm:w-auto px-8 md:px-10 py-4 md:py-5 bg-blue-500 text-white font-bold text-lg rounded-full border-2 border-blue-400 hover:bg-blue-700 transition-all duration-300 hover:border-blue-300 cursor-pointer">
+                Browse Events
+              </button>
+            </Link>
           </div>
 
           {/* Trust Indicators */}
@@ -60,9 +64,7 @@ export default function CallToAction() {
               <div className="text-2xl md:text-3xl font-bold text-white mb-1">
                 1000+
               </div>
-              <div className="text-blue-100 text-sm">
-                Events Created
-              </div>
+              <div className="text-blue-100 text-sm">Events Created</div>
             </div>
 
             <div className="bg-blue-500 rounded-2xl p-6 border border-blue-400">
@@ -70,9 +72,7 @@ export default function CallToAction() {
               <div className="text-2xl md:text-3xl font-bold text-white mb-1">
                 50K+
               </div>
-              <div className="text-blue-100 text-sm">
-                Tickets Sold
-              </div>
+              <div className="text-blue-100 text-sm">Tickets Sold</div>
             </div>
 
             <div className="bg-blue-500 rounded-2xl p-6 border border-blue-400">
@@ -80,9 +80,7 @@ export default function CallToAction() {
               <div className="text-2xl md:text-3xl font-bold text-white mb-1">
                 4.9/5
               </div>
-              <div className="text-blue-100 text-sm">
-                User Rating
-              </div>
+              <div className="text-blue-100 text-sm">User Rating</div>
             </div>
           </div>
 
