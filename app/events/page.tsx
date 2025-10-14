@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { Search, Filter, Calendar, MapPin, DollarSign } from "lucide-react";
 import { EventCard } from "@/components/event-card";
 import { dummyEvents } from "@/lib/dummy-data";
@@ -51,7 +52,13 @@ export default function EventsPage() {
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
-              <div className="h-10 w-10 rounded-lg bg-blue-600" />
+              <Image
+                src="/favicon.svg"
+                alt="Mythra Logo"
+                width={40}
+                height={40}
+                className="h-10 w-10 rounded-lg bg-white"
+              />
               <span className="text-2xl font-bold text-gray-900">Mythra</span>
             </Link>
             <div className="flex items-center gap-4">
@@ -96,13 +103,13 @@ export default function EventsPage() {
           transition={{ delay: 0.2, duration: 0.6 }}
         >
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-gray-100 shadow-lg">
-            <div className="grid gap-4 md:grid-cols-12">
+            <div className="flex gap-4 justify-between items-center">
               {/* Search */}
-              <div className="md:col-span-5">
+              <div className="flex-1">
                 <div className="relative">
                   <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
                   <Input
-                    placeholder="🔍 Search events..."
+                    placeholder="Search events..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="h-12 border-0 bg-gray-50 rounded-xl text-lg placeholder:text-gray-400 focus:bg-white focus:ring-2 focus:ring-blue-600/20 transition-all pl-12"
@@ -111,13 +118,13 @@ export default function EventsPage() {
               </div>
 
               {/* Category Filter */}
-              <div className="md:col-span-3">
+              <div className="flex-1 md:col-sx`pan-3 w-full">
                 <Select value={category} onValueChange={setCategory}>
-                  <SelectTrigger className="h-12 border-0 bg-gray-50 rounded-xl text-lg focus:bg-white focus:ring-2 focus:ring-blue-600/20 transition-all">
+                  <SelectTrigger className="h-12 border-0 bg-gray-50 rounded-xl text-lg focus:bg-white focus:ring-2 focus:ring-blue-600/20 transition-all w-full">
                     <Filter className="h-4 w-4 mr-2" />
                     <SelectValue placeholder="Category" />
                   </SelectTrigger>
-                  <SelectContent className="rounded-xl border-0 shadow-xl">
+                  <SelectContent className="rounded-xl border-0 shadow-xl bg-white">
                     {categories.map((cat) => (
                       <SelectItem key={cat} value={cat} className="rounded-lg">
                         {cat.charAt(0).toUpperCase() + cat.slice(1)}
@@ -128,13 +135,13 @@ export default function EventsPage() {
               </div>
 
               {/* Sort */}
-              <div className="md:col-span-3">
+              <div className="flex-1 md:col-span-3 w-full">
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="h-12 border-0 bg-gray-50 rounded-xl text-lg focus:bg-white focus:ring-2 focus:ring-blue-600/20 transition-all">
+                  <SelectTrigger className="h-12 border-0 bg-gray-50 rounded-xl text-lg focus:bg-white focus:ring-2 focus:ring-blue-600/20 transition-all w-full">
                     <Calendar className="h-4 w-4 mr-2" />
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
-                  <SelectContent className="rounded-xl border-0 shadow-xl">
+                  <SelectContent className="rounded-xl border-0 shadow-xl bg-white">
                     <SelectItem value="date" className="rounded-lg">
                       Date
                     </SelectItem>
@@ -146,7 +153,7 @@ export default function EventsPage() {
               </div>
 
               {/* Filter Button (Mobile) */}
-              <div className="md:col-span-1">
+              <div className="w-12 md:hidden">
                 <Button className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-all cursor-pointer">
                   <Filter className="h-4 w-4" />
                 </Button>

@@ -47,7 +47,7 @@ export function EventCard({
       whileHover={{ y: -5 }}
       className="group"
     >
-      <Card className="overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 rounded-2xl">
+      <Card className="overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 rounded-2xl p-0">
         <CardHeader className="p-0">
           <div className="relative h-52 w-full overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600">
             {event.coverImage ? (

@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import Image from "next/image";
 import { dummyUsers } from "@/lib/dummy-data";
 
 export default function LoginPage() {
@@ -93,8 +94,14 @@ export default function LoginPage() {
           className="text-center mb-12"
         >
           <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-[#48CAE4] to-[#90E0EF] flex items-center justify-center">
-              <Wallet className="h-8 w-8 text-[#03045E]" />
+            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br bg-white flex items-center justify-center">
+              <Image
+                src="/favicon.svg"
+                alt="Mythra Logo"
+                width={100}
+                height={100}
+                className="h-10 w-10 rounded-lg bg-white"
+              />
             </div>
             <h1 className="text-5xl md:text-6xl font-bold text-white">
               Mythra
@@ -210,7 +217,7 @@ export default function LoginPage() {
           </div>
           <div className="p-4">
             <div className="text-[#48CAE4] text-3xl font-bold mb-2">
-              DAO Governance
+              Investor DAO
             </div>
             <p className="text-[#CAF0F8] text-sm">Community-driven decisions</p>
           </div>
