@@ -1,7 +1,7 @@
 "use client";
 
 import { DashboardLayout } from "@/components/dashboard-layout";
-import { RoleSidebar } from "@/components/role-sidebar";
+import { getMenuSectionsWithCounts } from "@/app/utils/dashboardMenus";
 import { StatCard } from "@/components/stat-card";
 import { CampaignCard } from "@/components/campaign-card";
 import { dummyUsers, dummyCampaigns, dummyInvestments } from "@/lib/dummy-data";
@@ -29,8 +29,14 @@ export default function InvestorDashboard() {
   const totalDaoTokens = myInvestments.reduce((sum, i) => sum + i.daoTokens, 0);
   const portfolioValue = totalInvested * 1.15; // Mock 15% return
 
+  // Get menu sections with dynamic voting count
+  const pendingVotes = 2; // This could be calculated from actual data
+  const menuSections = getMenuSectionsWithCounts("investor", {
+    pendingVotes: pendingVotes,
+  });
+
   return (
-    <DashboardLayout user={user} sidebar={<RoleSidebar role="investor" />}>
+    <DashboardLayout user={user} menuSections={menuSections}>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">

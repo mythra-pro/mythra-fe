@@ -1,7 +1,7 @@
 "use client";
 
 import { DashboardLayout } from "@/components/dashboard-layout";
-import { RoleSidebar } from "@/components/role-sidebar";
+import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
 import { StatCard } from "@/components/stat-card";
 import { NFTTicketCard } from "@/components/nft-ticket-card";
 import { dummyUsers, dummyTickets } from "@/lib/dummy-data";
@@ -23,8 +23,11 @@ export default function CustomerDashboard() {
   const activeTickets = myTickets.filter((t) => t.status === "active").length;
   const totalSpent = myTickets.reduce((sum, t) => sum + t.price, 0);
 
+  // Get menu sections for customer role
+  const menuSections = getMenuSectionsForRole("customer");
+
   return (
-    <DashboardLayout user={user} sidebar={<RoleSidebar role="customer" />}>
+    <DashboardLayout user={user} menuSections={menuSections}>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">

@@ -1,7 +1,7 @@
 "use client";
 
 import { DashboardLayout } from "@/components/dashboard-layout";
-import { RoleSidebar } from "@/components/role-sidebar";
+import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
 import { StatCard } from "@/components/stat-card";
 import { dummyUsers, dummyInvestments, dummyCampaigns } from "@/lib/dummy-data";
 import {
@@ -68,8 +68,15 @@ export default function InvestorPortfolioPage() {
     },
   ];
 
+  // Get menu sections for investor role
+
+
+  const menuSections = getMenuSectionsForRole('investor');
+
+
+
   return (
-    <DashboardLayout user={user} sidebar={<RoleSidebar role="investor" />}>
+    <DashboardLayout user={user} menuSections={menuSections}>
       <div className="space-y-6">
         {/* Header */}
         <div>

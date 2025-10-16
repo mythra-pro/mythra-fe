@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
-import { RoleSidebar } from "@/components/role-sidebar";
+import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
 import { StatCard } from "@/components/stat-card";
 import { dummyUsers, dummyEvents, dummyTickets } from "@/lib/dummy-data";
 import { QrCode, Users, CheckCircle, Calendar } from "lucide-react";
@@ -24,6 +24,9 @@ export default function StaffDashboard() {
   const myEvents = dummyEvents.filter((e) => e.staffIds?.includes(user.id));
   const [scanInput, setScanInput] = useState("");
 
+  // Get menu sections for staff role
+  const menuSections = getMenuSectionsForRole("staff");
+
   const upcomingEvents = myEvents.filter((e) => new Date(e.date) > new Date());
   const totalCheckins = 125; // Mock data
 
@@ -34,13 +37,11 @@ export default function StaffDashboard() {
   };
 
   return (
-    <DashboardLayout user={user} sidebar={<RoleSidebar role="staff" />}>
+    <DashboardLayout user={user} menuSections={menuSections}>
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-4xl font-bold text-[#03045E]">
-            Staff Dashboard
-          </h1>
+          <h1 className="text-4xl font-bold text-[#03045E]">Staff Dashboard</h1>
           <p className="text-gray-600 mt-2">
             Manage check-ins and attendees for your assigned events.
           </p>

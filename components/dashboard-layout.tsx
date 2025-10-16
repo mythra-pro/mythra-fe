@@ -15,16 +15,32 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { User } from "@/app/types/user";
 
+export interface MenuItem {
+  title: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  badge?: string | number;
+  children?: MenuItem[];
+}
+
+export interface MenuSection {
+  title?: string;
+  items: MenuItem[];
+}
+
 interface DashboardLayoutProps {
   children: ReactNode;
-  sidebar: ReactNode;
   user: User;
+  menuSections?: MenuSection[];
+  // Legacy support - will be deprecated
+  sidebar?: ReactNode;
 }
 
 export function DashboardLayout({
   children,
-  sidebar,
   user,
+  menuSections = [],
+  sidebar, // Legacy support
 }: DashboardLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
@@ -55,7 +71,7 @@ export function DashboardLayout({
           </div>
 
           {/* Center - Search (hidden on mobile) */}
-          <div className="hidden md:flex flex-1 max-w-md mx-8">
+          {/* <div className="hidden md:flex flex-1 max-w-md mx-8">
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <Input
@@ -63,7 +79,7 @@ export function DashboardLayout({
                 className="pl-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500"
               />
             </div>
-          </div>
+          </div> */}
 
           {/* Right side */}
           <div className="flex items-center gap-3">
@@ -96,7 +112,7 @@ export function DashboardLayout({
                   </span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuContent align="end" className="w-56 bg-white z-100">
                 <DropdownMenuLabel>
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium">{user.name}</p>
@@ -125,7 +141,11 @@ export function DashboardLayout({
         {/* Desktop Sidebar */}
         {isSidebarOpen && (
           <aside className="hidden lg:block w-64 bg-white border-r border-gray-200 min-h-[calc(100vh-4rem)] shadow-sm">
-            {sidebar}
+            {menuSections.length > 0 ? (
+              <DynamicSidebar menuSections={menuSections} />
+            ) : (
+              sidebar
+            )}
           </aside>
         )}
 
@@ -137,7 +157,11 @@ export function DashboardLayout({
               onClick={() => setIsSidebarOpen(false)}
             />
             <aside className="fixed left-0 top-16 z-40 w-64 bg-white h-[calc(100vh-4rem)] shadow-xl lg:hidden overflow-y-auto">
-              {sidebar}
+              {menuSections.length > 0 ? (
+                <DynamicSidebar menuSections={menuSections} />
+              ) : (
+                sidebar
+              )}
             </aside>
           </>
         )}
@@ -147,6 +171,112 @@ export function DashboardLayout({
           {children}
         </main>
       </div>
+    </div>
+  );
+}
+
+// Dynamic Sidebar Component
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+
+interface DynamicSidebarProps {
+  menuSections: MenuSection[];
+}
+
+function DynamicSidebar({ menuSections }: DynamicSidebarProps) {
+  const pathname = usePathname();
+
+  const isActive = (href: string) => {
+    return pathname === href || pathname.startsWith(href + "/");
+  };
+
+  return (
+    <div className="p-4 space-y-6">
+      {menuSections.map((section, sectionIndex) => (
+        <div key={sectionIndex}>
+          {section.title && (
+            <div className="mb-3">
+              <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide px-2">
+                {section.title}
+              </h3>
+            </div>
+          )}
+
+          <nav className="space-y-1">
+            {section.items.map((item, itemIndex) => {
+              const Icon = item.icon;
+              const active = isActive(item.href);
+
+              return (
+                <div key={itemIndex}>
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      "flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors group",
+                      active
+                        ? "bg-blue-600 text-white"
+                        : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </div>
+                    {item.badge && (
+                      <Badge
+                        variant={active ? "secondary" : "default"}
+                        className={cn(
+                          "text-xs",
+                          active
+                            ? "bg-white/20 text-white hover:bg-white/30"
+                            : "bg-blue-600 text-white"
+                        )}
+                      >
+                        {item.badge}
+                      </Badge>
+                    )}
+                  </Link>
+
+                  {/* Sub-menu items */}
+                  {item.children && active && (
+                    <div className="ml-6 mt-1 space-y-1">
+                      {item.children.map((child, childIndex) => {
+                        const ChildIcon = child.icon;
+                        const childActive = isActive(child.href);
+
+                        return (
+                          <Link
+                            key={childIndex}
+                            href={child.href}
+                            className={cn(
+                              "flex items-center justify-between px-3 py-1.5 rounded-md text-sm transition-colors",
+                              childActive
+                                ? "bg-blue-100 text-blue-700"
+                                : "text-gray-600 hover:bg-gray-50 hover:text-gray-700"
+                            )}
+                          >
+                            <div className="flex items-center gap-2">
+                              <ChildIcon className="h-3 w-3" />
+                              <span>{child.title}</span>
+                            </div>
+                            {child.badge && (
+                              <Badge variant="outline" className="text-xs">
+                                {child.badge}
+                              </Badge>
+                            )}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </nav>
+        </div>
+      ))}
     </div>
   );
 }

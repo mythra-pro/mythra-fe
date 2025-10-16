@@ -1,7 +1,7 @@
 "use client";
 
 import { DashboardLayout } from "@/components/dashboard-layout";
-import { RoleSidebar } from "@/components/role-sidebar";
+import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
 import { CampaignCard } from "@/components/campaign-card";
 import { dummyUsers, dummyCampaigns, dummyInvestments } from "@/lib/dummy-data";
 import { Target, DollarSign, TrendingUp, Award } from "lucide-react";
@@ -27,8 +27,15 @@ export default function CustomerInvestmentsPage() {
   const totalInvested = myInvestments.reduce((sum, i) => sum + i.amount, 0);
   const totalDaoTokens = myInvestments.reduce((sum, i) => sum + i.daoTokens, 0);
 
+  // Get menu sections for customer role
+
+
+  const menuSections = getMenuSectionsForRole('customer');
+
+
+
   return (
-    <DashboardLayout user={user} sidebar={<RoleSidebar role="customer" />}>
+    <DashboardLayout user={user} menuSections={menuSections}>
       <div className="space-y-6">
         {/* Header */}
         <div>

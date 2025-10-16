@@ -1,7 +1,7 @@
 "use client";
 
 import { DashboardLayout } from "@/components/dashboard-layout";
-import { RoleSidebar } from "@/components/role-sidebar";
+import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
 import { StatCard } from "@/components/stat-card";
 import EventCreationWizard from "@/app/_components/dashboard/EventCreationWizard";
 import { dummyUsers } from "@/lib/dummy-data";
@@ -17,8 +17,15 @@ import {
 export default function CreateEventPage() {
   const user = dummyUsers.find((u) => u.role === "organizer")!;
 
+  // Get menu sections for organizer role
+
+
+  const menuSections = getMenuSectionsForRole('organizer');
+
+
+
   return (
-    <DashboardLayout user={user} sidebar={<RoleSidebar role="organizer" />}>
+    <DashboardLayout user={user} menuSections={menuSections}>
       <div className="space-y-6">
         {/* Header */}
         <div>

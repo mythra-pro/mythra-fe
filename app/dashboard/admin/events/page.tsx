@@ -1,7 +1,7 @@
 "use client";
 
 import { DashboardLayout } from "@/components/dashboard-layout";
-import { RoleSidebar } from "@/components/role-sidebar";
+import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
 import { dummyUsers, dummyEvents } from "@/lib/dummy-data";
 import {
   Calendar,
@@ -68,8 +68,15 @@ export default function AdminEventsPage() {
     }
   };
 
+  // Get menu sections for admin role
+
+
+  const menuSections = getMenuSectionsForRole('admin');
+
+
+
   return (
-    <DashboardLayout user={user} sidebar={<RoleSidebar role="admin" />}>
+    <DashboardLayout user={user} menuSections={menuSections}>
       <div className="space-y-6">
         {/* Header */}
         <div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { DashboardLayout } from "@/components/dashboard-layout";
-import { RoleSidebar } from "@/components/role-sidebar";
+import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
 import { StatCard } from "@/components/stat-card";
 import { EventCard } from "@/components/event-card";
 import { dummyUsers, dummyEvents } from "@/lib/dummy-data";
@@ -28,8 +28,11 @@ export default function OrganizerDashboard() {
   );
   const activeEvents = myEvents.filter((e) => e.status === "published").length;
 
+  // Get menu sections for organizer role
+  const menuSections = getMenuSectionsForRole("organizer");
+
   return (
-    <DashboardLayout user={user} sidebar={<RoleSidebar role="organizer" />}>
+    <DashboardLayout user={user} menuSections={menuSections}>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">

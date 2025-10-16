@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
-import { RoleSidebar } from "@/components/role-sidebar";
+import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
 import CheckInScanner from "@/app/_components/dashboard/CheckInScanner";
 import { dummyUsers, dummyEvents } from "@/lib/dummy-data";
 import { QrCode, Calendar, Users, CheckCircle } from "lucide-react";
@@ -28,8 +28,15 @@ export default function StaffCheckinPage() {
 
   const selectedEvent = myEvents.find((e) => e.id === selectedEventId);
 
+  // Get menu sections for staff role
+
+
+  const menuSections = getMenuSectionsForRole('staff');
+
+
+
   return (
-    <DashboardLayout user={user} sidebar={<RoleSidebar role="staff" />}>
+    <DashboardLayout user={user} menuSections={menuSections}>
       <div className="space-y-6">
         {/* Header */}
         <div>
