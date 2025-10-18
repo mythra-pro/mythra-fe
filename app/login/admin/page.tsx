@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Shield, Lock, Key } from "lucide-react";
+import { Shield, Lock, Key, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,30 +16,41 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
 import Link from "next/link";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { shortenAddress } from "@/lib/program";
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [isConnecting, setIsConnecting] = useState(false);
+  const { publicKey, connected, connecting } = useWallet();
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const [credentials, setCredentials] = useState({
     username: "",
     password: "",
   });
 
+  // Redirect when wallet is connected
+  useEffect(() => {
+    if (connected && publicKey && !isRedirecting) {
+      setIsRedirecting(true);
+      // Store admin wallet address
+      localStorage.setItem("adminWalletAddress", publicKey.toString());
+      localStorage.setItem("userRole", "admin");
+
+      setTimeout(() => {
+        router.push("/dashboard/admin");
+      }, 800);
+    }
+  }, [connected, publicKey, router, isRedirecting]);
+
   const handleAdminLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsConnecting(true);
+    setIsRedirecting(true);
 
     // Simulate admin authentication
     setTimeout(() => {
       // In a real app, you would validate credentials here
-      router.push("/dashboard/admin");
-    }, 1500);
-  };
-
-  const handleWalletConnect = () => {
-    setIsConnecting(true);
-    // Simulate wallet connection for admin
-    setTimeout(() => {
+      localStorage.setItem("userRole", "admin");
       router.push("/dashboard/admin");
     }, 1500);
   };
@@ -116,20 +127,31 @@ export default function AdminLoginPage() {
                 <Key className="h-5 w-5 text-[#48CAE4]" />
                 <span className="font-medium">Web3 Authentication</span>
               </div>
-              <Button
-                onClick={handleWalletConnect}
-                disabled={isConnecting}
-                className="w-full bg-gradient-to-r from-[#48CAE4] to-[#90E0EF] text-[#03045E] hover:from-[#90E0EF] hover:to-[#CAF0F8] font-semibold py-3"
-              >
-                {isConnecting ? (
-                  <span className="flex items-center gap-2">
-                    <span className="h-4 w-4 border-2 border-[#03045E] border-t-transparent rounded-full animate-spin" />
-                    Connecting...
-                  </span>
-                ) : (
-                  "Connect Admin Wallet"
-                )}
-              </Button>
+
+              {connected && publicKey ? (
+                <div className="p-4 bg-green-500/20 border border-green-400/30 rounded-lg">
+                  <div className="flex items-center justify-center gap-2 text-green-300 mb-2">
+                    <CheckCircle2 className="h-5 w-5" />
+                    <span className="text-sm font-medium">
+                      Connected: {shortenAddress(publicKey)}
+                    </span>
+                  </div>
+                  {isRedirecting && (
+                    <p className="text-xs text-green-200 text-center">
+                      Redirecting to admin dashboard...
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div>
+                  <WalletMultiButton className="!w-full !bg-gradient-to-r !from-[#48CAE4] !to-[#90E0EF] !text-[#03045E] hover:!from-[#90E0EF] hover:!to-[#CAF0F8] !font-semibold !py-3 !rounded-md" />
+                  {connecting && (
+                    <p className="text-xs text-[#90E0EF] text-center mt-2">
+                      Opening wallet...
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="relative">
@@ -179,10 +201,10 @@ export default function AdminLoginPage() {
               </div>
               <Button
                 type="submit"
-                disabled={isConnecting}
+                disabled={isRedirecting}
                 className="w-full bg-white text-[#0077B6] hover:bg-[#CAF0F8] font-semibold py-3"
               >
-                {isConnecting ? (
+                {isRedirecting ? (
                   <span className="flex items-center gap-2">
                     <span className="h-4 w-4 border-2 border-[#0077B6] border-t-transparent rounded-full animate-spin" />
                     Authenticating...

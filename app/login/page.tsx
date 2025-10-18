@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Wallet, Shield, Zap, Users } from "lucide-react";
+import { Wallet, Shield, Zap, Users, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,18 +14,33 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import Image from "next/image";
-import { dummyUsers } from "@/lib/dummy-data";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { shortenAddress } from "@/lib/program";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [isConnecting, setIsConnecting] = useState(false);
+  const { publicKey, connected, connecting, wallet } = useWallet();
+  const [selectedRole, setSelectedRole] = useState<string>("organizer");
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
-  const handleConnect = (role: string) => {
-    setIsConnecting(true);
-    // Simulate wallet connection
-    setTimeout(() => {
-      router.push(`/dashboard/${role}`);
-    }, 1500);
+  // Redirect to dashboard when wallet is connected and role is selected
+  useEffect(() => {
+    if (connected && publicKey && !isRedirecting) {
+      setIsRedirecting(true);
+      // Store wallet address in localStorage for session management
+      localStorage.setItem("walletAddress", publicKey.toString());
+      localStorage.setItem("userRole", selectedRole);
+
+      // Short delay for better UX
+      setTimeout(() => {
+        router.push(`/dashboard/${selectedRole}`);
+      }, 800);
+    }
+  }, [connected, publicKey, selectedRole, router, isRedirecting]);
+
+  const handleRoleSelect = (role: string) => {
+    setSelectedRole(role);
   };
 
   const roleCards = [
@@ -138,6 +153,8 @@ export default function LoginPage() {
 
               {roleCards.map((card) => {
                 const Icon = card.icon;
+                const isCurrentRole = selectedRole === card.role;
+
                 return (
                   <TabsContent
                     key={card.role}
@@ -161,20 +178,49 @@ export default function LoginPage() {
                       <p className="text-[#CAF0F8] mb-6 max-w-md mx-auto">
                         {card.description}
                       </p>
-                      <Button
-                        onClick={() => handleConnect(card.role)}
-                        disabled={isConnecting}
-                        className="w-full max-w-xs bg-white text-[#0077B6] hover:bg-[#CAF0F8] font-semibold py-3 cursor-pointer"
-                      >
-                        {isConnecting ? (
-                          <span className="flex items-center gap-2">
-                            <span className="h-4 w-4 border-2 border-[#0077B6] border-t-transparent rounded-full animate-spin" />
-                            Connecting...
-                          </span>
-                        ) : (
-                          "Connect Wallet"
-                        )}
-                      </Button>
+
+                      {/* Wallet Connection Status */}
+                      {connected && publicKey ? (
+                        <div className="mb-4 p-3 bg-green-500/20 border border-green-400/30 rounded-lg">
+                          <div className="flex items-center justify-center gap-2 text-green-300">
+                            <CheckCircle2 className="h-5 w-5" />
+                            <span className="text-sm font-medium">
+                              Connected: {shortenAddress(publicKey)}
+                            </span>
+                          </div>
+                          {isRedirecting && (
+                            <p className="text-xs text-green-200 mt-2">
+                              Redirecting to dashboard...
+                            </p>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="mb-4">
+                          <div className="wallet-adapter-button-wrapper max-w-xs mx-auto">
+                            <WalletMultiButton
+                              className="!w-full !bg-white !text-[#0077B6] hover:!bg-[#CAF0F8] !font-semibold !py-3 !rounded-md !transition-colors"
+                              onClick={() => handleRoleSelect(card.role)}
+                            />
+                          </div>
+                          {connecting && (
+                            <p className="text-xs text-[#90E0EF] mt-2">
+                              Opening wallet...
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Instructions */}
+                      <div className="mt-6 p-3 bg-white/10 rounded-lg text-left">
+                        <p className="text-xs text-[#CAF0F8] mb-2 font-medium">
+                          📝 Instructions:
+                        </p>
+                        <ol className="text-xs text-[#90E0EF] space-y-1 list-decimal list-inside">
+                          <li>Click "Select Wallet" to choose your wallet</li>
+                          <li>Approve the connection in your wallet</li>
+                          <li>You'll be redirected to your dashboard</li>
+                        </ol>
+                      </div>
                     </motion.div>
                   </TabsContent>
                 );
