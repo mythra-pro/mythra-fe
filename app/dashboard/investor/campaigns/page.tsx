@@ -51,10 +51,7 @@ export default function InvestorCampaignsPage() {
 
   // Get menu sections for investor role
 
-
-  const menuSections = getMenuSectionsForRole('investor');
-
-
+  const menuSections = getMenuSectionsForRole("investor");
 
   return (
     <DashboardLayout user={user} menuSections={menuSections}>
@@ -92,7 +89,7 @@ export default function InvestorCampaignsPage() {
                   <Filter className="h-4 w-4 mr-2" />
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white">
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="active">Active</SelectItem>
                   <SelectItem value="funded">Funded</SelectItem>
@@ -108,7 +105,7 @@ export default function InvestorCampaignsPage() {
                   <TrendingUp className="h-4 w-4 mr-2" />
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white">
                   <SelectItem value="newest">Newest</SelectItem>
                   <SelectItem value="funding">Most Funded</SelectItem>
                   <SelectItem value="deadline">Deadline</SelectItem>

@@ -105,7 +105,7 @@ export default function EventCreationWizard({
   ];
 
   return (
-    <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-4xl mx-auto">
+    <div className="bg-white rounded-2xl p-8 w-full">
       {/* Progress Steps */}
       <div className="mb-8">
         <div className="flex items-center justify-between">
@@ -115,7 +115,7 @@ export default function EventCreationWizard({
                 <div
                   className={`w-12 h-12 rounded-full flex items-center justify-center ${
                     currentStep >= step.number
-                      ? "bg-gradient-to-r from-[#0077B6] to-[#48CAE4] text-white"
+                      ? "bg-gradient-to-r from-blue-600 to-cyan-400 text-white"
                       : "bg-gray-200 text-gray-500"
                   } transition-all duration-300`}
                 >
@@ -135,7 +135,7 @@ export default function EventCreationWizard({
                 <div
                   className={`flex-1 h-1 mx-4 ${
                     currentStep > step.number
-                      ? "bg-gradient-to-r from-[#0077B6] to-[#48CAE4]"
+                      ? "bg-gradient-to-r from-blue-600 to-cyan-400"
                       : "bg-gray-200"
                   } transition-all duration-300`}
                 ></div>
@@ -162,7 +162,7 @@ export default function EventCreationWizard({
               onChange={(e) => updateFormData("name", e.target.value)}
               className={`w-full px-4 py-3 border ${
                 errors.name ? "border-red-500" : "border-gray-300"
-              } rounded-lg focus:ring-2 focus:ring-[#0077B6] focus:border-transparent`}
+              } rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent`}
               placeholder="e.g., Web3 Summit 2025"
             />
             {errors.name && (
@@ -180,7 +180,7 @@ export default function EventCreationWizard({
               rows={4}
               className={`w-full px-4 py-3 border ${
                 errors.description ? "border-red-500" : "border-gray-300"
-              } rounded-lg focus:ring-2 focus:ring-[#0077B6] focus:border-transparent`}
+              } rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent`}
               placeholder="Describe your event..."
             />
             {errors.description && (
@@ -197,7 +197,7 @@ export default function EventCreationWizard({
               onChange={(e) => updateFormData("category", e.target.value)}
               className={`w-full px-4 py-3 border ${
                 errors.category ? "border-red-500" : "border-gray-300"
-              } rounded-lg focus:ring-2 focus:ring-[#0077B6] focus:border-transparent`}
+              } rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent`}
             >
               <option value="">Select a category</option>
               {categories.map((cat) => (
@@ -231,7 +231,7 @@ export default function EventCreationWizard({
               onChange={(e) => updateFormData("date", e.target.value)}
               className={`w-full px-4 py-3 border ${
                 errors.date ? "border-red-500" : "border-gray-300"
-              } rounded-lg focus:ring-2 focus:ring-[#0077B6] focus:border-transparent`}
+              } rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent`}
             />
             {errors.date && (
               <p className="text-red-500 text-sm mt-1">{errors.date}</p>
@@ -247,7 +247,7 @@ export default function EventCreationWizard({
               type="datetime-local"
               value={formData.endDate || ""}
               onChange={(e) => updateFormData("endDate", e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0077B6] focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
             />
           </div>
 
@@ -262,7 +262,7 @@ export default function EventCreationWizard({
               onChange={(e) => updateFormData("location", e.target.value)}
               className={`w-full px-4 py-3 border ${
                 errors.location ? "border-red-500" : "border-gray-300"
-              } rounded-lg focus:ring-2 focus:ring-[#0077B6] focus:border-transparent`}
+              } rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent`}
               placeholder="e.g., Jakarta Convention Center or Online Event"
             />
             {errors.location && (
@@ -294,7 +294,7 @@ export default function EventCreationWizard({
               }
               className={`w-full px-4 py-3 border ${
                 errors.priceInSOL ? "border-red-500" : "border-gray-300"
-              } rounded-lg focus:ring-2 focus:ring-[#0077B6] focus:border-transparent`}
+              } rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent`}
               placeholder="0.5"
             />
             {errors.priceInSOL && (
@@ -316,7 +316,7 @@ export default function EventCreationWizard({
               }
               className={`w-full px-4 py-3 border ${
                 errors.maxTickets ? "border-red-500" : "border-gray-300"
-              } rounded-lg focus:ring-2 focus:ring-[#0077B6] focus:border-transparent`}
+              } rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent`}
               placeholder="100"
             />
             {errors.maxTickets && (
@@ -325,7 +325,7 @@ export default function EventCreationWizard({
           </div>
 
           {/* Summary */}
-          <div className="bg-gradient-to-r from-[#CAF0F8] to-[#0096C7]/10 p-6 rounded-lg">
+          <div className="bg-gradient-to-r from-cyan-100 to-sky-100 p-6 rounded-lg">
             <h3 className="font-bold text-gray-900 mb-4">Event Summary</h3>
             <div className="space-y-2 text-sm">
               <p>
@@ -375,14 +375,14 @@ export default function EventCreationWizard({
         {currentStep < 3 ? (
           <button
             onClick={handleNext}
-            className="px-6 py-3 bg-gradient-to-r from-[#0077B6] to-[#48CAE4] text-white rounded-lg hover:shadow-lg transition-all"
+            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-400 text-white rounded-lg hover:shadow-lg transition-all"
           >
             Next
           </button>
         ) : (
           <button
             onClick={handleSubmit}
-            className="px-8 py-3 bg-gradient-to-r from-[#0077B6] to-[#48CAE4] text-white rounded-lg hover:shadow-lg transition-all font-bold"
+            className="px-8 py-3 bg-gradient-to-r from-blue-600 to-cyan-400 text-white rounded-lg hover:shadow-lg transition-all font-bold"
           >
             Create Event & Mint NFT Tickets
           </button>

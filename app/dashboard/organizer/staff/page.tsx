@@ -25,8 +25,6 @@ export default function OrganizerStaffPage() {
 
   const menuSections = getMenuSectionsForRole('organizer');
 
-
-
   return (
     <DashboardLayout user={user} menuSections={menuSections}>
       <div className="space-y-6">
@@ -34,7 +32,7 @@ export default function OrganizerStaffPage() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-4xl font-bold text-[#03045E]">
-              Staff Management 👥
+              Staff Management
             </h1>
             <p className="text-gray-600 mt-2">
               Manage your event staff and assign them to events.

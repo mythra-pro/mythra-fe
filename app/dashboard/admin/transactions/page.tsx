@@ -249,7 +249,7 @@ export default function AdminTransactionsPage() {
                   <Filter className="h-4 w-4 mr-2" />
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white">
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="completed">Completed</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
@@ -263,7 +263,7 @@ export default function AdminTransactionsPage() {
                   <Filter className="h-4 w-4 mr-2" />
                   <SelectValue placeholder="Type" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white">
                   <SelectItem value="all">All Types</SelectItem>
                   <SelectItem value="ticket_purchase">
                     Ticket Purchase

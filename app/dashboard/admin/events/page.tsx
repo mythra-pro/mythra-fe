@@ -70,10 +70,7 @@ export default function AdminEventsPage() {
 
   // Get menu sections for admin role
 
-
-  const menuSections = getMenuSectionsForRole('admin');
-
-
+  const menuSections = getMenuSectionsForRole("admin");
 
   return (
     <DashboardLayout user={user} menuSections={menuSections}>
@@ -81,7 +78,7 @@ export default function AdminEventsPage() {
         {/* Header */}
         <div>
           <h1 className="text-4xl font-bold text-[#03045E]">
-            Event Management 📅
+            Event Management
           </h1>
           <p className="text-gray-600 mt-2">
             Manage all events across the platform.
@@ -149,7 +146,7 @@ export default function AdminEventsPage() {
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <Input
-                placeholder="🔍 Search events..."
+                placeholder="Search events..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="h-12 border-0 bg-gray-50 rounded-xl text-lg placeholder:text-gray-400 focus:bg-white focus:ring-2 focus:ring-[#0077B6]/20 transition-all"
@@ -160,7 +157,7 @@ export default function AdminEventsPage() {
                 <SelectTrigger className="h-12 border-0 bg-gray-50 rounded-xl text-lg focus:bg-white focus:ring-2 focus:ring-[#0077B6]/20 transition-all">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
-                <SelectContent className="rounded-xl border-0 shadow-xl">
+                <SelectContent className="rounded-xl border-0 shadow-xl bg-white">
                   <SelectItem value="all" className="rounded-lg">
                     All Status
                   </SelectItem>

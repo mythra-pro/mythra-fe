@@ -61,7 +61,7 @@ export default function AdminAnalyticsPage() {
         {/* Header */}
         <div>
           <h1 className="text-4xl font-bold text-[#03045E]">
-            Platform Analytics 📊
+            Platform Analytics
           </h1>
           <p className="text-gray-600 mt-2">
             Comprehensive insights and performance metrics for the entire

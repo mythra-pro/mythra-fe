@@ -35,7 +35,7 @@ export function StatCard({
     >
       <Card
         className={cn(
-          "bg-white/90 backdrop-blur border-[#48CAE4] shadow-lg hover:shadow-xl transition-shadow",
+          "bg-white/90 backdrop-blur border-[#48CAE4] shadow-lg hover:shadow-xl transition-shadow h-full flex flex-col",
           className
         )}
       >
@@ -47,26 +47,28 @@ export function StatCard({
             <Icon className="h-5 w-5 text-white" />
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="text-3xl font-bold text-[#03045E]">{value}</div>
-          {description && (
-            <p className="text-xs text-muted-foreground mt-1">{description}</p>
-          )}
-          {trend && (
-            <div className="flex items-center gap-1 mt-2">
-              <span
-                className={cn(
-                  "text-xs font-medium",
-                  trend.isPositive ? "text-green-600" : "text-red-600"
-                )}
-              >
-                {trend.isPositive ? "↑" : "↓"} {Math.abs(trend.value)}%
-              </span>
-              <span className="text-xs text-muted-foreground">
-                vs last period
-              </span>
-            </div>
-          )}
+        <CardContent className="flex-1 flex flex-col justify-between">
+          <div className="text-3xl font-bold text-[#03045E] mb-2">{value}</div>
+          <div className="space-y-2 mt-auto">
+            {description && (
+              <p className="text-xs text-muted-foreground">{description}</p>
+            )}
+            {trend && (
+              <div className="flex items-center gap-1">
+                <span
+                  className={cn(
+                    "text-xs font-medium",
+                    trend.isPositive ? "text-green-600" : "text-red-600"
+                  )}
+                >
+                  {trend.isPositive ? "↑" : "↓"} {Math.abs(trend.value)}%
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  vs last period
+                </span>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
     </motion.div>

@@ -30,10 +30,7 @@ export default function StaffCheckinPage() {
 
   // Get menu sections for staff role
 
-
-  const menuSections = getMenuSectionsForRole('staff');
-
-
+  const menuSections = getMenuSectionsForRole("staff");
 
   return (
     <DashboardLayout user={user} menuSections={menuSections}>
@@ -72,7 +69,7 @@ export default function StaffCheckinPage() {
                   <SelectTrigger className="border-gray-200">
                     <SelectValue placeholder="Select an event" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white">
                     {myEvents.map((event) => (
                       <SelectItem key={event.id} value={event.id}>
                         {event.name} -{" "}

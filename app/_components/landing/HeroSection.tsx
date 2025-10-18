@@ -8,19 +8,18 @@ export default function HeroSection() {
         <div className="max-w-5xl mx-auto text-center">
           {/* Main Headline */}
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
-            Next Level Funding
+            Mythra
             <br />
-            <span className="text-blue-100">& Ticketing for Events</span>
+            {/* <span className="text-blue-100">& Ticketing for Events</span> */}
           </h1>
 
           {/* Subheadline */}
           <p className="text-lg sm:text-xl md:text-2xl text-blue-100 mb-12 max-w-3xl mx-auto">
-            Empower event organizers with advanced funding solutions powered by
-            Web3 blockchain. Secure, transparent, and instant.
+            The Trust Protocol For the Event Industry
           </p>
 
           {/* Value Props */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-12 items-center">
+          {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-12 items-center">
             <div className="bg-blue-500 rounded-2xl p-6 border border-blue-400 hover:bg-blue-700 transition-all duration-300">
               <Ticket className="text-3xl mb-3 text-white mx-auto block" />
               <h3 className="text-white font-semibold text-lg mb-2">
@@ -58,7 +57,7 @@ export default function HeroSection() {
                 Keep memories as digital souvenirs
               </p>
             </div>
-          </div>
+          </div> */}
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -67,9 +66,9 @@ export default function HeroSection() {
                 Get Started
               </button>
             </Link>
-            <Link href="/learn-more">
+            <Link href="/">
               <button className="w-full sm:w-auto px-8 py-4 bg-blue-500 text-white font-bold rounded-full border-2 border-blue-400 hover:bg-blue-700 transition-all duration-300 cursor-pointer">
-                Learn More
+                Read Our Docs
               </button>
             </Link>
           </div>

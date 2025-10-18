@@ -10,8 +10,15 @@ import {
 } from "@/components/ui/card";
 import { Home, ArrowLeft, Search } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function NotFound() {
+  const router = useRouter();
+
+  const handleGoBack = () => {
+    router.back();
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="max-w-md w-full">
@@ -37,30 +44,18 @@ export default function NotFound() {
             </div>
 
             <div className="space-y-3">
+              <Button
+                onClick={handleGoBack}
+                className="w-full bg-gray-600 hover:bg-gray-700 text-white cursor-pointer"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Go Back
+              </Button>
+
               <Link href="/" className="block">
-                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white cursor-pointer">
                   <Home className="mr-2 h-4 w-4" />
                   Go to Homepage
-                </Button>
-              </Link>
-
-              <Link href="/dashboard" className="block">
-                <Button
-                  variant="outline"
-                  className="w-full border-gray-200 hover:bg-blue-600 hover:text-white hover:border-blue-600"
-                >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to Dashboard
-                </Button>
-              </Link>
-
-              <Link href="/events" className="block">
-                <Button
-                  variant="outline"
-                  className="w-full border-gray-200 hover:bg-blue-600 hover:text-white hover:border-blue-600"
-                >
-                  <Search className="mr-2 h-4 w-4" />
-                  Browse Events
                 </Button>
               </Link>
             </div>

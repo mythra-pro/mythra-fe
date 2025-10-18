@@ -56,7 +56,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 auto-rows-fr">
           <StatCard
             title="Total Events"
             value={allEvents.length}

@@ -182,7 +182,7 @@ export default function AdminUsersPage() {
                 <SelectTrigger className="border-gray-200">
                   <SelectValue placeholder="Filter by role" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white">
                   <SelectItem value="all">All Roles</SelectItem>
                   <SelectItem value="admin">Admin</SelectItem>
                   <SelectItem value="organizer">Organizer</SelectItem>

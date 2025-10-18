@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { User } from "@/app/types/user";
+import Image from "next/image";
 
 export interface MenuItem {
   title: string;
@@ -65,7 +66,13 @@ export function DashboardLayout({
             </Button>
 
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-blue-600" />
+              <Image 
+                src="/favicon.svg" 
+                alt="Mythra Logo" 
+                width={30} 
+                height={30} 
+                className="h-8 w-8 rounded-lg bg-white" 
+              />
               <span className="text-xl font-bold text-gray-900">Mythra</span>
             </div>
           </div>
@@ -129,7 +136,9 @@ export function DashboardLayout({
                 <DropdownMenuItem>Settings</DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="text-red-600">
+                  <Link href="/login">
                   Disconnect Wallet
+                  </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

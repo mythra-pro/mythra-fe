@@ -19,18 +19,14 @@ export default function CreateEventPage() {
 
   // Get menu sections for organizer role
 
-
-  const menuSections = getMenuSectionsForRole('organizer');
-
-
+  const menuSections = getMenuSectionsForRole("organizer");
 
   return (
     <DashboardLayout user={user} menuSections={menuSections}>
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-4xl font-bold text-[#03045E] flex items-center gap-3">
-            <Wand2 className="h-10 w-10" />
+          <h1 className="text-4xl font-bold text-blue-900 flex items-center gap-3">
             Create New Event
           </h1>
           <p className="text-gray-600 mt-2">
@@ -39,10 +35,9 @@ export default function CreateEventPage() {
         </div>
 
         {/* Event Creation Wizard */}
-        <Card className="bg-white/90 border-[#48CAE4] shadow-xl">
+        <Card className="w-full bg-white/90 border-cyan-400 shadow-xl">
           <CardHeader>
-            <CardTitle className="text-[#03045E] flex items-center gap-2">
-              <Plus className="h-5 w-5" />
+            <CardTitle className="text-blue-900 flex items-center gap-2">
               Event Creation Wizard
             </CardTitle>
             <CardDescription>
@@ -50,7 +45,7 @@ export default function CreateEventPage() {
               sales
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="w-full">
             <EventCreationWizard
               onSubmit={(eventData) => {
                 console.log("Event created:", eventData);

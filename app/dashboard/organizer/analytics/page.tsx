@@ -42,7 +42,7 @@ export default function OrganizerAnalyticsPage() {
         {/* Header */}
         <div>
           <h1 className="text-4xl font-bold text-[#03045E]">
-            Analytics Dashboard 📊
+            Analytics Dashboard
           </h1>
           <p className="text-gray-600 mt-2">
             Detailed insights and performance metrics for your events.
