@@ -2,8 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // Vercel deployment optimization
-  output: 'standalone',
-  
+  output: "standalone",
+
   images: {
     remotePatterns: [
       {
@@ -20,7 +20,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  
+
   // Reduce memory usage during build
   experimental: {
     webpackMemoryOptimizations: true,
