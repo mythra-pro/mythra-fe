@@ -4,21 +4,43 @@ import { Connection, PublicKey, SystemProgram } from "@solana/web3.js";
 import { AnchorWallet } from "@solana/wallet-adapter-react";
 
 /**
- * Deployed Program ID on Devnet
- * Can be overridden with NEXT_PUBLIC_PROGRAM_ID environment variable
+ * Default Program ID (Devnet)
  */
-export const PROGRAM_ID = new PublicKey(
-  process.env.NEXT_PUBLIC_PROGRAM_ID ||
-    "3STUXGoh2tGAcsLofsZM8seXdNH6K1AoijdNvxTCMULd"
-);
+const DEFAULT_PROGRAM_ID = "3STUXGoh2tGAcsLofsZM8seXdNH6K1AoijdNvxTCMULd";
+
+/**
+ * Default RPC Endpoint (Devnet)
+ */
+const DEFAULT_RPC_ENDPOINT = "https://api.devnet.solana.com";
+
+/**
+ * Get Program ID with environment variable override support
+ * This is lazy-loaded to ensure environment variables are available
+ */
+export function getProgramId(): PublicKey {
+  return new PublicKey(
+    process.env.NEXT_PUBLIC_PROGRAM_ID || DEFAULT_PROGRAM_ID
+  );
+}
+
+/**
+ * Get RPC Endpoint with environment variable override support
+ */
+export function getRpcEndpoint(): string {
+  return process.env.NEXT_PUBLIC_RPC_ENDPOINT || DEFAULT_RPC_ENDPOINT;
+}
+
+/**
+ * Deployed Program ID on Devnet
+ * For backward compatibility - use getProgramId() in new code
+ */
+export const PROGRAM_ID = new PublicKey(DEFAULT_PROGRAM_ID);
 
 /**
  * Devnet RPC endpoint
- * You can replace this with Helius, QuickNode, or other providers for better performance
- * Can be overridden with NEXT_PUBLIC_RPC_ENDPOINT environment variable
+ * For backward compatibility - use getRpcEndpoint() in new code
  */
-export const DEVNET_ENDPOINT =
-  process.env.NEXT_PUBLIC_RPC_ENDPOINT || "https://api.devnet.solana.com";
+export const DEVNET_ENDPOINT = DEFAULT_RPC_ENDPOINT;
 
 /**
  * Program Interface Type
