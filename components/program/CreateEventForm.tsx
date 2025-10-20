@@ -9,7 +9,7 @@
 import { useState } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
-import { MythraClient } from "../lib/program";
+import { MythraClient } from "@/lib/program";
 
 // Import your IDL
 // import IDL from '../lib/idl/mythra_program.json';

@@ -5,16 +5,20 @@ import { AnchorWallet } from "@solana/wallet-adapter-react";
 
 /**
  * Deployed Program ID on Devnet
+ * Can be overridden with NEXT_PUBLIC_PROGRAM_ID environment variable
  */
 export const PROGRAM_ID = new PublicKey(
-  "3STUXGoh2tGAcsLofsZM8seXdNH6K1AoijdNvxTCMULd"
+  process.env.NEXT_PUBLIC_PROGRAM_ID ||
+    "3STUXGoh2tGAcsLofsZM8seXdNH6K1AoijdNvxTCMULd"
 );
 
 /**
  * Devnet RPC endpoint
  * You can replace this with Helius, QuickNode, or other providers for better performance
+ * Can be overridden with NEXT_PUBLIC_RPC_ENDPOINT environment variable
  */
-export const DEVNET_ENDPOINT = "https://api.devnet.solana.com";
+export const DEVNET_ENDPOINT =
+  process.env.NEXT_PUBLIC_RPC_ENDPOINT || "https://api.devnet.solana.com";
 
 /**
  * Program Interface Type
@@ -40,7 +44,7 @@ export function getProgram(
     preflightCommitment: "confirmed",
   });
 
-  return new Program<MythraProgram>(idl, PROGRAM_ID, provider);
+  return new Program<MythraProgram>(idl, provider);
 }
 
 /**
@@ -163,7 +167,7 @@ export class MythraClient {
 
   async getEvent(organizer: PublicKey, eventId: string) {
     const [eventPda] = getEventPDA(organizer, eventId);
-    return await this.program.account.event.fetch(eventPda);
+    return await (this.program.account as any).event.fetch(eventPda);
   }
 
   // ===== CAMPAIGN OPERATIONS =====
@@ -224,7 +228,7 @@ export class MythraClient {
   async getCampaign(organizer: PublicKey, eventId: string) {
     const [eventPda] = getEventPDA(organizer, eventId);
     const [campaignPda] = getCampaignPDA(eventPda);
-    return await this.program.account.campaign.fetch(campaignPda);
+    return await (this.program.account as any).campaign.fetch(campaignPda);
   }
 
   // ===== BUDGET & VOTING =====
@@ -340,7 +344,7 @@ export class MythraClient {
     const [campaignPda] = getCampaignPDA(eventPda);
 
     // Fetch all contribution accounts for this campaign
-    const contributions = await this.program.account.contribution.all([
+    const contributions = await (this.program.account as any).contribution.all([
       {
         memcmp: {
           offset: 8, // After discriminator
@@ -365,7 +369,9 @@ export class MythraClient {
     const [contributionPda] = getContributionPDA(campaignPda, contributor);
 
     try {
-      return await this.program.account.contribution.fetch(contributionPda);
+      return await (this.program.account as any).contribution.fetch(
+        contributionPda
+      );
     } catch {
       return null; // User hasn't contributed yet
     }

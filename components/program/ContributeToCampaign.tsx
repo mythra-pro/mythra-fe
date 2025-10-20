@@ -9,7 +9,7 @@
 import { useState } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
-import { MythraClient, lamportsToSol } from "../lib/program";
+import { MythraClient, lamportsToSol } from "@/lib/program";
 
 export function ContributeToCampaign() {
   const { connection } = useConnection();
