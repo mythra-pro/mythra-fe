@@ -97,6 +97,13 @@ export async function POST(request: NextRequest) {
       buyer = newBuyer;
     }
 
+    if (!buyer) {
+      return NextResponse.json(
+        { error: "Failed to get or create buyer" },
+        { status: 500 }
+      );
+    }
+
     // Create ticket
     const { data: ticket, error: ticketError } = await supabase
       .from("tickets")

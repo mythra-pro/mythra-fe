@@ -174,7 +174,7 @@ export default function EventOrganizerDashboard() {
                           : "text-gray-500"
                       }`}
                     >
-                      {event.date.toLocaleDateString()}
+                      {new Date(event.start_time || event.date || '').toLocaleDateString()}
                     </p>
                     <div className="flex items-center justify-between mt-2">
                       <span
@@ -266,12 +266,12 @@ export default function EventOrganizerDashboard() {
                       <div>
                         <p className="text-blue-100 text-sm">Date</p>
                         <p className="font-bold">
-                          {selectedEvent.date.toLocaleDateString()}
+                          {new Date(selectedEvent.start_time || selectedEvent.date || '').toLocaleDateString()}
                         </p>
                       </div>
                       <div>
                         <p className="text-blue-100 text-sm">Location</p>
-                        <p className="font-bold">{selectedEvent.location}</p>
+                        <p className="font-bold">{selectedEvent.venue || selectedEvent.location}</p>
                       </div>
                       <div>
                         <p className="text-blue-100 text-sm">Tickets Sold</p>

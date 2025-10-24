@@ -4,10 +4,10 @@ import { getServiceSupabase } from "@/lib/supabase/server";
 // GET /api/tickets/[id] - Get single ticket
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const supabase = getServiceSupabase();
 
     const { data: ticket, error } = await supabase

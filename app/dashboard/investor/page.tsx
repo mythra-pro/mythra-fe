@@ -5,6 +5,7 @@ import { DashboardLayout } from "@/components/dashboard-layout";
 import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
 import { useDashboardUser } from "@/hooks/useDashboardUser";
 import { StatCard } from "@/components/stat-card";
+import { CampaignCard } from "@/components/campaign-card";
 import { dummyInvestments, dummyCampaigns } from "@/lib/dummy-data";
 import { Target, DollarSign, TrendingUp, Award, Vote } from "lucide-react";
 import {
@@ -45,11 +46,8 @@ export default function InvestorDashboard() {
   const totalDaoTokens = myInvestments.reduce((sum, i) => sum + i.daoTokens, 0);
   const portfolioValue = totalInvested * 1.15; // Mock 15% return
 
-  // Get menu sections with dynamic voting count
-  const pendingVotes = 2; // This could be calculated from actual data
-  const menuSections = getMenuSectionsWithCounts("investor", {
-    pendingVotes: pendingVotes,
-  });
+  // Get menu sections
+  const menuSections = getMenuSectionsForRole("investor");
 
   return (
     <DashboardLayout user={user} menuSections={menuSections}>

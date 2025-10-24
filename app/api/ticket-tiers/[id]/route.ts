@@ -4,10 +4,10 @@ import { getServiceSupabase } from "@/lib/supabase/server";
 // GET /api/ticket-tiers/[id] - Get single ticket tier
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const supabase = getServiceSupabase();
 
     const { data: tier, error } = await supabase
@@ -36,10 +36,10 @@ export async function GET(
 // PATCH /api/ticket-tiers/[id] - Update ticket tier
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await req.json();
     const { name, description, price, supplyMax } = body;
 
@@ -81,10 +81,10 @@ export async function PATCH(
 // DELETE /api/ticket-tiers/[id] - Delete ticket tier
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const supabase = getServiceSupabase();
 
     const { error } = await supabase

@@ -4,10 +4,10 @@ import { getServiceSupabase } from "@/lib/supabase/server";
 // GET /api/users/[wallet] - Get user by wallet address
 export async function GET(
   req: Request,
-  { params }: { params: { wallet: string } }
+  { params }: { params: Promise<{ wallet: string }> }
 ) {
   try {
-    const { wallet } = params;
+    const { wallet } = await params;
 
     if (!wallet) {
       return NextResponse.json(
@@ -44,10 +44,10 @@ export async function GET(
 // PATCH /api/users/[wallet] - Update user profile
 export async function PATCH(
   req: Request,
-  { params }: { params: { wallet: string } }
+  { params }: { params: Promise<{ wallet: string }> }
 ) {
   try {
-    const { wallet } = params;
+    const { wallet } = await params;
     const body = await req.json();
     const { displayName, email, avatarUrl } = body;
 

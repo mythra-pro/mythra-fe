@@ -28,6 +28,7 @@ export default function OrganizerAnalyticsPage() {
   const user = useDashboardUser("organizer");
   const [userId, setUserId] = useState<string | null>(null);
   const [stats, setStats] = useState<any>(null);
+  const [myEvents, setMyEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Upsert user and get user ID
@@ -55,12 +56,15 @@ export default function OrganizerAnalyticsPage() {
     if (!userId) return;
 
     setLoading(true);
-    fetch(`/api/stats/organizer?organizerId=${userId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setStats(data.stats);
+    Promise.all([
+      fetch(`/api/stats/organizer?organizerId=${userId}`).then(res => res.json()),
+      fetch(`/api/events?organizerId=${userId}`).then(res => res.json())
+    ])
+      .then(([statsData, eventsData]) => {
+        setStats(statsData.stats);
+        setMyEvents(eventsData.events || []);
       })
-      .catch((e) => console.error("Failed to fetch stats:", e))
+      .catch((e) => console.error("Failed to fetch data:", e))
       .finally(() => setLoading(false));
   }, [userId]);
 

@@ -105,6 +105,13 @@ export async function POST(request: NextRequest) {
       user = newUser;
     }
 
+    if (!user) {
+      return NextResponse.json(
+        { error: "Failed to get or create user" },
+        { status: 500 }
+      );
+    }
+
     // Generate slug
     const slug = name
       .toLowerCase()
