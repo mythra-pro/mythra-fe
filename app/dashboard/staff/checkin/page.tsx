@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
+import { useDashboardUser } from "@/hooks/useDashboardUser";
 import CheckInScanner from "@/app/_components/dashboard/CheckInScanner";
-import { dummyUsers, dummyEvents } from "@/lib/dummy-data";
+import { dummyEvents } from "@/lib/dummy-data";
 import { QrCode, Calendar, Users, CheckCircle } from "lucide-react";
 import {
   Card,
@@ -25,15 +26,31 @@ import {
 export const dynamic = "force-dynamic";
 
 export default function StaffCheckinPage() {
-  const user = dummyUsers.find((u) => u.role === "staff")!;
+  const user = useDashboardUser("staff");
   const myEvents = dummyEvents.filter((e) => e.staffIds?.includes(user.id));
   const [selectedEventId, setSelectedEventId] = useState(myEvents[0]?.id || "");
-
   const selectedEvent = myEvents.find((e) => e.id === selectedEventId);
-
-  // Get menu sections for staff role
-
   const menuSections = getMenuSectionsForRole("staff");
+
+  // Ensure user exists in DB on mount
+  useEffect(() => {
+    const upsertUser = async () => {
+      try {
+        await fetch("/api/users/upsert", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            walletAddress: user.walletAddress,
+            displayName: user.name,
+            email: user.email,
+          }),
+        });
+      } catch (e) {
+        console.error("Failed to upsert user:", e);
+      }
+    };
+    upsertUser();
+  }, [user.walletAddress, user.name, user.email]);
 
   return (
     <DashboardLayout user={user} menuSections={menuSections}>
@@ -76,7 +93,7 @@ export default function StaffCheckinPage() {
                     {myEvents.map((event) => (
                       <SelectItem key={event.id} value={event.id}>
                         {event.name} -{" "}
-                        {new Date(event.date).toLocaleDateString()}
+                        {new Date(event.start_time).toLocaleDateString()}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -122,10 +139,37 @@ export default function StaffCheckinPage() {
                 eventId={selectedEvent.id}
                 eventName={selectedEvent.name}
                 onCheckIn={async (data) => {
-                  alert(
-                    `Checked in ticket: ${data.ticketId} for ${selectedEvent.name}`
-                  );
-                  return true;
+                  try {
+                    const res = await fetch("/api/checkins", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        "x-wallet-address": user.walletAddress || "",
+                      },
+                      body: JSON.stringify({
+                        ticketId: data.ticketId,
+                        eventId: data.eventId,
+                        checkInDate: new Date(data.checkInDate).toISOString(),
+                        walletSignature: data.walletSignature,
+                        location: data.location || null,
+                      }),
+                    });
+                    const json = await res.json();
+                    if (!res.ok || !json.ok) {
+                      alert(
+                        json.reason ||
+                          "Check-in failed. Ticket may be invalid or already used."
+                      );
+                      return false;
+                    }
+                    alert(
+                      `Checked in ticket: ${data.ticketId} for ${selectedEvent.name}`
+                    );
+                    return true;
+                  } catch (e: any) {
+                    alert("Error processing check-in. Please try again.");
+                    return false;
+                  }
                 }}
               />
             </CardContent>

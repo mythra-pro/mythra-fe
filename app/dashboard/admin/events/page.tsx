@@ -254,7 +254,7 @@ export default function AdminEventsPage() {
                             <div>
                               <p className="text-sm text-gray-500">Date</p>
                               <p className="font-medium text-gray-900">
-                                {new Date(event.date).toLocaleDateString()}
+                                {new Date(event.start_time).toLocaleDateString()}
                               </p>
                             </div>
                           </div>
@@ -265,7 +265,7 @@ export default function AdminEventsPage() {
                             <div>
                               <p className="text-sm text-gray-500">Location</p>
                               <p className="font-medium text-gray-900">
-                                {event.location}
+                                {event.venue}
                               </p>
                             </div>
                           </div>

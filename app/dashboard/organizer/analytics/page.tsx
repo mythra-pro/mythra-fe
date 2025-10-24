@@ -1,9 +1,10 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
+import { useDashboardUser } from "@/hooks/useDashboardUser";
 import { StatCard } from "@/components/stat-card";
-import { dummyUsers, dummyEvents } from "@/lib/dummy-data";
 import {
   TrendingUp,
   BarChart3,
@@ -24,16 +25,51 @@ import {
 export const dynamic = "force-dynamic";
 
 export default function OrganizerAnalyticsPage() {
-  const user = dummyUsers.find((u) => u.role === "organizer")!;
-  const myEvents = dummyEvents.filter((e) => e.organizerId === user.id);
-  const totalRevenue = myEvents.reduce((sum, e) => sum + (e.revenue || 0), 0);
-  const totalAttendees = myEvents.reduce(
-    (sum, e) => sum + (e.soldTickets || 0),
-    0
-  );
+  const user = useDashboardUser("organizer");
+  const [userId, setUserId] = useState<string | null>(null);
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Upsert user and get user ID
+  useEffect(() => {
+    fetch("/api/users/upsert", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        walletAddress: user.walletAddress,
+        displayName: user.name,
+        email: user.email,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.user?.id) {
+          setUserId(data.user.id);
+        }
+      })
+      .catch((e) => console.error("Failed to upsert user:", e));
+  }, [user.walletAddress, user.name, user.email]);
+
+  // Fetch stats when userId is available
+  useEffect(() => {
+    if (!userId) return;
+
+    setLoading(true);
+    fetch(`/api/stats/organizer?organizerId=${userId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setStats(data.stats);
+      })
+      .catch((e) => console.error("Failed to fetch stats:", e))
+      .finally(() => setLoading(false));
+  }, [userId]);
+
+  const totalRevenue = stats?.totalRevenue || 0;
+  const totalAttendees = stats?.totalTicketsSold || 0;
+  const totalEvents = stats?.totalEvents || 0;
+  const avgRevenuePerEvent = totalEvents > 0 ? totalRevenue / totalEvents : 0;
 
   // Get menu sections for organizer role
-
   const menuSections = getMenuSectionsForRole("organizer");
 
   return (
@@ -53,7 +89,7 @@ export default function OrganizerAnalyticsPage() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatCard
             title="Total Revenue"
-            value={`$${totalRevenue.toLocaleString()}`}
+            value={`${totalRevenue.toFixed(2)} SOL`}
             description="All events combined"
             icon={DollarSign}
             trend={{ value: 23.4, isPositive: true }}
@@ -69,16 +105,14 @@ export default function OrganizerAnalyticsPage() {
           />
           <StatCard
             title="Events Created"
-            value={myEvents.length}
+            value={totalEvents}
             description="Lifetime events"
             icon={Calendar}
             delay={0.2}
           />
           <StatCard
             title="Avg. Revenue/Event"
-            value={`$${Math.round(
-              totalRevenue / myEvents.length || 0
-            ).toLocaleString()}`}
+            value={`${avgRevenuePerEvent.toFixed(2)} SOL`}
             description="Performance metric"
             icon={TrendingUp}
             trend={{ value: 8.2, isPositive: true }}
@@ -160,7 +194,7 @@ export default function OrganizerAnalyticsPage() {
                         {event.name}
                       </h3>
                       <span className="text-sm text-gray-500">
-                        {new Date(event.date).toLocaleDateString()}
+                        {new Date(event.start_time).toLocaleDateString()}
                       </span>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

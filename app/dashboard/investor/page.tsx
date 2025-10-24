@@ -1,10 +1,11 @@
 "use client";
 
+import { useEffect } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
-import { getMenuSectionsWithCounts } from "@/app/utils/dashboardMenus";
+import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
+import { useDashboardUser } from "@/hooks/useDashboardUser";
 import { StatCard } from "@/components/stat-card";
-import { CampaignCard } from "@/components/campaign-card";
-import { dummyUsers, dummyCampaigns, dummyInvestments } from "@/lib/dummy-data";
+import { dummyInvestments, dummyCampaigns } from "@/lib/dummy-data";
 import { Target, DollarSign, TrendingUp, Award, Vote } from "lucide-react";
 import {
   Card,
@@ -22,7 +23,19 @@ import Link from "next/link";
 export const dynamic = "force-dynamic";
 
 export default function InvestorDashboard() {
-  const user = dummyUsers.find((u) => u.role === "investor")!;
+  const user = useDashboardUser("investor");
+
+  useEffect(() => {
+    fetch("/api/users/upsert", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        walletAddress: user.walletAddress,
+        displayName: user.name,
+        email: user.email,
+      }),
+    }).catch((e) => console.error("Failed to upsert user:", e));
+  }, [user.walletAddress, user.name, user.email]);
   const myInvestments = dummyInvestments.filter(
     (i) => i.investorId === user.id
   );

@@ -1,9 +1,10 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
-import { getMenuSectionsWithCounts } from "@/app/utils/dashboardMenus";
+import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
+import { useDashboardUser } from "@/hooks/useDashboardUser";
 import { StatCard } from "@/components/stat-card";
-import { dummyUsers, dummyEvents } from "@/lib/dummy-data";
 import {
   Calendar,
   Users,
@@ -28,22 +29,42 @@ import Link from "next/link";
 export const dynamic = "force-dynamic";
 
 export default function AdminDashboard() {
-  const user = dummyUsers.find((u) => u.role === "admin")!;
-  const allEvents = dummyEvents;
-  const allUsers = dummyUsers;
+  const user = useDashboardUser("admin");
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const pendingApprovals = allEvents.filter((e) => e.status === "draft").length;
-  const totalRevenue = allEvents.reduce((sum, e) => sum + (e.revenue || 0), 0);
-  const platformFee = totalRevenue * 0.05; // 5% platform fee
-  const totalPoolBalance = allEvents.reduce(
-    (sum, e) => sum + (e.poolBalance || 0),
-    0
-  );
+  // Upsert user
+  useEffect(() => {
+    fetch("/api/users/upsert", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        walletAddress: user.walletAddress,
+        displayName: user.name,
+        email: user.email,
+      }),
+    }).catch((e) => console.error("Failed to upsert user:", e));
+  }, [user.walletAddress, user.name, user.email]);
 
-  // Get menu sections with dynamic counts
-  const menuSections = getMenuSectionsWithCounts("admin", {
-    pendingApprovals: pendingApprovals,
-  });
+  // Fetch admin stats
+  useEffect(() => {
+    setLoading(true);
+    fetch('/api/stats/admin')
+      .then((res) => res.json())
+      .then((data) => {
+        setStats(data.stats);
+      })
+      .catch((e) => console.error("Failed to fetch stats:", e))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const pendingApprovals = stats?.pendingApprovals || 0;
+  const totalRevenue = stats?.totalRevenue || 0;
+  const platformFee = stats?.platformFee || 0;
+  const totalPoolBalance = 0; // TODO: Add pool balance to stats API
+
+  // Get menu sections
+  const menuSections = getMenuSectionsForRole("admin");
 
   return (
     <DashboardLayout user={user} menuSections={menuSections}>
@@ -62,14 +83,14 @@ export default function AdminDashboard() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 auto-rows-fr">
           <StatCard
             title="Total Events"
-            value={allEvents.length}
+            value={stats?.totalEvents || 0}
             description="Platform-wide"
             icon={Calendar}
             delay={0}
           />
           <StatCard
             title="Total Users"
-            value={allUsers.length}
+            value={stats?.totalUsers || 0}
             description="Registered users"
             icon={Users}
             trend={{ value: 18.2, isPositive: true }}
@@ -77,8 +98,8 @@ export default function AdminDashboard() {
           />
           <StatCard
             title="Platform Revenue"
-            value={`$${totalRevenue.toLocaleString()}`}
-            description={`Fee: $${platformFee.toLocaleString()}`}
+            value={`${totalRevenue.toFixed(2)} SOL`}
+            description={`Fee: ${platformFee.toFixed(2)} SOL`}
             icon={DollarSign}
             trend={{ value: 25.4, isPositive: true }}
             delay={0.2}
@@ -114,57 +135,21 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {allEvents
-                .filter((e) => e.status === "draft")
-                .slice(0, 3)
-                .map((event, idx) => (
-                  <motion.div
-                    key={event.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.1 }}
-                  >
-                    <Card className="bg-gradient-to-r from-white to-[#CAF0F8] border-[#48CAE4]">
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <h3 className="text-lg font-bold text-[#03045E]">
-                                {event.name}
-                              </h3>
-                              <Badge className="bg-yellow-500 text-white">
-                                Pending Review
-                              </Badge>
-                            </div>
-                            <div className="text-sm text-gray-600">
-                              <p>Organizer: {event.organizerName}</p>
-                              <p>
-                                Date:{" "}
-                                {new Date(event.date).toLocaleDateString()}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              className="bg-green-500 hover:bg-green-600 text-white"
-                            >
-                              Approve
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
-                            >
-                              Reject
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
-              {pendingApprovals === 0 && (
+              {pendingApprovals > 0 ? (
+                <div className="p-8 text-center">
+                  <Badge className="bg-yellow-500 text-white mb-4">
+                    {pendingApprovals} Pending
+                  </Badge>
+                  <p className="text-gray-600">
+                    You have {pendingApprovals} event{pendingApprovals !== 1 ? 's' : ''} awaiting approval.
+                  </p>
+                  <Link href="/dashboard/admin/approvals">
+                    <Button className="mt-4 bg-blue-600 hover:bg-blue-700 text-white">
+                      Review Now
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
                 <div className="p-8 text-center">
                   <ShieldCheck className="h-12 w-12 mx-auto text-gray-400 mb-4" />
                   <p className="text-gray-500">No pending approvals</p>
@@ -190,7 +175,7 @@ export default function AdminDashboard() {
                     Total Revenue
                   </span>
                   <span className="text-xl font-bold text-[#0077B6]">
-                    ${totalRevenue.toLocaleString()}
+                    {totalRevenue.toFixed(2)} SOL
                   </span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-gradient-to-r from-[#90E0EF] to-white rounded-lg">
@@ -198,7 +183,7 @@ export default function AdminDashboard() {
                     Platform Fee (5%)
                   </span>
                   <span className="text-xl font-bold text-[#0077B6]">
-                    ${platformFee.toLocaleString()}
+                    {platformFee.toFixed(2)} SOL
                   </span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-gradient-to-r from-[#48CAE4] to-white rounded-lg">
@@ -206,7 +191,7 @@ export default function AdminDashboard() {
                     Organizer Share
                   </span>
                   <span className="text-xl font-bold text-[#0077B6]">
-                    ${(totalRevenue - platformFee).toLocaleString()}
+                    {(totalRevenue - platformFee).toFixed(2)} SOL
                   </span>
                 </div>
               </div>
@@ -225,16 +210,17 @@ export default function AdminDashboard() {
                 <div className="p-4 bg-gradient-to-br from-[#0077B6] to-[#0096C7] rounded-lg text-white">
                   <p className="text-sm opacity-90 mb-1">Total Pool Balance</p>
                   <p className="text-3xl font-bold">
-                    ${totalPoolBalance.toLocaleString()}
+                    {totalPoolBalance.toFixed(2)} SOL
                   </p>
                   <p className="text-xs opacity-75 mt-2">
-                    Across {allEvents.length} events
+                    Across {stats?.totalEvents || 0} events
                   </p>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="p-3 bg-gradient-to-br from-[#CAF0F8] to-white rounded-lg border border-[#48CAE4]">
                     <p className="text-xs text-gray-600 mb-1">Locked Funds</p>
                     <p className="text-lg font-bold text-[#03045E]">
+                      {(totalPoolBalance * 0.7).toFixed(2)} SOL
                       ${(totalPoolBalance * 0.7).toLocaleString()}
                     </p>
                   </div>
