@@ -17,6 +17,9 @@ import {
   TrendingUp,
 } from "lucide-react";
 
+// Force dynamic rendering - required for wallet-connected pages
+export const dynamic = "force-dynamic";
+
 export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50">

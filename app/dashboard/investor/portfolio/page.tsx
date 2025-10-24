@@ -23,6 +23,9 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
 
+// Force dynamic rendering - required for wallet-connected pages
+export const dynamic = "force-dynamic";
+
 export default function InvestorPortfolioPage() {
   const user = dummyUsers.find((u) => u.role === "investor")!;
   const myInvestments = dummyInvestments.filter(
@@ -70,10 +73,7 @@ export default function InvestorPortfolioPage() {
 
   // Get menu sections for investor role
 
-
-  const menuSections = getMenuSectionsForRole('investor');
-
-
+  const menuSections = getMenuSectionsForRole("investor");
 
   return (
     <DashboardLayout user={user} menuSections={menuSections}>

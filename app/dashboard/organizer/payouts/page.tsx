@@ -14,6 +14,9 @@ import {
 } from "@/components/ui/card";
 import { StatCard } from "@/components/stat-card";
 
+// Force dynamic rendering - required for wallet-connected pages
+export const dynamic = "force-dynamic";
+
 export default function OrganizerPayoutsPage() {
   const user = dummyUsers.find((u) => u.role === "organizer")!;
   const myEvents = dummyEvents.filter((e) => e.organizerId === user.id);
@@ -23,8 +26,7 @@ export default function OrganizerPayoutsPage() {
 
   // Get menu sections for organizer role
 
-
-  const menuSections = getMenuSectionsForRole('organizer');
+  const menuSections = getMenuSectionsForRole("organizer");
 
   return (
     <DashboardLayout user={user} menuSections={menuSections}>

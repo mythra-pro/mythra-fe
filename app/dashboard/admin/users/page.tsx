@@ -32,6 +32,9 @@ import {
 } from "@/components/ui/select";
 import { motion } from "framer-motion";
 
+// Force dynamic rendering - required for wallet-connected pages
+export const dynamic = "force-dynamic";
+
 export default function AdminUsersPage() {
   const user = dummyUsers.find((u) => u.role === "admin")!;
   const [searchQuery, setSearchQuery] = useState("");

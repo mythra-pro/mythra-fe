@@ -23,6 +23,9 @@ import {
 } from "@/components/ui/select";
 import { useState } from "react";
 
+// Force dynamic rendering - required for wallet-connected pages
+export const dynamic = "force-dynamic";
+
 export default function InvestorCampaignsPage() {
   const user = dummyUsers.find((u) => u.role === "investor")!;
   const [searchQuery, setSearchQuery] = useState("");

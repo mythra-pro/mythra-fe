@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { Menu, X, Bell, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,17 +48,34 @@ export function DashboardLayout({
   sidebar, // Legacy support
 }: DashboardLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
   const { disconnect, connected, publicKey } = useWallet();
   const router = useRouter();
 
-  // Strict validation - must have connected wallet and user must match
-  if (!connected || !publicKey) {
-    throw new Error("Dashboard requires connected wallet");
+  // Wait for client-side mount
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Only perform wallet checks after mounting on client
+  useEffect(() => {
+    if (!isMounted) return;
+
+    // Strict validation - must have connected wallet and user must match
+    if (!connected || !publicKey) {
+      throw new Error("Dashboard requires connected wallet");
+    }
+
+    if (user.walletAddress !== publicKey.toString()) {
+      throw new Error("User wallet address mismatch");
+    }
+  }, [isMounted, connected, publicKey, user.walletAddress]);
+
+  // Don't render until mounted on client
+  if (!isMounted) {
+    return null;
   }
 
-  if (user.walletAddress !== publicKey.toString()) {
-    throw new Error("User wallet address mismatch");
-  }
   const handleDisconnectWallet = async () => {
     try {
       await disconnect();
@@ -137,12 +154,12 @@ export function DashboardLayout({
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={user.avatar} alt="Wallet User" />
                     <AvatarFallback className="bg-blue-600 text-white">
-                      {user.walletAddress.slice(0, 2).toUpperCase()}
+                      {(user.walletAddress || "").slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <span className="hidden md:inline-block text-sm font-mono">
-                    {user.walletAddress.slice(0, 4)}...
-                    {user.walletAddress.slice(-4)}
+                    {(user.walletAddress || "").slice(0, 4)}...
+                    {(user.walletAddress || "").slice(-4)}
                   </span>
                 </Button>
               </DropdownMenuTrigger>

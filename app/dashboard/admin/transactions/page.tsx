@@ -31,6 +31,9 @@ import {
 } from "@/components/ui/select";
 import { motion } from "framer-motion";
 
+// Force dynamic rendering - required for wallet-connected pages
+export const dynamic = "force-dynamic";
+
 // Mock transaction data
 const mockTransactions = [
   {
@@ -159,10 +162,7 @@ export default function AdminTransactionsPage() {
 
   // Get menu sections for admin role
 
-
-  const menuSections = getMenuSectionsForRole('admin');
-
-
+  const menuSections = getMenuSectionsForRole("admin");
 
   return (
     <DashboardLayout user={user} menuSections={menuSections}>

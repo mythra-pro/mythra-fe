@@ -19,6 +19,9 @@ import Link from "next/link";
 import { DashboardGuard } from "@/hooks/useDashboardUser";
 import { WalletErrorBoundary } from "@/components/WalletErrorBoundary";
 
+// Force dynamic rendering - required for wallet-connected pages
+export const dynamic = "force-dynamic";
+
 export default function OrganizerDashboard() {
   const menuSections = getMenuSectionsForRole("organizer");
 

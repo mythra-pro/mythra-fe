@@ -24,6 +24,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 
+// Force dynamic rendering - required for wallet-connected pages
+export const dynamic = "force-dynamic";
+
 export default function AdminApprovalsPage() {
   const user = dummyUsers.find((u) => u.role === "admin")!;
   const [pendingEvents, setPendingEvents] = useState(
@@ -50,9 +53,7 @@ export default function AdminApprovalsPage() {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-4xl font-bold text-[#03045E]">
-            Event Approvals
-          </h1>
+          <h1 className="text-4xl font-bold text-[#03045E]">Event Approvals</h1>
           <p className="text-gray-600 mt-2">
             Review and approve pending event submissions.
           </p>

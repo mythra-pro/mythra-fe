@@ -20,6 +20,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+// Force dynamic rendering - required for wallet-connected pages
+export const dynamic = "force-dynamic";
+
 export default function OrganizerAnalyticsPage() {
   const user = dummyUsers.find((u) => u.role === "organizer")!;
   const myEvents = dummyEvents.filter((e) => e.organizerId === user.id);
@@ -31,10 +34,7 @@ export default function OrganizerAnalyticsPage() {
 
   // Get menu sections for organizer role
 
-
-  const menuSections = getMenuSectionsForRole('organizer');
-
-
+  const menuSections = getMenuSectionsForRole("organizer");
 
   return (
     <DashboardLayout user={user} menuSections={menuSections}>

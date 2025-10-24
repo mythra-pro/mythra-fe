@@ -15,6 +15,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 
+// Force dynamic rendering - required for wallet-connected pages
+export const dynamic = "force-dynamic";
+
 export default function OrganizerStaffPage() {
   const user = dummyUsers.find((u) => u.role === "organizer")!;
   const myEvents = dummyEvents.filter((e) => e.organizerId === user.id);
@@ -22,8 +25,7 @@ export default function OrganizerStaffPage() {
 
   // Get menu sections for organizer role
 
-
-  const menuSections = getMenuSectionsForRole('organizer');
+  const menuSections = getMenuSectionsForRole("organizer");
 
   return (
     <DashboardLayout user={user} menuSections={menuSections}>

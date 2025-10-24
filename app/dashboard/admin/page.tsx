@@ -24,6 +24,9 @@ import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
+// Force dynamic rendering - required for wallet-connected pages
+export const dynamic = "force-dynamic";
+
 export default function AdminDashboard() {
   const user = dummyUsers.find((u) => u.role === "admin")!;
   const allEvents = dummyEvents;

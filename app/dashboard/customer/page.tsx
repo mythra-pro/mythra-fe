@@ -16,6 +16,9 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
+// Force dynamic rendering - required for wallet-connected pages
+export const dynamic = "force-dynamic";
+
 export default function CustomerDashboard() {
   const user = dummyUsers.find((u) => u.role === "customer")!;
   const myTickets = dummyTickets.filter((t) => t.owner === user.id);

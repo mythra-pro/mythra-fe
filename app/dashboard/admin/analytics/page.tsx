@@ -20,6 +20,9 @@ import {
 } from "@/components/ui/card";
 import { StatCard } from "@/components/stat-card";
 
+// Force dynamic rendering - required for wallet-connected pages
+export const dynamic = "force-dynamic";
+
 export default function AdminAnalyticsPage() {
   const user = dummyUsers.find((u) => u.role === "admin")!;
 
@@ -50,10 +53,7 @@ export default function AdminAnalyticsPage() {
 
   // Get menu sections for admin role
 
-
-  const menuSections = getMenuSectionsForRole('admin');
-
-
+  const menuSections = getMenuSectionsForRole("admin");
 
   return (
     <DashboardLayout user={user} menuSections={menuSections}>

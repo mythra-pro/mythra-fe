@@ -21,6 +21,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+// Force dynamic rendering - required for wallet-connected pages
+export const dynamic = "force-dynamic";
+
 export default function StaffCheckinPage() {
   const user = dummyUsers.find((u) => u.role === "staff")!;
   const myEvents = dummyEvents.filter((e) => e.staffIds?.includes(user.id));
