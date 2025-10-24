@@ -15,6 +15,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { User } from "@/app/types/user";
 import Image from "next/image";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useRouter } from "next/navigation";
+// Uncomment to add wallet button to dashboard
+// import { CustomWalletButton } from "@/components/program/WalletButton";
 
 export interface MenuItem {
   title: string;
@@ -31,7 +35,7 @@ export interface MenuSection {
 
 interface DashboardLayoutProps {
   children: ReactNode;
-  user: User;
+  user: User; // User is REQUIRED - no optional fallback
   menuSections?: MenuSection[];
   // Legacy support - will be deprecated
   sidebar?: ReactNode;
@@ -44,6 +48,28 @@ export function DashboardLayout({
   sidebar, // Legacy support
 }: DashboardLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const { disconnect, connected, publicKey } = useWallet();
+  const router = useRouter();
+
+  // Strict validation - must have connected wallet and user must match
+  if (!connected || !publicKey) {
+    throw new Error("Dashboard requires connected wallet");
+  }
+
+  if (user.walletAddress !== publicKey.toString()) {
+    throw new Error("User wallet address mismatch");
+  }
+  const handleDisconnectWallet = async () => {
+    try {
+      await disconnect();
+      // Redirect to login page after disconnect
+      router.push("/login");
+    } catch (error) {
+      console.error("Error disconnecting wallet:", error);
+      // Still redirect even if disconnect fails
+      router.push("/login");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -66,12 +92,12 @@ export function DashboardLayout({
             </Button>
 
             <div className="flex items-center gap-2">
-              <Image 
-                src="/favicon.svg" 
-                alt="Mythra Logo" 
-                width={30} 
-                height={30} 
-                className="h-8 w-8 rounded-lg bg-white" 
+              <Image
+                src="/favicon.svg"
+                alt="Mythra Logo"
+                width={30}
+                height={30}
+                className="h-8 w-8 rounded-lg bg-white"
               />
               <span className="text-xl font-bold text-gray-900">Mythra</span>
             </div>
@@ -99,6 +125,9 @@ export function DashboardLayout({
               <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-blue-600" />
             </Button>
 
+            {/* Wallet Button - Optional, uncomment if needed */}
+            {/* <CustomWalletButton /> */}
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -106,39 +135,34 @@ export function DashboardLayout({
                   className="relative h-10 gap-2 px-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
                 >
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.avatar} alt={user.name} />
+                    <AvatarImage src={user.avatar} alt="Wallet User" />
                     <AvatarFallback className="bg-blue-600 text-white">
-                      {user.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
+                      {user.walletAddress.slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="hidden md:inline-block text-sm font-medium">
-                    {user.name}
+                  <span className="hidden md:inline-block text-sm font-mono">
+                    {user.walletAddress.slice(0, 4)}...
+                    {user.walletAddress.slice(-4)}
                   </span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-white z-100">
+              <DropdownMenuContent align="end" className="w-80 bg-white z-100">
                 <DropdownMenuLabel>
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium">{user.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      {user.email}
+                      Wallet Address
                     </p>
-                    <p className="text-xs font-mono text-blue-600">
+                    <p className="text-sm font-mono text-blue-600 break-all">
                       {user.walletAddress}
                     </p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Profile</DropdownMenuItem>
-                <DropdownMenuItem>Settings</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-red-600">
-                  <Link href="/login">
+                <DropdownMenuItem
+                  className="text-red-600 cursor-pointer"
+                  onClick={handleDisconnectWallet}
+                >
                   Disconnect Wallet
-                  </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

@@ -131,9 +131,9 @@ export default function CheckInScanner({
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-green-500 rounded-2xl p-8 text-white">
+      <div className="bg-gradient-to-r from-blue-600 to-blue-500 rounded-2xl p-8 text-white">
         <h2 className="text-3xl font-bold mb-2">Check-in Scanner</h2>
-        <p className="text-purple-100">{eventName}</p>
+        <p className="text-blue-100">{eventName}</p>
       </div>
 
       {/* Mode Selector */}
@@ -143,7 +143,7 @@ export default function CheckInScanner({
             onClick={() => setScanMode("qr")}
             className={`flex-1 flex items-center justify-center gap-3 px-6 py-4 rounded-lg font-medium transition-all ${
               scanMode === "qr"
-                ? "bg-gradient-to-r from-purple-600 to-green-500 text-white shadow-lg"
+                ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
@@ -154,7 +154,7 @@ export default function CheckInScanner({
             onClick={() => setScanMode("manual")}
             className={`flex-1 flex items-center justify-center gap-3 px-6 py-4 rounded-lg font-medium transition-all ${
               scanMode === "manual"
-                ? "bg-gradient-to-r from-purple-600 to-green-500 text-white shadow-lg"
+                ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
@@ -168,11 +168,11 @@ export default function CheckInScanner({
       <div className="bg-white rounded-xl shadow-lg p-8">
         {scanMode === "qr" ? (
           <div className="space-y-6">
-            <div className="aspect-square max-w-md mx-auto bg-gradient-to-br from-purple-100 via-white to-green-100 rounded-2xl border-4 border-dashed border-purple-300 flex items-center justify-center">
+            <div className="aspect-square max-w-md mx-auto bg-gradient-to-br from-blue-100 via-white to-blue-50 rounded-2xl border-4 border-dashed border-blue-300 flex items-center justify-center">
               {isScanning ? (
                 <div className="text-center">
                   <div className="animate-pulse">
-                    <QrCode className="text-8xl text-purple-500 mx-auto mb-4" />
+                    <QrCode className="text-8xl text-blue-500 mx-auto mb-4" />
                   </div>
                   <p className="text-lg font-medium text-gray-700">
                     Scanning...
@@ -194,7 +194,7 @@ export default function CheckInScanner({
             <button
               onClick={handleQRScan}
               disabled={isScanning}
-              className="w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-green-500 text-white rounded-lg font-bold text-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-lg font-bold text-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isScanning ? "Scanning..." : "Start Scanning"}
             </button>
@@ -211,7 +211,7 @@ export default function CheckInScanner({
                 onChange={(e) => setTicketInput(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleManualCheckIn()}
                 placeholder="e.g., tkt_001 or wallet address"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-lg"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
                 disabled={isScanning}
               />
             </div>
@@ -219,7 +219,7 @@ export default function CheckInScanner({
             <button
               onClick={handleManualCheckIn}
               disabled={isScanning || !ticketInput.trim()}
-              className="w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-green-500 text-white rounded-lg font-bold text-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-lg font-bold text-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isScanning ? "Processing..." : "Check In"}
             </button>

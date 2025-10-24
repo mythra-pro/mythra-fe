@@ -94,18 +94,18 @@ export default function PayoutManagement({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-green-500 rounded-2xl p-8 text-white">
+      <div className="bg-gradient-to-r from-blue-600 to-blue-500 rounded-2xl p-8 text-white">
         <h2 className="text-3xl font-bold mb-2">Payout Management</h2>
-        <p className="text-purple-100">{eventName}</p>
+        <p className="text-blue-100">{eventName}</p>
       </div>
 
       {/* Payout Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Total Revenue */}
-        <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500">
+        <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
           <div className="flex items-center gap-3 mb-3">
-            <div className="bg-purple-100 p-3 rounded-lg">
-              <Coins className="text-2xl text-purple-600" />
+            <div className="bg-blue-100 p-3 rounded-lg">
+              <Coins className="text-2xl text-blue-600" />
             </div>
             <span className="text-xs font-medium text-gray-500">
               TOTAL REVENUE
@@ -181,12 +181,12 @@ export default function PayoutManagement({
             </p>
           </div>
 
-          <div className="flex justify-between items-center p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg">
+          <div className="flex justify-between items-center p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
             <div>
               <p className="font-medium text-gray-900">Platform Fee (5%)</p>
               <p className="text-sm text-gray-600">Mythra service fee</p>
             </div>
-            <p className="text-2xl font-bold text-purple-700">
+            <p className="text-2xl font-bold text-blue-700">
               {platformFee.toFixed(2)} SOL
             </p>
           </div>
@@ -209,7 +209,7 @@ export default function PayoutManagement({
             <button
               onClick={() => setShowConfirmation(true)}
               disabled={isProcessing}
-              className="px-8 py-4 bg-gradient-to-r from-purple-600 to-green-500 text-white font-bold rounded-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold rounded-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Request Payout
             </button>
@@ -266,7 +266,7 @@ export default function PayoutManagement({
                           href={`https://solscan.io/tx/${payout.transactionSignature}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-purple-600 hover:text-purple-700 text-sm"
+                          className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm"
                         >
                           View
                           <ExternalLink className="text-xs" />
