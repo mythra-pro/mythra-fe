@@ -1,10 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
+import { useDashboardUser } from "@/hooks/useDashboardUser";
 import { StatCard } from "@/components/stat-card";
 import { NFTTicketCard } from "@/components/nft-ticket-card";
-import { dummyUsers, dummyTickets } from "@/lib/dummy-data";
 import { Ticket, ShoppingBag, Wallet, TrendingUp } from "lucide-react";
 import {
   Card,
@@ -20,11 +21,40 @@ import Link from "next/link";
 export const dynamic = "force-dynamic";
 
 export default function CustomerDashboard() {
-  const user = dummyUsers.find((u) => u.role === "customer")!;
-  const myTickets = dummyTickets.filter((t) => t.owner === user.id);
+  const user = useDashboardUser("customer");
+  const [tickets, setTickets] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  // Upsert user
+  useEffect(() => {
+    fetch("/api/users/upsert", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        walletAddress: user.walletAddress,
+        displayName: user.name,
+        email: user.email,
+      }),
+    }).catch((e) => console.error("Failed to upsert user:", e));
+  }, [user.walletAddress, user.name, user.email]);
+
+  // Fetch tickets
+  useEffect(() => {
+    setLoading(true);
+    fetch(`/api/tickets?owner=${user.walletAddress}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setTickets(data.tickets || []);
+      })
+      .catch((e) => console.error("Failed to fetch tickets:", e))
+      .finally(() => setLoading(false));
+  }, [user.walletAddress]);
+
+  const myTickets = tickets;
   const activeTickets = myTickets.filter((t) => t.status === "active").length;
-  const totalSpent = myTickets.reduce((sum, t) => sum + t.price, 0);
+  const totalSpent = myTickets.reduce((sum, t) => {
+    return sum + (t.ticket_tier?.price || 0);
+  }, 0);
 
   // Get menu sections for customer role
   const menuSections = getMenuSectionsForRole("customer");
@@ -68,7 +98,7 @@ export default function CustomerDashboard() {
           />
           <StatCard
             title="Total Spent"
-            value={`$${totalSpent}`}
+            value={`${totalSpent.toFixed(2)} SOL`}
             description="On tickets"
             icon={Wallet}
             delay={0.2}

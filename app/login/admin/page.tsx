@@ -55,31 +55,46 @@ export default function AdminLoginPage() {
     }, 1500);
   };
 
+  // Generate stable pseudo-random values for background animations (prevents hydration mismatch)
+  const getStableRandom = (seed: number, min: number, max: number) => {
+    const x = Math.sin(seed) * 10000;
+    return min + (x - Math.floor(x)) * (max - min);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#03045E] via-[#0077B6] to-[#0096C7] flex items-center justify-center p-4">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(15)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute bg-white/5 rounded-full"
-            style={{
-              width: Math.random() * 80 + 40,
-              height: Math.random() * 80 + 40,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              y: [0, -25, 0],
-              opacity: [0.1, 0.3, 0.1],
-            }}
-            transition={{
-              duration: Math.random() * 4 + 3,
-              repeat: Infinity,
-              delay: Math.random() * 2,
-            }}
-          />
-        ))}
+        {[...Array(15)].map((_, i) => {
+          const width = getStableRandom(i * 1, 40, 120);
+          const height = getStableRandom(i * 2, 40, 120);
+          const left = getStableRandom(i * 3, 0, 100);
+          const top = getStableRandom(i * 4, 0, 100);
+          const duration = getStableRandom(i * 5, 3, 7);
+          const delay = getStableRandom(i * 6, 0, 2);
+          
+          return (
+            <motion.div
+              key={i}
+              className="absolute bg-white/5 rounded-full"
+              style={{
+                width,
+                height,
+                left: `${left}%`,
+                top: `${top}%`,
+              }}
+              animate={{
+                y: [0, -25, 0],
+                opacity: [0.1, 0.3, 0.1],
+              }}
+              transition={{
+                duration,
+                repeat: Infinity,
+                delay,
+              }}
+            />
+          );
+        })}
       </div>
 
       <motion.div

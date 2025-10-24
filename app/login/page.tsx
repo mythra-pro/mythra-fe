@@ -43,6 +43,12 @@ export default function LoginPage() {
     setSelectedRole(role);
   };
 
+  // Generate stable pseudo-random values for background animations (prevents hydration mismatch)
+  const getStableRandom = (seed: number, min: number, max: number) => {
+    const x = Math.sin(seed) * 10000;
+    return min + (x - Math.floor(x)) * (max - min);
+  };
+
   const roleCards = [
     {
       role: "organizer",
@@ -78,27 +84,36 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-[#03045E] via-[#0077B6] to-[#0096C7] flex items-center justify-center p-4">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute bg-white/5 rounded-full"
-            style={{
-              width: Math.random() * 100 + 50,
-              height: Math.random() * 100 + 50,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              y: [0, -30, 0],
-              opacity: [0.1, 0.3, 0.1],
-            }}
-            transition={{
-              duration: Math.random() * 3 + 2,
-              repeat: Infinity,
-              delay: Math.random() * 2,
-            }}
-          />
-        ))}
+        {[...Array(20)].map((_, i) => {
+          const width = getStableRandom(i * 1, 50, 150);
+          const height = getStableRandom(i * 2, 50, 150);
+          const left = getStableRandom(i * 3, 0, 100);
+          const top = getStableRandom(i * 4, 0, 100);
+          const duration = getStableRandom(i * 5, 2, 5);
+          const delay = getStableRandom(i * 6, 0, 2);
+          
+          return (
+            <motion.div
+              key={i}
+              className="absolute bg-white/5 rounded-full"
+              style={{
+                width,
+                height,
+                left: `${left}%`,
+                top: `${top}%`,
+              }}
+              animate={{
+                y: [0, -30, 0],
+                opacity: [0.1, 0.3, 0.1],
+              }}
+              transition={{
+                duration,
+                repeat: Infinity,
+                delay,
+              }}
+            />
+          );
+        })}
       </div>
 
       <motion.div

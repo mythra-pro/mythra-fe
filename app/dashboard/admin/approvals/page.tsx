@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
-import { dummyUsers, dummyEvents } from "@/lib/dummy-data";
+import { useDashboardUser } from "@/hooks/useDashboardUser";
 import {
   ShieldCheck,
   Calendar,
@@ -28,21 +28,66 @@ import { motion } from "framer-motion";
 export const dynamic = "force-dynamic";
 
 export default function AdminApprovalsPage() {
-  const user = dummyUsers.find((u) => u.role === "admin")!;
-  const [pendingEvents, setPendingEvents] = useState(
-    dummyEvents.filter((e) => e.status === "draft")
-  );
+  const user = useDashboardUser("admin");
+  const [pendingEvents, setPendingEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleApprove = (eventId: string) => {
-    setPendingEvents(pendingEvents.filter((e) => e.id !== eventId));
-    // In a real app, you would make an API call here
-    alert("Event approved successfully!");
+  // Fetch pending events
+  useEffect(() => {
+    setLoading(true);
+    fetch('/api/events?status=draft')
+      .then((res) => res.json())
+      .then((data) => {
+        setPendingEvents(data.events || []);
+      })
+      .catch((e) => console.error("Failed to fetch pending events:", e))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleApprove = async (eventId: string) => {
+    try {
+      const response = await fetch('/api/admin/approve-event', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-wallet-address': user.walletAddress,
+        },
+        body: JSON.stringify({ eventId, approved: true }),
+      });
+
+      if (response.ok) {
+        setPendingEvents(pendingEvents.filter((e) => e.id !== eventId));
+        alert("Event approved successfully!");
+      } else {
+        const data = await response.json();
+        alert("Failed to approve event: " + (data.error || 'Unknown error'));
+      }
+    } catch (e: any) {
+      alert("Error: " + e.message);
+    }
   };
 
-  const handleReject = (eventId: string) => {
-    setPendingEvents(pendingEvents.filter((e) => e.id !== eventId));
-    // In a real app, you would make an API call here
-    alert("Event rejected successfully!");
+  const handleReject = async (eventId: string) => {
+    try {
+      const response = await fetch('/api/admin/approve-event', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-wallet-address': user.walletAddress,
+        },
+        body: JSON.stringify({ eventId, approved: false }),
+      });
+
+      if (response.ok) {
+        setPendingEvents(pendingEvents.filter((e) => e.id !== eventId));
+        alert("Event rejected successfully!");
+      } else {
+        const data = await response.json();
+        alert("Failed to reject event: " + (data.error || 'Unknown error'));
+      }
+    } catch (e: any) {
+      alert("Error: " + e.message);
+    }
   };
 
   // Get menu sections for admin role
@@ -159,13 +204,13 @@ export default function AdminApprovalsPage() {
                                 <Calendar className="h-4 w-4" />
                                 <span className="font-medium">Date:</span>
                                 <span>
-                                  {new Date(event.date).toLocaleDateString()}
+                                  {new Date(event.start_time).toLocaleDateString()}
                                 </span>
                               </div>
                               <div className="flex items-center gap-2 text-sm text-gray-600">
                                 <MapPin className="h-4 w-4" />
                                 <span className="font-medium">Location:</span>
-                                <span>{event.location}</span>
+                                <span>{event.venue}</span>
                               </div>
                               <div className="flex items-center gap-2 text-sm text-gray-600">
                                 <Users className="h-4 w-4" />

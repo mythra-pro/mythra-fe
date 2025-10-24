@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
+import { useDashboardUser } from "@/hooks/useDashboardUser";
 import { StatCard } from "@/components/stat-card";
-import { dummyUsers, dummyEvents, dummyTickets } from "@/lib/dummy-data";
 import { QrCode, Users, CheckCircle, Calendar } from "lucide-react";
 import {
   Card,
@@ -23,15 +23,61 @@ import { motion } from "framer-motion";
 export const dynamic = "force-dynamic";
 
 export default function StaffDashboard() {
-  const user = dummyUsers.find((u) => u.role === "staff")!;
-  const myEvents = dummyEvents.filter((e) => e.staffIds?.includes(user.id));
+  const user = useDashboardUser("staff");
+  const [userId, setUserId] = useState<string | null>(null);
+  const [checkins, setCheckins] = useState<any[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [scanInput, setScanInput] = useState("");
+
+  // Upsert user and get user ID
+  useEffect(() => {
+    fetch("/api/users/upsert", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        walletAddress: user.walletAddress,
+        displayName: user.name,
+        email: user.email,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.user?.id) {
+          setUserId(data.user.id);
+        }
+      })
+      .catch((e) => console.error("Failed to upsert user:", e));
+  }, [user.walletAddress, user.name, user.email]);
+
+  // Fetch check-ins when userId is available
+  useEffect(() => {
+    if (!userId) return;
+
+    setLoading(true);
+    fetch(`/api/checkins?staffId=${userId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setCheckins(data.checkins || []);
+        // Extract unique events from check-ins
+        const uniqueEvents = new Map();
+        (data.checkins || []).forEach((checkin: any) => {
+          if (checkin.event && !uniqueEvents.has(checkin.event_id)) {
+            uniqueEvents.set(checkin.event_id, checkin.event);
+          }
+        });
+        setEvents(Array.from(uniqueEvents.values()));
+      })
+      .catch((e) => console.error("Failed to fetch check-ins:", e))
+      .finally(() => setLoading(false));
+  }, [userId]);
 
   // Get menu sections for staff role
   const menuSections = getMenuSectionsForRole("staff");
 
-  const upcomingEvents = myEvents.filter((e) => new Date(e.date) > new Date());
-  const totalCheckins = 125; // Mock data
+  const myEvents = events;
+  const upcomingEvents = events.filter((e: any) => new Date(e.start_time) > new Date());
+  const totalCheckins = checkins.length
 
   const handleScan = () => {
     // Mock scan functionality
@@ -147,7 +193,7 @@ export default function StaffDashboard() {
                           <div className="flex items-center gap-4 text-sm text-gray-600">
                             <div className="flex items-center gap-1">
                               <Calendar className="h-4 w-4" />
-                              {new Date(event.date).toLocaleDateString()}
+                              {new Date(event.start_time).toLocaleDateString()}
                             </div>
                             <div className="flex items-center gap-1">
                               <Users className="h-4 w-4" />

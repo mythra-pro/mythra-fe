@@ -1,10 +1,10 @@
 "use client";
 
+import { useEffect } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
-import { StatCard } from "@/components/stat-card";
+import { useDashboardUser } from "@/hooks/useDashboardUser";
 import EventCreationWizard from "@/app/_components/dashboard/EventCreationWizard";
-import { dummyUsers } from "@/lib/dummy-data";
 import { Plus, Wand2 } from "lucide-react";
 import {
   Card,
@@ -18,11 +18,28 @@ import {
 export const dynamic = "force-dynamic";
 
 export default function CreateEventPage() {
-  const user = dummyUsers.find((u) => u.role === "organizer")!;
-
-  // Get menu sections for organizer role
-
+  const user = useDashboardUser("organizer");
   const menuSections = getMenuSectionsForRole("organizer");
+
+  // Ensure user exists in DB on mount
+  useEffect(() => {
+    const upsertUser = async () => {
+      try {
+        await fetch("/api/users/upsert", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            walletAddress: user.walletAddress,
+            displayName: user.name,
+            email: user.email,
+          }),
+        });
+      } catch (e) {
+        console.error("Failed to upsert user:", e);
+      }
+    };
+    upsertUser();
+  }, [user.walletAddress, user.name, user.email]);
 
   return (
     <DashboardLayout user={user} menuSections={menuSections}>
@@ -50,9 +67,29 @@ export default function CreateEventPage() {
           </CardHeader>
           <CardContent className="w-full">
             <EventCreationWizard
-              onSubmit={(eventData) => {
-                console.log("Event created:", eventData);
-                alert("Event created successfully!");
+              onSubmit={async (eventData) => {
+                try {
+                  const res = await fetch("/api/events", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      "x-wallet-address": user.walletAddress || "",
+                    },
+                    body: JSON.stringify(eventData),
+                  });
+
+                  const json = await res.json();
+                  if (!res.ok) {
+                    console.error("Create event failed:", json);
+                    alert(json.error || "Failed to create event");
+                    return;
+                  }
+
+                  alert("Event created successfully!");
+                } catch (e: any) {
+                  console.error(e);
+                  alert("Unexpected error creating event");
+                }
               }}
               onCancel={() => {
                 console.log("Event creation cancelled");

@@ -120,7 +120,7 @@ export default function OrganizerPayoutsPage() {
                           {event.name}
                         </h3>
                         <p className="text-sm text-gray-600">
-                          {new Date(event.date).toLocaleDateString()} •{" "}
+                          {new Date(event.start_time).toLocaleDateString()} •{" "}
                           {event.soldTickets} tickets sold
                         </p>
                       </div>

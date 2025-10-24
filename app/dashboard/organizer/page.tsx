@@ -1,10 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
+import { useDashboardUser } from "@/hooks/useDashboardUser";
 import { StatCard } from "@/components/stat-card";
 import { EventCard } from "@/components/event-card";
-import { dummyEvents } from "@/lib/dummy-data";
 import { Calendar, DollarSign, Ticket, TrendingUp, Users } from "lucide-react";
 import {
   Card,
@@ -23,33 +24,80 @@ import { WalletErrorBoundary } from "@/components/WalletErrorBoundary";
 export const dynamic = "force-dynamic";
 
 export default function OrganizerDashboard() {
+  const user = useDashboardUser("organizer");
+  const [userId, setUserId] = useState<string | null>(null);
+  const [events, setEvents] = useState<any[]>([]);
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Upsert user and get user ID
+  useEffect(() => {
+    fetch("/api/users/upsert", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        walletAddress: user.walletAddress,
+        displayName: user.name,
+        email: user.email,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.user?.id) {
+          setUserId(data.user.id);
+        }
+      })
+      .catch((e) => console.error("Failed to upsert user:", e));
+  }, [user.walletAddress, user.name, user.email]);
+
+  // Fetch events and stats when userId is available
+  useEffect(() => {
+    if (!userId) return;
+
+    setLoading(true);
+
+    // Fetch events
+    fetch(`/api/events?organizerId=${userId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setEvents(data.events || []);
+      })
+      .catch((e) => console.error("Failed to fetch events:", e));
+
+    // Fetch stats
+    fetch(`/api/stats/organizer?organizerId=${userId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setStats(data.stats);
+      })
+      .catch((e) => console.error("Failed to fetch stats:", e))
+      .finally(() => setLoading(false));
+  }, [userId]);
+
   const menuSections = getMenuSectionsForRole("organizer");
 
   return (
     <WalletErrorBoundary>
       <DashboardGuard role="organizer">
         {(user) => {
-          // Filter events by wallet address - NO DUMMY DATA FALLBACK
-          const myEvents = dummyEvents.filter(
-            (e) => e.organizerId === user.walletAddress
-          );
+          // Use real data from API
+          const myEvents = events;
+          const totalRevenue = stats?.totalRevenue || 0;
+          const totalTicketsSold = stats?.totalTicketsSold || 0;
+          const activeEvents = stats?.publishedEvents || 0;
 
-          // If no events found for this wallet, show empty state (not dummy)
-          if (myEvents.length === 0) {
-            console.log(`No events found for wallet: ${user.walletAddress}`);
+          if (loading) {
+            return (
+              <DashboardLayout user={user} menuSections={menuSections}>
+                <div className="flex items-center justify-center h-64">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading your dashboard...</p>
+                  </div>
+                </div>
+              </DashboardLayout>
+            );
           }
-
-          const totalRevenue = myEvents.reduce(
-            (sum, e) => sum + (e.revenue || 0),
-            0
-          );
-          const totalTicketsSold = myEvents.reduce(
-            (sum, e) => sum + (e.soldTickets || 0),
-            0
-          );
-          const activeEvents = myEvents.filter(
-            (e) => e.status === "published"
-          ).length;
 
           return (
             <DashboardLayout user={user} menuSections={menuSections}>
@@ -76,7 +124,7 @@ export default function OrganizerDashboard() {
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                   <StatCard
                     title="Total Events"
-                    value={myEvents.length}
+                    value={stats?.totalEvents || 0}
                     description="All time events"
                     icon={Calendar}
                     delay={0}
@@ -91,7 +139,7 @@ export default function OrganizerDashboard() {
                   />
                   <StatCard
                     title="Total Revenue"
-                    value={`$${totalRevenue.toLocaleString()}`}
+                    value={`${totalRevenue.toFixed(2)} SOL`}
                     description="Across all events"
                     icon={DollarSign}
                     trend={{ value: 8.2, isPositive: true }}

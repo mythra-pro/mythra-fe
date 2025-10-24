@@ -240,8 +240,8 @@ export default function OrganizerStaffPage() {
                             {event.name}
                           </h4>
                           <p className="text-sm text-gray-600">
-                            {new Date(event.date).toLocaleDateString()} •{" "}
-                            {event.location}
+                            {new Date(event.start_time).toLocaleDateString()} •{" "}
+                            {event.venue}
                           </p>
                         </div>
                         <div className="text-right">
