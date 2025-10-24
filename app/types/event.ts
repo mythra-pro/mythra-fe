@@ -21,10 +21,14 @@ export interface EventData {
   description: string;
   organizerId: string;
   organizerName: string;
-  date: Date;
+  // Database uses snake_case
+  start_time: string | Date;
+  end_time?: string | Date;
+  venue: string;
+  // Legacy fields (deprecated)
+  date?: Date;
   endDate?: Date;
-  location: string;
-  venue?: string;
+  location?: string;
   startTime?: string;
   endTime?: string;
   priceInSOL: number;

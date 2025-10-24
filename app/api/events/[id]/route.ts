@@ -4,10 +4,10 @@ import { getServiceSupabase } from "@/lib/supabase/server";
 // GET /api/events/[id] - Get event by ID or slug
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const supabase = getServiceSupabase();
 
     // Try to find by ID first, then by slug
@@ -50,10 +50,10 @@ export async function GET(
 // PATCH /api/events/[id] - Update event
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await req.json();
     const {
       name,
@@ -109,10 +109,10 @@ export async function PATCH(
 // DELETE /api/events/[id] - Delete event
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const supabase = getServiceSupabase();
 
     const { error } = await supabase

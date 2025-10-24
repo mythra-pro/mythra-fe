@@ -11,6 +11,20 @@ import { useMemo } from "react";
 export function useDashboardUser(role: UserRole): User {
   const { connected, publicKey } = useWallet();
 
+  // During build/SSR, return a placeholder to prevent build errors
+  // The actual page will show the connection UI when rendered client-side
+  if (typeof window === 'undefined') {
+    return {
+      id: 'build-placeholder',
+      name: 'Build Placeholder',
+      email: 'build@placeholder.com',
+      role: role,
+      walletAddress: 'BuildPlaceholder',
+      avatar: '',
+      createdAt: new Date(),
+    };
+  }
+
   if (!connected || !publicKey) {
     throw new Error(`Wallet must be connected to access ${role} dashboard`);
   }

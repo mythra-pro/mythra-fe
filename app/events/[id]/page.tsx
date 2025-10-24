@@ -140,7 +140,7 @@ export default function EventDetailPage({
                       <div>
                         <p className="text-sm text-gray-600">Date</p>
                         <p className="font-semibold text-gray-900">
-                          {new Date(event.date).toLocaleDateString("en-US", {
+                          {new Date(event.start_time || event.date || '').toLocaleDateString("en-US", {
                             weekday: "long",
                             year: "numeric",
                             month: "long",
@@ -157,7 +157,7 @@ export default function EventDetailPage({
                       <div>
                         <p className="text-sm text-gray-600">Time</p>
                         <p className="font-semibold text-gray-900">
-                          {event.startTime} - {event.endTime}
+                          {event.start_time ? new Date(event.start_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : event.startTime} - {event.end_time ? new Date(event.end_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : event.endTime}
                         </p>
                       </div>
                     </div>
@@ -169,11 +169,8 @@ export default function EventDetailPage({
                       <div>
                         <p className="text-sm text-gray-600">Location</p>
                         <p className="font-semibold text-gray-900">
-                          {event.location}
+                          {event.venue || event.location}
                         </p>
-                        {event.venue && (
-                          <p className="text-sm text-gray-500">{event.venue}</p>
-                        )}
                       </div>
                     </div>
 

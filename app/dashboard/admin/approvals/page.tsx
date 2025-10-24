@@ -50,7 +50,7 @@ export default function AdminApprovalsPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-wallet-address': user.walletAddress,
+          'x-wallet-address': user.walletAddress || '',
         },
         body: JSON.stringify({ eventId, approved: true }),
       });
@@ -73,7 +73,7 @@ export default function AdminApprovalsPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-wallet-address': user.walletAddress,
+          'x-wallet-address': user.walletAddress || '',
         },
         body: JSON.stringify({ eventId, approved: false }),
       });
@@ -227,7 +227,7 @@ export default function AdminApprovalsPage() {
                                     Ticket Types:
                                   </h4>
                                   <div className="flex flex-wrap gap-2">
-                                    {event.ticketTypes.map((ticket) => (
+                                    {event.ticketTypes.map((ticket: any) => (
                                       <Badge
                                         key={ticket.id}
                                         variant="outline"

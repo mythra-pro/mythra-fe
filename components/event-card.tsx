@@ -95,7 +95,7 @@ export function EventCard({
                 <Calendar className="h-4 w-4 text-blue-600" />
               </div>
               <span className="text-gray-700 font-medium">
-                {new Date(event.date).toLocaleDateString("en-US", {
+                {new Date(event.start_time || event.date || '').toLocaleDateString("en-US", {
                   year: "numeric",
                   month: "long",
                   day: "numeric",
@@ -108,7 +108,7 @@ export function EventCard({
                 <MapPin className="h-4 w-4 text-purple-600" />
               </div>
               <span className="text-gray-700 font-medium line-clamp-1">
-                {event.location}
+                {event.venue || event.location}
               </span>
             </div>
 

@@ -18,6 +18,9 @@ const nextConfig: NextConfig = {
     ],
   },
 
+  // Skip static generation for dashboard pages (require wallet)
+  skipTrailingSlashRedirect: true,
+  
   // Reduce memory usage during build
   experimental: {
     webpackMemoryOptimizations: true,

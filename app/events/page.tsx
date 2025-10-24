@@ -33,7 +33,7 @@ export default function EventsPage() {
     })
     .sort((a, b) => {
       if (sortBy === "date") {
-        return new Date(a.date).getTime() - new Date(b.date).getTime();
+        return new Date(a.start_time || a.date || 0).getTime() - new Date(b.start_time || b.date || 0).getTime();
       } else if (sortBy === "price") {
         return (a.priceInSOL || 0) - (b.priceInSOL || 0);
       }
