@@ -60,6 +60,10 @@ export default function OrganizerDashboard() {
     fetch(`/api/events?organizerId=${userId}`)
       .then((res) => res.json())
       .then((data) => {
+        console.log("📊 Fetched events:", data.events);
+        console.log("🔍 Events with live status:", data.events?.filter((e: any) => e.status === "live"));
+        console.log("✅ Events with verified:", data.events?.filter((e: any) => e.verified));
+        console.log("⛓️ Events with chain_verified:", data.events?.filter((e: any) => e.chain_verified));
         setEvents(data.events || []);
       })
       .catch((e) => console.error("Failed to fetch events:", e));
@@ -181,7 +185,7 @@ export default function OrganizerDashboard() {
                   <TabsContent value="active" className="mt-6">
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                       {myEvents
-                        .filter((e) => e.status === "published")
+                        .filter((e) => e.status === "live" && e.verified && e.chain_verified)
                         .map((event, idx) => (
                           <EventCard
                             key={event.id}
@@ -191,7 +195,7 @@ export default function OrganizerDashboard() {
                           />
                         ))}
                     </div>
-                    {myEvents.filter((e) => e.status === "published").length ===
+                    {myEvents.filter((e) => e.status === "live" && e.verified && e.chain_verified).length ===
                       0 && (
                       <Card className="bg-white border border-gray-200">
                         <CardContent className="p-12 text-center">

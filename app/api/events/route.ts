@@ -5,20 +5,55 @@ import { getServiceSupabase } from "@/lib/supabase/server";
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const status = searchParams.get("status"); // draft, published, cancelled
+    const status = searchParams.get("status"); // draft, published, live, cancelled
     const organizerId = searchParams.get("organizerId");
     const category = searchParams.get("category");
+    const verified = searchParams.get("verified"); // true/false
+    const chainVerified = searchParams.get("chain_verified"); // true/false
+
+    console.log("📝 GET /api/events - Query params:", {
+      status,
+      organizerId,
+      category,
+      verified,
+      chainVerified,
+    });
 
     const supabase = getServiceSupabase();
 
     let query = supabase
-      .from("events")
-      .select("*, organizer:users(id, display_name, wallet_address)");
+    .from("events")
+    .select("*, organizer:users!events_organizer_id_fkey(id, display_name, wallet_address)");
 
     // Apply filters
-    if (status) query = query.eq("status", status);
-    if (organizerId) query = query.eq("organizer_id", organizerId);
-    if (category) query = query.eq("category", category);
+    if (status) {
+      console.log("🔍 Filtering by status:", status);
+      query = query.eq("status", status);
+    }
+    if (organizerId) {
+      console.log("🔍 Filtering by organizerId:", organizerId);
+      query = query.eq("organizer_id", organizerId);
+    }
+    if (category) {
+      console.log("🔍 Filtering by category:", category);
+      query = query.eq("category", category);
+    }
+    if (verified === "true") {
+      console.log("🔍 Filtering by verified=true");
+      query = query.eq("verified", true);
+    }
+    if (verified === "false") {
+      console.log("🔍 Filtering by verified=false");
+      query = query.eq("verified", false);
+    }
+    if (chainVerified === "true") {
+      console.log("🔍 Filtering by chain_verified=true");
+      query = query.eq("chain_verified", true);
+    }
+    if (chainVerified === "false") {
+      console.log("🔍 Filtering by chain_verified=false");
+      query = query.eq("chain_verified", false);
+    }
 
     // Order by start_time descending
     query = query.order("start_time", { ascending: false });
@@ -26,13 +61,22 @@ export async function GET(req: Request) {
     const { data: events, error } = await query;
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error("❌ Error fetching events:", error);
+      return NextResponse.json(
+        { error: error.message, details: error },
+        { status: 500 }
+      );
     }
 
+    console.log("✅ Events fetched:", events?.length || 0);
+    if (events && events.length > 0) {
+      console.log("📊 First event:", events[0]);
+    }
     return NextResponse.json({ events }, { status: 200 });
   } catch (e: any) {
+    console.error("❌ Unexpected error in GET /api/events:", e);
     return NextResponse.json(
-      { error: e?.message || "Unexpected error" },
+      { error: e?.message || "Unexpected error", details: e },
       { status: 500 }
     );
   }
