@@ -25,6 +25,10 @@ interface EventCardProps {
 
 const statusColors = {
   draft: "bg-gray-500",
+  pending_approval: "bg-yellow-500",
+  approved: "bg-green-600",
+  rejected: "bg-red-700",
+  dao_voting: "bg-purple-600",
   published: "bg-green-500",
   ongoing: "bg-blue-500",
   live: "bg-red-600",

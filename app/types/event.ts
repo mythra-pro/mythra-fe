@@ -2,11 +2,21 @@
 
 export enum EventStatus {
   DRAFT = "draft",
+  PENDING_APPROVAL = "pending_approval",
+  APPROVED = "approved",
+  REJECTED = "rejected",
+  DAO_VOTING = "dao_voting",
   PUBLISHED = "published",
   ONGOING = "ongoing",
   LIVE = "live",
   COMPLETED = "completed",
   CANCELLED = "cancelled",
+}
+
+export enum ApprovalStatus {
+  PENDING = "pending",
+  APPROVED = "approved",
+  REJECTED = "rejected",
 }
 
 export enum TicketStatus {
@@ -38,6 +48,15 @@ export interface EventData {
   status: EventStatus;
   verified?: boolean;
   chain_verified?: boolean;
+  // Admin approval fields
+  approval_status?: ApprovalStatus;
+  approved_by?: string;
+  approved_at?: Date;
+  rejected_reason?: string;
+  // DAO and investment fields
+  dao_completed?: boolean;
+  can_sell_tickets?: boolean;
+  selling_started_at?: Date;
   coverImage?: string;
   category: string;
   createdAt: Date;
@@ -147,4 +166,95 @@ export interface DashboardStats {
   totalRevenue: number;
   totalTicketsSold: number;
   upcomingEvents: number;
+}
+
+// DAO Question Types
+export interface DAOQuestion {
+  id: string;
+  eventId: string;
+  question: string;
+  options: DAOOption[];
+  created_by: string; // organizer user ID
+  created_at: Date;
+  order: number;
+}
+
+export interface DAOOption {
+  id: string;
+  questionId: string;
+  option_text: string;
+  order: number;
+}
+
+export interface DAOVote {
+  id: string;
+  questionId: string;
+  optionId: string;
+  investorId: string;
+  eventId: string;
+  voted_at: Date;
+}
+
+export interface DAOResult {
+  questionId: string;
+  question: string;
+  options: {
+    id: string;
+    option_text: string;
+    vote_count: number;
+    percentage: number;
+  }[];
+  total_votes: number;
+}
+
+// Investment Types
+export interface Investment {
+  id: string;
+  eventId: string;
+  investorId: string;
+  investor_wallet: string;
+  investor_name?: string;
+  amount_sol: number;
+  investment_date: Date;
+  transaction_signature?: string;
+  status: "pending" | "confirmed" | "refunded";
+  roi_paid?: boolean;
+  roi_amount?: number;
+  roi_paid_at?: Date;
+}
+
+export interface InvestmentSummary {
+  eventId: string;
+  total_investments: number;
+  total_amount_sol: number;
+  investor_count: number;
+  investments: Investment[];
+}
+
+// ROI Distribution Types
+export interface ROIDistribution {
+  id: string;
+  eventId: string;
+  total_revenue: number; // in SOL
+  total_costs: number; // in SOL
+  net_profit: number; // in SOL
+  investor_share_percentage: number; // e.g., 20%
+  total_roi_pool: number; // in SOL
+  distributed_at?: Date;
+  status: "pending" | "processing" | "completed" | "failed";
+  transaction_signature?: string;
+}
+
+export interface InvestorROI {
+  id: string;
+  distributionId: string;
+  investmentId: string;
+  investorId: string;
+  investor_wallet: string;
+  investment_amount: number; // in SOL
+  roi_amount: number; // in SOL
+  roi_percentage: number; // based on investment proportion
+  paid: boolean;
+  paid_at?: Date;
+  transaction_signature?: string;
 }
