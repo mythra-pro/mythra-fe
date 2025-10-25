@@ -29,6 +29,29 @@ export function CustomWalletButton() {
     try {
       setShowMenu(false);
       await disconnect();
+      
+      // Clear wallet adapter localStorage
+      if (typeof window !== 'undefined') {
+        const keysToRemove = [
+          'walletName',
+          'walletAdapter',
+          'wallet-adapter',
+          'solana-wallet-adapter',
+        ];
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+        
+        // Clear wallet-related keys
+        Object.keys(localStorage).forEach(key => {
+          if (
+            key.includes('wallet') ||
+            key.includes('phantom') ||
+            key.includes('solflare') ||
+            key.includes('solana')
+          ) {
+            localStorage.removeItem(key);
+          }
+        });
+      }
     } catch (error) {
       console.error("Error disconnecting wallet:", error);
       throw error; // Re-throw error instead of silent fail

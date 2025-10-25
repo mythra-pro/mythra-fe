@@ -66,10 +66,10 @@ export default function AdminLoginPage() {
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {[...Array(15)].map((_, i) => {
-          const width = getStableRandom(i * 1, 40, 120);
-          const height = getStableRandom(i * 2, 40, 120);
-          const left = getStableRandom(i * 3, 0, 100);
-          const top = getStableRandom(i * 4, 0, 100);
+          const width = Math.round(getStableRandom(i * 1, 40, 120));
+          const height = Math.round(getStableRandom(i * 2, 40, 120));
+          const left = getStableRandom(i * 3, 0, 100).toFixed(2);
+          const top = getStableRandom(i * 4, 0, 100).toFixed(2);
           const duration = getStableRandom(i * 5, 3, 7);
           const delay = getStableRandom(i * 6, 0, 2);
           
@@ -78,8 +78,8 @@ export default function AdminLoginPage() {
               key={i}
               className="absolute bg-white/5 rounded-full"
               style={{
-                width,
-                height,
+                width: `${width}px`,
+                height: `${height}px`,
                 left: `${left}%`,
                 top: `${top}%`,
               }}
