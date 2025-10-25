@@ -16,7 +16,8 @@ import {
 import { User } from "@/app/types/user";
 import Image from "next/image";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+import { RoleSwitcher } from "@/components/RoleSwitcher";
 // Uncomment to add wallet button to dashboard
 // import { CustomWalletButton } from "@/components/program/WalletButton";
 
@@ -52,6 +53,10 @@ export function DashboardLayout({
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const { disconnect, connected, publicKey } = useWallet();
   const router = useRouter();
+  const pathname = usePathname();
+  
+  // Extract current role from pathname
+  const currentRole = pathname?.split('/')[2] || 'organizer';
 
   // Wait for client-side mount
   useEffect(() => {
@@ -180,6 +185,9 @@ export function DashboardLayout({
 
           {/* Right side */}
           <div className="flex items-center gap-3">
+            {/* Role Switcher - Only shows if user has multiple roles */}
+            <RoleSwitcher currentRole={currentRole} className="hidden md:flex" />
+            
             <Button
               variant="ghost"
               size="icon"
@@ -274,7 +282,6 @@ export function DashboardLayout({
 
 // Dynamic Sidebar Component
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
