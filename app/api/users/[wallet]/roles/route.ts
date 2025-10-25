@@ -70,6 +70,7 @@ async function fetchUserRolesFromDB(wallet: string): Promise<string[]> {
   const multiRoleWallets = [
     'Cm46ieDFKRiRHjY8LdVegP9U3ndabXoKic6pVQ7uasRt', // Test wallet 1
     '3Bdy3rjj9XpZrtCQqcTxdJxLAQM6Ncw33hDPGe2zqUnA', // Test wallet 2 (current user)
+    'B43gicVW5rsfibDNHzaHkjdX7sDbo7sdiWhSwLDcndmW'
   ];
 
   if (multiRoleWallets.includes(wallet)) {
