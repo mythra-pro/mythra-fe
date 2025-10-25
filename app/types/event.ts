@@ -1,5 +1,32 @@
 // Event and Ticket Type Definitions
 
+/**
+ * Event Status Flow:
+ *
+ * 1. DRAFT - Event created by organizer, still being edited (not used in current flow)
+ *
+ * 2. PENDING_APPROVAL - Event submitted by organizer, waiting for admin review
+ *    - Organizer cannot edit after submission
+ *
+ * 3. APPROVED - Event approved by admin
+ *    - Automatically triggers DAO voting
+ *
+ * 4. DAO_VOTING - Event is in DAO voting process
+ *    - Investors vote on whether to fund/support the event
+ *
+ * 5. PUBLISHED - DAO voting passed, event is live on platform
+ *    - Tickets can be sold (can_sell_tickets = true)
+ *    - Event visible on public /events page
+ *
+ * 6. LIVE/ONGOING - Event is currently happening
+ *    - Check-ins active
+ *
+ * 7. COMPLETED - Event has ended
+ *
+ * 8. REJECTED - Event rejected by admin OR failed DAO voting
+ *
+ * 9. CANCELLED - Event cancelled by organizer or admin
+ */
 export enum EventStatus {
   DRAFT = "draft",
   PENDING_APPROVAL = "pending_approval",
@@ -13,6 +40,10 @@ export enum EventStatus {
   CANCELLED = "cancelled",
 }
 
+/**
+ * Approval Status (removed - using 'status' field instead)
+ * All approval tracking is done via the main 'status' field
+ */
 export enum ApprovalStatus {
   PENDING = "pending",
   APPROVED = "approved",
@@ -48,15 +79,20 @@ export interface EventData {
   status: EventStatus;
   verified?: boolean;
   chain_verified?: boolean;
-  // Admin approval fields
-  approval_status?: ApprovalStatus;
+  // Admin approval and DAO voting tracking
   approved_by?: string;
   approved_at?: Date;
   rejected_reason?: string;
-  // DAO and investment fields
+  rejected_by?: string;
+  rejected_at?: Date;
+  // DAO voting fields
   dao_completed?: boolean;
-  can_sell_tickets?: boolean;
-  selling_started_at?: Date;
+  dao_voting_started_at?: Date;
+  dao_voting_completed_at?: Date;
+  dao_total_votes?: number;
+  dao_approval_votes?: number;
+  dao_rejection_reason?: string;
+  published_at?: Date;
   coverImage?: string;
   category: string;
   createdAt: Date;

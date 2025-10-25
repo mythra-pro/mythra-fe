@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Shield, Lock, Key, CheckCircle2 } from "lucide-react";
+import { Shield, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,43 +16,104 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
 import Link from "next/link";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { shortenAddress } from "@/lib/program";
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const { publicKey, connected, connecting } = useWallet();
-  const [isRedirecting, setIsRedirecting] = useState(false);
-  const [credentials, setCredentials] = useState({
-    username: "",
-    password: "",
-  });
+  const [isLogin, setIsLogin] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Redirect when wallet is connected
-  useEffect(() => {
-    if (connected && publicKey && !isRedirecting) {
-      setIsRedirecting(true);
-      // Store admin wallet address
-      localStorage.setItem("adminWalletAddress", publicKey.toString());
-      localStorage.setItem("userRole", "admin");
+  // Form states
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [displayName, setDisplayName] = useState("");
 
-      setTimeout(() => {
-        router.push("/dashboard/admin");
-      }, 800);
-    }
-  }, [connected, publicKey, router, isRedirecting]);
-
-  const handleAdminLogin = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsRedirecting(true);
+    setError(null);
+    setIsLoading(true);
 
-    // Simulate admin authentication
-    setTimeout(() => {
-      // In a real app, you would validate credentials here
-      localStorage.setItem("userRole", "admin");
-      router.push("/dashboard/admin");
-    }, 1500);
+    try {
+      if (isLogin) {
+        // Login logic - query backend API
+        if (!email || !password) {
+          setError("Email and password are required");
+          setIsLoading(false);
+          return;
+        }
+
+        const loginResponse = await fetch("/api/admin/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+
+        if (!loginResponse.ok) {
+          const data = await loginResponse.json();
+          setError(data.error || "Login failed");
+          setIsLoading(false);
+          return;
+        }
+
+        const data = await loginResponse.json();
+        const user = data.user;
+
+        // Store UUID and user info in localStorage
+        localStorage.setItem("userId", user.id); // Store UUID!
+        localStorage.setItem("userEmail", user.email);
+        localStorage.setItem("displayName", user.displayName || "");
+        localStorage.setItem("userRole", "admin");
+        localStorage.setItem("isAuthenticated", "true");
+
+        console.log("✅ Login successful. Stored UUID:", user.id);
+
+        // Redirect to admin dashboard
+        setTimeout(() => {
+          router.push("/dashboard/admin");
+        }, 500);
+      } else {
+        // Register logic - call backend API
+        if (!email || !displayName) {
+          setError("Email and display name are required");
+          setIsLoading(false);
+          return;
+        }
+
+        const registerResponse = await fetch("/api/admin/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, displayName }),
+        });
+
+        if (!registerResponse.ok) {
+          const data = await registerResponse.json();
+          setError(data.error || "Registration failed");
+          setIsLoading(false);
+          return;
+        }
+
+        const data = await registerResponse.json();
+        const user = data.user;
+
+        // Store UUID and user info in localStorage
+        localStorage.setItem("userId", user.id); // Store UUID!
+        localStorage.setItem("userEmail", user.email);
+        localStorage.setItem("displayName", user.displayName || "");
+        localStorage.setItem("userRole", "admin");
+        localStorage.setItem("isAuthenticated", "true");
+
+        console.log("✅ Registration successful. Stored UUID:", user.id);
+
+        // Redirect to admin dashboard
+        setTimeout(() => {
+          router.push("/dashboard/admin");
+        }, 500);
+      }
+    } catch (err: any) {
+      setError(err.message || "Authentication failed");
+      setIsLoading(false);
+    }
   };
 
   // Generate stable pseudo-random values for background animations (prevents hydration mismatch)
@@ -65,14 +126,14 @@ export default function AdminLoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-[#03045E] via-[#0077B6] to-[#0096C7] flex items-center justify-center p-4">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(15)].map((_, i) => {
-          const width = Math.round(getStableRandom(i * 1, 40, 120));
-          const height = Math.round(getStableRandom(i * 2, 40, 120));
+        {[...Array(20)].map((_, i) => {
+          const width = Math.round(getStableRandom(i * 1, 50, 150));
+          const height = Math.round(getStableRandom(i * 2, 50, 150));
           const left = getStableRandom(i * 3, 0, 100).toFixed(2);
           const top = getStableRandom(i * 4, 0, 100).toFixed(2);
-          const duration = getStableRandom(i * 5, 3, 7);
+          const duration = getStableRandom(i * 5, 2, 5);
           const delay = getStableRandom(i * 6, 0, 2);
-          
+
           return (
             <motion.div
               key={i}
@@ -84,7 +145,7 @@ export default function AdminLoginPage() {
                 top: `${top}%`,
               }}
               animate={{
-                y: [0, -25, 0],
+                y: [0, -30, 0],
                 opacity: [0.1, 0.3, 0.1],
               }}
               transition={{
@@ -101,7 +162,7 @@ export default function AdminLoginPage() {
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="w-full max-w-md relative z-10"
+        className="w-full max-w-2xl relative z-10"
       >
         {/* Header */}
         <div className="text-center mb-8">
@@ -115,120 +176,163 @@ export default function AdminLoginPage() {
                 className="h-10 w-10 rounded-lg bg-white"
               />
             </div>
-            <h1 className="text-4xl font-bold text-white">Mythra</h1>
+            <h1 className="text-4xl md:text-5xl font-bold text-white">
+              Mythra
+            </h1>
           </div>
           <div className="flex items-center justify-center gap-2 mb-2">
             <Shield className="h-6 w-6 text-[#48CAE4]" />
-            <h2 className="text-2xl font-bold text-white">Admin Portal</h2>
+            <h2 className="text-xl font-bold text-white">Admin Portal</h2>
           </div>
-          <p className="text-[#CAF0F8]">Platform management and oversight</p>
+          <p className="text-[#90E0EF]">Secure admin access</p>
         </div>
 
         {/* Admin Login Card */}
         <Card className="bg-white/20 backdrop-blur-lg border-white/30 text-white">
-          <CardHeader className="text-center">
+          <CardHeader className="text-center pb-4">
             <div className="h-16 w-16 rounded-lg bg-gradient-to-br from-[#48CAE4] to-[#90E0EF] flex items-center justify-center mx-auto mb-4">
-              <Lock className="h-8 w-8 text-[#03045E]" />
+              <Shield className="h-8 w-8 text-[#03045E]" />
             </div>
-            <CardTitle className="text-xl">Secure Access</CardTitle>
+            <CardTitle className="text-2xl mb-2">
+              Administrator Access
+            </CardTitle>
             <CardDescription className="text-[#CAF0F8]">
-              Choose your preferred authentication method
+              Platform management and oversight
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Wallet Connection Option */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Key className="h-5 w-5 text-[#48CAE4]" />
-                <span className="font-medium">Web3 Authentication</span>
-              </div>
-
-              {connected && publicKey ? (
-                <div className="p-4 bg-green-500/20 border border-green-400/30 rounded-lg">
-                  <div className="flex items-center justify-center gap-2 text-green-300 mb-2">
-                    <CheckCircle2 className="h-5 w-5" />
-                    <span className="text-sm font-medium">
-                      Connected: {shortenAddress(publicKey)}
-                    </span>
-                  </div>
-                  {isRedirecting && (
-                    <p className="text-xs text-green-200 text-center">
-                      Redirecting to admin dashboard...
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <div>
-                  <WalletMultiButton className="!w-full !bg-gradient-to-r !from-[#48CAE4] !to-[#90E0EF] !text-[#03045E] hover:!from-[#90E0EF] hover:!to-[#CAF0F8] !font-semibold !py-3 !rounded-md" />
-                  {connecting && (
-                    <p className="text-xs text-[#90E0EF] text-center mt-2">
-                      Opening wallet...
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-white/20" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-transparent px-2 text-[#90E0EF]">
-                  Or continue with
-                </span>
-              </div>
-            </div>
-
-            {/* Traditional Login Form */}
-            <form onSubmit={handleAdminLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="username" className="text-[#CAF0F8]">
-                  Username
-                </Label>
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="Enter admin username"
-                  value={credentials.username}
-                  onChange={(e) =>
-                    setCredentials({ ...credentials, username: e.target.value })
-                  }
-                  className="bg-white/10 border-white/20 text-white placeholder:text-[#90E0EF] focus:border-[#48CAE4]"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-[#CAF0F8]">
-                  Password
-                </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter admin password"
-                  value={credentials.password}
-                  onChange={(e) =>
-                    setCredentials({ ...credentials, password: e.target.value })
-                  }
-                  className="bg-white/10 border-white/20 text-white placeholder:text-[#90E0EF] focus:border-[#48CAE4]"
-                  required
-                />
-              </div>
-              <Button
-                type="submit"
-                disabled={isRedirecting}
-                className="w-full bg-white text-[#0077B6] hover:bg-[#CAF0F8] font-semibold py-3"
+          <CardContent>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              {/* Login/Register Form */}
+              <form
+                onSubmit={handleSubmit}
+                className="space-y-4 max-w-md mx-auto text-left"
               >
-                {isRedirecting ? (
-                  <span className="flex items-center gap-2">
-                    <span className="h-4 w-4 border-2 border-[#0077B6] border-t-transparent rounded-full animate-spin" />
-                    Authenticating...
-                  </span>
-                ) : (
-                  "Sign In"
+                {/* Toggle Login/Register */}
+                <div className="flex gap-2 p-1 bg-white/10 rounded-lg mb-4">
+                  <button
+                    type="button"
+                    onClick={() => setIsLogin(true)}
+                    className={`flex-1 py-2 px-4 rounded-md transition-colors ${
+                      isLogin
+                        ? "bg-white text-[#0077B6] font-semibold"
+                        : "text-white hover:bg-white/10"
+                    }`}
+                  >
+                    Login
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsLogin(false)}
+                    className={`flex-1 py-2 px-4 rounded-md transition-colors ${
+                      !isLogin
+                        ? "bg-white text-[#0077B6] font-semibold"
+                        : "text-white hover:bg-white/10"
+                    }`}
+                  >
+                    Register
+                  </button>
+                </div>
+
+                {/* Display Name Field (Register Only) */}
+                {!isLogin && (
+                  <div>
+                    <Label
+                      htmlFor="displayName"
+                      className="text-white mb-2 block"
+                    >
+                      Display Name
+                    </Label>
+                    <Input
+                      id="displayName"
+                      type="text"
+                      placeholder="Admin Name"
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                      required={!isLogin}
+                    />
+                  </div>
                 )}
-              </Button>
-            </form>
+
+                {/* Email Field */}
+                <div>
+                  <Label htmlFor="email" className="text-white mb-2 block">
+                    Email
+                  </Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/50" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="admin@mythra.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Password Field */}
+                <div>
+                  <Label htmlFor="password" className="text-white mb-2 block">
+                    Password
+                  </Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/50" />
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="pl-10 pr-10 bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Error Message */}
+                {error && (
+                  <div className="p-3 bg-red-500/20 border border-red-400/30 rounded-lg text-red-300 text-sm">
+                    {error}
+                  </div>
+                )}
+
+                {/* Submit Button */}
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full bg-white text-[#0077B6] hover:bg-[#CAF0F8] font-semibold py-3 rounded-md transition-colors"
+                >
+                  {isLoading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="h-4 w-4 border-2 border-[#0077B6] border-t-transparent rounded-full animate-spin" />
+                      {isLogin ? "Signing in..." : "Creating account..."}
+                    </span>
+                  ) : isLogin ? (
+                    "Sign In"
+                  ) : (
+                    "Create Account"
+                  )}
+                </Button>
+              </form>
+            </motion.div>
           </CardContent>
         </Card>
 
@@ -272,10 +376,10 @@ export default function AdminLoginPage() {
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.9 }}
-          className="text-center text-[#90E0EF] text-xs mt-6"
+          transition={{ delay: 0.8 }}
+          className="text-center text-[#90E0EF] text-sm mt-6"
         >
-          Powered by Web3 • Secure • Transparent • Decentralized
+          Secure • Fast • Reliable
         </motion.p>
       </motion.div>
     </div>

@@ -1,83 +1,84 @@
 "use client";
 
-import { useWallet } from "@solana/wallet-adapter-react";
 import { User, UserRole } from "@/app/types/user";
 import { useMemo } from "react";
 
 /**
- * Hook to get user data from wallet for dashboard pages
- * STRICT: Must have wallet connected, no fallback
+ * Hook to get user data from localStorage for dashboard pages
+ * STRICT: Must be authenticated, no fallback
  */
 export function useDashboardUser(role: UserRole): User {
-  const { connected, publicKey } = useWallet();
-
   // During build/SSR, return a placeholder to prevent build errors
-  // The actual page will show the connection UI when rendered client-side
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return {
-      id: 'build-placeholder',
-      name: 'Build Placeholder',
-      email: 'build@placeholder.com',
+      id: "build-placeholder",
+      name: "Build Placeholder",
+      email: "build@placeholder.com",
       role: role,
-      walletAddress: 'BuildPlaceholder',
-      avatar: '',
+      walletAddress: "BuildPlaceholder",
+      avatar: "",
       createdAt: new Date(),
     };
   }
 
-  // Client-side: redirect to login if wallet not connected
-  if (!connected || !publicKey) {
+  // Get user data from localStorage
+  const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
+  const userEmail = localStorage.getItem("userEmail");
+  const displayName = localStorage.getItem("displayName");
+
+  // Client-side: redirect to login if not authenticated
+  if (!isAuthenticated || !userEmail) {
     // Use setTimeout to avoid React state update during render
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       setTimeout(() => {
-        window.location.href = '/login';
+        window.location.href = "/login";
       }, 0);
     }
-    
+
     // Return placeholder while redirecting
     return {
-      id: 'redirecting',
-      name: 'Redirecting...',
-      email: 'redirect@mythra.tix',
+      id: "redirecting",
+      name: "Redirecting...",
+      email: "redirect@mythra.tix",
       role: role,
-      walletAddress: 'Redirecting',
-      avatar: '',
+      walletAddress: "Redirecting",
+      avatar: "",
       createdAt: new Date(),
     };
   }
 
   const user = useMemo(() => {
-    const walletAddress = publicKey.toString();
+    // Get UUID from localStorage (stored during login)
+    const userId = localStorage.getItem("userId");
+
+    console.log("🔍 useDashboardUser - userId from localStorage:", userId);
+    console.log(
+      "🔍 useDashboardUser - userEmail from localStorage:",
+      userEmail
+    );
+
+    if (!userId) {
+      // DO NOT fallback to email-based ID - require valid UUID
+      console.error("❌ No userId (UUID) found in localStorage!");
+      throw new Error(
+        "User ID (UUID) not found in localStorage. Please log in again."
+      );
+    }
+
+    const userName = displayName || userEmail?.split("@")[0] || "User";
 
     return {
-      id: walletAddress,
-      name: generateNameFromRole(role, walletAddress),
-      email: `${walletAddress.slice(0, 8)}@mythra.tix`,
+      id: userId, // Use UUID from localStorage!
+      name: userName,
+      email: userEmail || "",
       role: role,
-      walletAddress: walletAddress,
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${walletAddress}`,
+      walletAddress: userEmail || "",
+      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userEmail}`,
       createdAt: new Date(),
     };
-  }, [publicKey, role]);
+  }, [userEmail, displayName, role]);
 
   return user;
-}
-/**
- * Generate name based on role and wallet address
- */
-function generateNameFromRole(role: UserRole, address: string): string {
-  const roleNames = {
-    organizer: "Organizer",
-    staff: "Staff",
-    customer: "Customer",
-    admin: "Admin",
-    investor: "Investor",
-  };
-
-  const prefix = address.slice(0, 4);
-  const suffix = address.slice(-4);
-
-  return `${roleNames[role]} ${prefix}...${suffix}`;
 }
 
 /**
@@ -94,10 +95,13 @@ export function DashboardGuard({
   children,
   fallback,
 }: DashboardGuardProps) {
-  const { connected } = useWallet();
+  // Check authentication first
+  const isAuthenticated =
+    typeof window !== "undefined" &&
+    localStorage.getItem("isAuthenticated") === "true" &&
+    localStorage.getItem("userEmail");
 
-  // Check wallet connection first
-  if (!connected) {
+  if (!isAuthenticated) {
     if (fallback) {
       return <>{fallback}</>;
     }
@@ -122,44 +126,37 @@ export function DashboardGuard({
               </svg>
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Wallet Extension Required
+              Authentication Required
             </h2>
             <p className="text-gray-600 mb-4">
-              You must connect a wallet extension (Phantom, Solflare) to access
-              the {role} dashboard.
+              You must be signed in to access the {role} dashboard.
             </p>
-            <div className="text-xs text-gray-500 mb-4">
-              No dummy data allowed. Real wallet connection required.
-            </div>
           </div>
           <a
             href="/login"
             className="inline-block w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-full hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl"
           >
-            Connect Wallet Extension
+            Sign In
           </a>
         </div>
       </div>
     );
   }
 
-  // Get user data (will throw error if wallet issues)
+  // Get user data
   try {
     const user = useDashboardUser(role);
     return <>{children(user)}</>;
   } catch (error) {
-    console.error("Wallet error:", error);
+    console.error("Authentication error:", error);
     return (
       <div className="min-h-screen bg-red-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
           <div className="text-red-600 mb-4">
-            <h2 className="text-2xl font-bold mb-2">Wallet Error</h2>
+            <h2 className="text-2xl font-bold mb-2">Authentication Error</h2>
             <p className="mb-4">
-              {error instanceof Error ? error.message : "Unknown wallet error"}
+              {error instanceof Error ? error.message : "Unknown error"}
             </p>
-            <div className="text-sm bg-red-50 p-3 rounded-lg mb-4">
-              Please ensure your wallet extension is installed and unlocked.
-            </div>
           </div>
           <button
             onClick={() => window.location.reload()}

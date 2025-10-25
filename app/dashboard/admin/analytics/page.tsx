@@ -2,7 +2,7 @@
 
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
-import { dummyUsers } from "@/lib/dummy-data";
+import { useDashboardUser } from "@/hooks/useDashboardUser";
 import {
   TrendingUp,
   BarChart3,
@@ -24,7 +24,7 @@ import { StatCard } from "@/components/stat-card";
 export const dynamic = "force-dynamic";
 
 export default function AdminAnalyticsPage() {
-  const user = dummyUsers.find((u) => u.role === "admin")!;
+  const user = useDashboardUser("admin");
 
   // Mock analytics data
   const analyticsData = {

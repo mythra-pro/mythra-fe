@@ -1,6 +1,6 @@
 "use client";
 
-import { use } from "react";
+import { use, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
@@ -18,7 +18,6 @@ import {
   Twitter,
   Facebook,
 } from "lucide-react";
-import { dummyEvents } from "@/lib/dummy-data";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -29,15 +28,53 @@ export default function EventDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const event = dummyEvents.find((e) => e.id === id);
+  const [event, setEvent] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!event) {
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    fetch(`/api/events/${id}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Event not found");
+        return res.json();
+      })
+      .then((data) => {
+        if (data.event) {
+          setEvent(data.event);
+        } else {
+          setError("Event not found");
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching event:", err);
+        setError(err.message || "Error loading event");
+      })
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading event details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!event || error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="p-12 text-center bg-white border border-gray-200">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             Event Not Found
           </h1>
+          <p className="text-gray-600 mb-6">
+            {error || "Event does not exist"}
+          </p>
           <Link href="/events">
             <Button className="bg-blue-600 hover:bg-blue-700 text-white">
               Back to Events
@@ -140,7 +177,9 @@ export default function EventDetailPage({
                       <div>
                         <p className="text-sm text-gray-600">Date</p>
                         <p className="font-semibold text-gray-900">
-                          {new Date(event.start_time || event.date || '').toLocaleDateString("en-US", {
+                          {new Date(
+                            event.start_time || event.date || ""
+                          ).toLocaleDateString("en-US", {
                             weekday: "long",
                             year: "numeric",
                             month: "long",
@@ -157,7 +196,19 @@ export default function EventDetailPage({
                       <div>
                         <p className="text-sm text-gray-600">Time</p>
                         <p className="font-semibold text-gray-900">
-                          {event.start_time ? new Date(event.start_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : event.startTime} - {event.end_time ? new Date(event.end_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : event.endTime}
+                          {event.start_time
+                            ? new Date(event.start_time).toLocaleTimeString(
+                                "en-US",
+                                { hour: "2-digit", minute: "2-digit" }
+                              )
+                            : event.startTime}{" "}
+                          -{" "}
+                          {event.end_time
+                            ? new Date(event.end_time).toLocaleTimeString(
+                                "en-US",
+                                { hour: "2-digit", minute: "2-digit" }
+                              )
+                            : event.endTime}
                         </p>
                       </div>
                     </div>
@@ -212,7 +263,7 @@ export default function EventDetailPage({
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {event.ticketTypes?.map((ticketType, idx) => (
+                  {event.ticketTypes?.map((ticketType: any, idx: number) => (
                     <motion.div
                       key={ticketType.id}
                       initial={{ opacity: 0, x: -20 }}
@@ -247,16 +298,18 @@ export default function EventDetailPage({
                               BENEFITS:
                             </p>
                             <div className="flex flex-wrap gap-2">
-                              {ticketType.benefits.map((benefit, i) => (
-                                <Badge
-                                  key={i}
-                                  variant="outline"
-                                  className="text-xs border-gray-300"
-                                >
-                                  <CheckCircle className="h-3 w-3 mr-1 text-green-500" />
-                                  {benefit}
-                                </Badge>
-                              ))}
+                              {ticketType.benefits.map(
+                                (benefit: string, i: number) => (
+                                  <Badge
+                                    key={i}
+                                    variant="outline"
+                                    className="text-xs border-gray-300"
+                                  >
+                                    <CheckCircle className="h-3 w-3 mr-1 text-green-500" />
+                                    {benefit}
+                                  </Badge>
+                                )
+                              )}
                             </div>
                           </div>
 
@@ -354,7 +407,7 @@ export default function EventDetailPage({
                       variant="outline"
                       className="flex-1 border-gray-200 hover:bg-blue-600 hover:text-white hover:border-blue-600"
                     >
-                      <Facebook/> Facebook
+                      <Facebook /> Facebook
                     </Button>
                   </div>
                 </CardContent>

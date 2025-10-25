@@ -3,6 +3,7 @@
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
 import { CampaignCard } from "@/components/campaign-card";
+import { useDashboardUser } from "@/hooks/useDashboardUser";
 import { dummyUsers, dummyCampaigns, dummyInvestments } from "@/lib/dummy-data";
 import { Target, DollarSign, TrendingUp, Award } from "lucide-react";
 import {
@@ -19,7 +20,7 @@ import { motion } from "framer-motion";
 export const dynamic = "force-dynamic";
 
 export default function CustomerInvestmentsPage() {
-  const user = dummyUsers.find((u) => u.role === "customer")!;
+  const user = useDashboardUser("customer");
   const myInvestments = dummyInvestments.filter(
     (i) => i.investorId === user.id
   );
@@ -31,7 +32,6 @@ export default function CustomerInvestmentsPage() {
   const totalDaoTokens = myInvestments.reduce((sum, i) => sum + i.daoTokens, 0);
 
   // Get menu sections for customer role
-
   const menuSections = getMenuSectionsForRole("customer");
 
   return (

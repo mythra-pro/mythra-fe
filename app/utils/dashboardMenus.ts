@@ -50,11 +50,6 @@ export function getMenuSectionsForRole(role: UserRole): MenuSection[] {
               icon: Users,
             },
             {
-              title: "Events",
-              href: "/dashboard/admin/events",
-              icon: Calendar,
-            },
-            {
               title: "Approvals",
               href: "/dashboard/admin/approvals",
               icon: FileCheck,

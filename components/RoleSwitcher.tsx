@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useWallet } from "@solana/wallet-adapter-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, Wallet, Shield, Zap, Users, Crown } from "lucide-react";
+import { ChevronDown, Mail, Shield, Zap, Users, Crown } from "lucide-react";
 
 interface RoleSwitcherProps {
   currentRole: string;
@@ -29,7 +28,7 @@ const roleConfig = {
   },
   customer: {
     label: "Customer",
-    icon: Wallet,
+    icon: Mail,
     color: "bg-green-600",
     description: "Purchase and manage tickets",
   },
@@ -55,24 +54,25 @@ const roleConfig = {
 
 export function RoleSwitcher({ currentRole, className }: RoleSwitcherProps) {
   const router = useRouter();
-  const { publicKey } = useWallet();
   const [availableRoles, setAvailableRoles] = useState<string[]>([currentRole]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch available roles for this user
+  // Fetch available roles for this user (Web2)
   useEffect(() => {
-    if (!publicKey) return;
+    const userEmail = localStorage.getItem("userEmail");
+    if (!userEmail) return;
 
     const fetchRoles = async () => {
       try {
-        const walletAddress = publicKey.toString();
-        console.log("🔍 Fetching roles for wallet:", walletAddress);
-        
-        const response = await fetch(`/api/users/${walletAddress}/roles`);
+        console.log("🔍 Fetching roles for user:", userEmail);
+
+        const response = await fetch(
+          `/api/users/${encodeURIComponent(userEmail)}/roles`
+        );
         const data = await response.json();
-        
+
         console.log("📡 API Response:", data);
-        
+
         if (data.success && data.roles && data.roles.length > 0) {
           console.log("✅ Roles found:", data.roles);
           setAvailableRoles(data.roles);
@@ -85,15 +85,15 @@ export function RoleSwitcher({ currentRole, className }: RoleSwitcherProps) {
     };
 
     fetchRoles();
-  }, [publicKey]);
+  }, []); // Empty dependency array - only fetch once on mount
 
   const handleRoleSwitch = (newRole: string) => {
     if (newRole === currentRole) return;
-    
+
     setLoading(true);
     // Update localStorage
     localStorage.setItem("userRole", newRole);
-    
+
     // Redirect to new dashboard
     router.push(`/dashboard/${newRole}`);
   };
@@ -110,10 +110,11 @@ export function RoleSwitcher({ currentRole, className }: RoleSwitcherProps) {
     console.log("⏭️ Hiding switcher - only 1 role available");
     return null;
   }
-  
+
   console.log("✨ Showing switcher - multiple roles available");
 
-  const CurrentRoleConfig = roleConfig[currentRole as keyof typeof roleConfig] || roleConfig.organizer;
+  const CurrentRoleConfig =
+    roleConfig[currentRole as keyof typeof roleConfig] || roleConfig.organizer;
   const CurrentIcon = CurrentRoleConfig.icon;
 
   return (
@@ -136,7 +137,7 @@ export function RoleSwitcher({ currentRole, className }: RoleSwitcherProps) {
         {availableRoles.map((role) => {
           const config = roleConfig[role as keyof typeof roleConfig];
           if (!config) return null;
-          
+
           const Icon = config.icon;
           const isActive = role === currentRole;
 
@@ -148,12 +149,16 @@ export function RoleSwitcher({ currentRole, className }: RoleSwitcherProps) {
               disabled={isActive}
             >
               <div className="flex items-center gap-3 w-full">
-                <div className={`h-8 w-8 rounded-lg ${config.color} flex items-center justify-center`}>
+                <div
+                  className={`h-8 w-8 rounded-lg ${config.color} flex items-center justify-center`}
+                >
                   <Icon className="h-4 w-4 text-white" />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-gray-900">{config.label}</span>
+                    <span className="font-medium text-gray-900">
+                      {config.label}
+                    </span>
                     {isActive && (
                       <Badge variant="secondary" className="text-xs">
                         Active

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Wallet, Shield, Zap, Users, CheckCircle2 } from "lucide-react";
+import { Shield, Zap, Users, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,32 +12,110 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import Image from "next/image";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { shortenAddress } from "@/lib/program";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { publicKey, connected, connecting, wallet } = useWallet();
   const [selectedRole, setSelectedRole] = useState<string>("organizer");
-  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [isLogin, setIsLogin] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Redirect to dashboard when wallet is connected and role is selected
-  useEffect(() => {
-    if (connected && publicKey && !isRedirecting) {
-      setIsRedirecting(true);
-      // Store wallet address in localStorage for session management
-      localStorage.setItem("walletAddress", publicKey.toString());
-      localStorage.setItem("userRole", selectedRole);
+  // Form states
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [displayName, setDisplayName] = useState("");
 
-      // Short delay for better UX
-      setTimeout(() => {
-        router.push(`/dashboard/${selectedRole}`);
-      }, 800);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      if (isLogin) {
+        // Login logic - query backend API
+        if (!email) {
+          setError("Email is required");
+          setIsLoading(false);
+          return;
+        }
+
+        const loginResponse = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, role: selectedRole }),
+        });
+
+        if (!loginResponse.ok) {
+          const data = await loginResponse.json();
+          setError(data.error || "Login failed");
+          setIsLoading(false);
+          return;
+        }
+
+        const data = await loginResponse.json();
+        const user = data.user;
+
+        // Store UUID and user info in localStorage
+        localStorage.setItem("userId", user.id); // Store UUID!
+        localStorage.setItem("userEmail", user.email);
+        localStorage.setItem("displayName", user.displayName || "");
+        localStorage.setItem("userRole", selectedRole);
+        localStorage.setItem("isAuthenticated", "true");
+
+        console.log("✅ Login successful. Stored UUID:", user.id);
+
+        // Redirect to dashboard
+        setTimeout(() => {
+          router.push(`/dashboard/${selectedRole}`);
+        }, 500);
+      } else {
+        // Register logic - call backend API
+        if (!email || !displayName) {
+          setError("Email and display name are required");
+          setIsLoading(false);
+          return;
+        }
+
+        const registerResponse = await fetch("/api/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, displayName, role: selectedRole }),
+        });
+
+        if (!registerResponse.ok) {
+          const data = await registerResponse.json();
+          setError(data.error || "Registration failed");
+          setIsLoading(false);
+          return;
+        }
+
+        const data = await registerResponse.json();
+        const user = data.user;
+
+        // Store UUID and user info in localStorage
+        localStorage.setItem("userId", user.id); // Store UUID!
+        localStorage.setItem("userEmail", user.email);
+        localStorage.setItem("displayName", user.displayName || "");
+        localStorage.setItem("userRole", selectedRole);
+        localStorage.setItem("isAuthenticated", "true");
+
+        console.log("✅ Registration successful. Stored UUID:", user.id);
+
+        // Redirect to dashboard
+        setTimeout(() => {
+          router.push(`/dashboard/${selectedRole}`);
+        }, 500);
+      }
+    } catch (err: any) {
+      setError(err.message || "Authentication failed");
+      setIsLoading(false);
     }
-  }, [connected, publicKey, selectedRole, router, isRedirecting]);
+  };
 
   // Generate stable pseudo-random values for background animations (prevents hydration mismatch)
   const getStableRandom = (seed: number, min: number, max: number) => {
@@ -49,15 +127,15 @@ export default function LoginPage() {
     {
       role: "organizer",
       title: "Organizer",
-      description: "Create and manage events, sell NFT tickets",
+      description: "Create and manage events, sell tickets",
       icon: Users,
       color: "from-[#0077B6] to-[#0096C7]",
     },
     {
       role: "customer",
       title: "Customer",
-      description: "Buy tickets, collect NFTs, attend events",
-      icon: Wallet,
+      description: "Buy tickets, attend events",
+      icon: Mail,
       color: "from-[#0096C7] to-[#48CAE4]",
     },
     {
@@ -87,7 +165,7 @@ export default function LoginPage() {
           const top = getStableRandom(i * 4, 0, 100).toFixed(2);
           const duration = getStableRandom(i * 5, 2, 5);
           const delay = getStableRandom(i * 6, 0, 2);
-          
+
           return (
             <motion.div
               key={i}
@@ -135,9 +213,9 @@ export default function LoginPage() {
             </h1>
           </div>
           <p className="text-lg text-[#CAF0F8] mb-2">
-            Next-Generation Web3 Event Ticketing Platform
+            Event Ticketing & Management Platform
           </p>
-          <p className="text-[#90E0EF]">Connect your wallet to get started</p>
+          <p className="text-[#90E0EF]">Sign in to get started</p>
         </div>
 
         {/* Main Login Card with Tabs */}
@@ -149,8 +227,8 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs 
-              defaultValue="organizer" 
+            <Tabs
+              defaultValue="organizer"
               className="w-full"
               onValueChange={(value) => setSelectedRole(value)}
             >
@@ -159,7 +237,7 @@ export default function LoginPage() {
                   <TabsTrigger
                     key={card.role}
                     value={card.role}
-                    className="text-white data-[state=active]:bg-white/40 data-[state=active]:text-white cursor-pointer"
+                    className="text-blue-500 data-[state=active]:bg-white/40 data-[state=active]:text-white cursor-pointer"
                   >
                     {card.title.split(" ")[0]}
                   </TabsTrigger>
@@ -194,47 +272,140 @@ export default function LoginPage() {
                         {card.description}
                       </p>
 
-                      {/* Wallet Connection Status */}
-                      {connected && publicKey ? (
-                        <div className="mb-4 p-3 bg-green-500/20 border border-green-400/30 rounded-lg">
-                          <div className="flex items-center justify-center gap-2 text-green-300">
-                            <CheckCircle2 className="h-5 w-5" />
-                            <span className="text-sm font-medium">
-                              Connected: {shortenAddress(publicKey)}
-                            </span>
-                          </div>
-                          {isRedirecting && (
-                            <p className="text-xs text-green-200 mt-2">
-                              Redirecting to dashboard...
-                            </p>
-                          )}
+                      {/* Login/Register Form */}
+                      <form
+                        onSubmit={handleSubmit}
+                        className="space-y-4 max-w-md mx-auto text-left"
+                      >
+                        {/* Toggle Login/Register */}
+                        <div className="flex gap-2 p-1 bg-white/10 rounded-lg mb-4">
+                          <button
+                            type="button"
+                            onClick={() => setIsLogin(true)}
+                            className={`flex-1 py-2 px-4 rounded-md transition-colors ${
+                              isLogin
+                                ? "bg-white text-[#0077B6] font-semibold"
+                                : "text-white hover:bg-white/10"
+                            }`}
+                          >
+                            Login
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setIsLogin(false)}
+                            className={`flex-1 py-2 px-4 rounded-md transition-colors ${
+                              !isLogin
+                                ? "bg-white text-[#0077B6] font-semibold"
+                                : "text-white hover:bg-white/10"
+                            }`}
+                          >
+                            Register
+                          </button>
                         </div>
-                      ) : (
-                        <div className="mb-4">
-                          <div className="wallet-adapter-button-wrapper max-w-xs mx-auto">
-                            <WalletMultiButton
-                              className="!w-full !bg-white !text-[#0077B6] hover:!bg-[#CAF0F8] !font-semibold !py-3 !rounded-md !transition-colors"
+
+                        {/* Display Name Field (Register Only) */}
+                        {!isLogin && (
+                          <div>
+                            <Label
+                              htmlFor="displayName"
+                              className="text-white mb-2 block"
+                            >
+                              Display Name
+                            </Label>
+                            <Input
+                              id="displayName"
+                              type="text"
+                              placeholder="John Doe"
+                              value={displayName}
+                              onChange={(e) => setDisplayName(e.target.value)}
+                              className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                              required={!isLogin}
                             />
                           </div>
-                          {connecting && (
-                            <p className="text-xs text-[#90E0EF] mt-2">
-                              Opening wallet...
-                            </p>
-                          )}
-                        </div>
-                      )}
+                        )}
 
-                      {/* Instructions */}
-                      <div className="mt-6 p-3 bg-white/10 rounded-lg text-left">
-                        <p className="text-xs text-[#CAF0F8] mb-2 font-medium">
-                          📝 Instructions:
-                        </p>
-                        <ol className="text-xs text-[#90E0EF] space-y-1 list-decimal list-inside">
-                          <li>Click "Select Wallet" to choose your wallet</li>
-                          <li>Approve the connection in your wallet</li>
-                          <li>You'll be redirected to your dashboard</li>
-                        </ol>
-                      </div>
+                        {/* Email Field */}
+                        <div>
+                          <Label
+                            htmlFor="email"
+                            className="text-white mb-2 block"
+                          >
+                            Email
+                          </Label>
+                          <div className="relative">
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/50" />
+                            <Input
+                              id="email"
+                              type="email"
+                              placeholder="you@example.com"
+                              value={email}
+                              onChange={(e) => setEmail(e.target.value)}
+                              className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        {/* Password Field */}
+                        <div>
+                          <Label
+                            htmlFor="password"
+                            className="text-white mb-2 block"
+                          >
+                            Password
+                          </Label>
+                          <div className="relative">
+                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/50" />
+                            <Input
+                              id="password"
+                              type={showPassword ? "text" : "password"}
+                              placeholder="••••••••"
+                              value={password}
+                              onChange={(e) => setPassword(e.target.value)}
+                              className="pl-10 pr-10 bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                              required
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white"
+                            >
+                              {showPassword ? (
+                                <EyeOff className="h-5 w-5" />
+                              ) : (
+                                <Eye className="h-5 w-5" />
+                              )}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Error Message */}
+                        {error && (
+                          <div className="p-3 bg-red-500/20 border border-red-400/30 rounded-lg text-red-300 text-sm">
+                            {error}
+                          </div>
+                        )}
+
+                        {/* Submit Button */}
+                        <Button
+                          type="submit"
+                          disabled={isLoading}
+                          className="w-full bg-white text-[#0077B6] hover:bg-[#CAF0F8] font-semibold py-3 rounded-md transition-colors"
+                        >
+                          {isLoading ? (
+                            <span className="flex items-center justify-center gap-2">
+                              <div className="h-4 w-4 border-2 border-[#0077B6] border-t-transparent rounded-full animate-spin" />
+                              {isLogin
+                                ? "Signing in..."
+                                : "Creating account..."}
+                            </span>
+                          ) : isLogin ? (
+                            "Sign In"
+                          ) : (
+                            "Create Account"
+                          )}
+                        </Button>
+                      </form>
                     </motion.div>
                   </TabsContent>
                 );
@@ -250,7 +421,7 @@ export default function LoginPage() {
           transition={{ delay: 0.8 }}
           className="text-center text-[#90E0EF] text-sm mt-6"
         >
-          Powered by Web3 • Secure • Transparent • Decentralized
+          Secure • Fast • Reliable
         </motion.p>
       </motion.div>
     </div>

@@ -3,6 +3,7 @@
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
 import PayoutManagement from "@/app/_components/dashboard/PayoutManagement";
+import { useDashboardUser } from "@/hooks/useDashboardUser";
 import { dummyUsers, dummyEvents } from "@/lib/dummy-data";
 import { DollarSign, TrendingUp, Calendar, CreditCard } from "lucide-react";
 import {
@@ -18,7 +19,7 @@ import { StatCard } from "@/components/stat-card";
 export const dynamic = "force-dynamic";
 
 export default function OrganizerPayoutsPage() {
-  const user = dummyUsers.find((u) => u.role === "organizer")!;
+  const user = useDashboardUser("organizer");
   const myEvents = dummyEvents.filter((e) => e.organizerId === user.id);
   const totalRevenue = myEvents.reduce((sum, e) => sum + (e.revenue || 0), 0);
   const platformFee = totalRevenue * 0.05; // 5% platform fee

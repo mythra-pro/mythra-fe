@@ -23,10 +23,7 @@ export async function GET(req: Request) {
       .eq("organizer_id", organizerId);
 
     if (eventsError) {
-      return NextResponse.json(
-        { error: eventsError.message },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: eventsError.message }, { status: 500 });
     }
 
     const eventIds = events?.map((e) => e.id) || [];
@@ -38,16 +35,19 @@ export async function GET(req: Request) {
     if (eventIds.length > 0) {
       const { data: tickets } = await supabase
         .from("tickets")
-        .select(`
+        .select(
+          `
           id,
           ticket_tier:ticket_tiers(price)
-        `)
+        `
+        )
         .in("ticket_tier.event_id", eventIds);
 
       totalTicketsSold = tickets?.length || 0;
-      totalRevenue = tickets?.reduce((sum, t: any) => {
-        return sum + (t.ticket_tier?.price || 0);
-      }, 0) || 0;
+      totalRevenue =
+        tickets?.reduce((sum, t: any) => {
+          return sum + (t.ticket_tier?.price || 0);
+        }, 0) || 0;
     }
 
     // Get check-in counts
@@ -58,8 +58,21 @@ export async function GET(req: Request) {
 
     const stats = {
       totalEvents: events?.length || 0,
-      publishedEvents: events?.filter((e) => e.status === "published").length || 0,
+      publishedEvents:
+        events?.filter((e) => e.status === "published").length || 0,
+      liveEvents:
+        events?.filter((e) => e.status === "live" || e.status === "ongoing")
+          .length || 0,
+      pendingApproval:
+        events?.filter((e) => e.status === "pending_approval").length || 0,
+      inDaoVoting: events?.filter((e) => e.status === "dao_voting").length || 0,
+      approvedEvents:
+        events?.filter((e) => e.status === "approved").length || 0,
       draftEvents: events?.filter((e) => e.status === "draft").length || 0,
+      completedEvents:
+        events?.filter((e) => e.status === "completed").length || 0,
+      rejectedEvents:
+        events?.filter((e) => e.status === "rejected").length || 0,
       totalTicketsSold,
       totalRevenue,
       totalCheckins: totalCheckins || 0,

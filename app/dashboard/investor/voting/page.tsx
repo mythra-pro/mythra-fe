@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
+import { useDashboardUser } from "@/hooks/useDashboardUser";
 import { dummyUsers } from "@/lib/dummy-data";
 import {
   Vote,
@@ -92,7 +93,7 @@ const mockProposals = [
 ];
 
 export default function InvestorVotingPage() {
-  const user = dummyUsers.find((u) => u.role === "investor")!;
+  const user = useDashboardUser("investor");
   const [votedProposals, setVotedProposals] = useState<Set<string>>(new Set());
 
   const activeProposals = mockProposals.filter((p) => p.status === "active");

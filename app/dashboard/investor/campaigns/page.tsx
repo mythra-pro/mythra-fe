@@ -3,6 +3,7 @@
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
 import { CampaignCard } from "@/components/campaign-card";
+import { useDashboardUser } from "@/hooks/useDashboardUser";
 import { dummyUsers, dummyCampaigns } from "@/lib/dummy-data";
 import { Target, Search, Filter, TrendingUp } from "lucide-react";
 import {
@@ -27,7 +28,7 @@ import { useState } from "react";
 export const dynamic = "force-dynamic";
 
 export default function InvestorCampaignsPage() {
-  const user = dummyUsers.find((u) => u.role === "investor")!;
+  const user = useDashboardUser("investor");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");

@@ -2,7 +2,8 @@
 
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
-import { dummyUsers, dummyEvents } from "@/lib/dummy-data";
+import { useDashboardUser } from "@/hooks/useDashboardUser";
+import { useEffect, useState } from "react";
 import {
   Calendar,
   Users,
@@ -29,20 +30,41 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
 import { motion } from "framer-motion";
 
 // Force dynamic rendering - required for wallet-connected pages
 export const dynamic = "force-dynamic";
 
 export default function AdminEventsPage() {
-  const user = dummyUsers.find((u) => u.role === "admin")!;
+  const user = useDashboardUser("admin");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [events, setEvents] = useState(dummyEvents);
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch events from Supabase
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    fetch("/api/events")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.events) {
+          setEvents(data.events);
+        } else {
+          setError("Failed to load events");
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching events:", err);
+        setError("Error loading events");
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
   const filteredEvents = events.filter((event) => {
-    const matchesSearch = event.name
+    const matchesSearch = (event.name || event.title || "")
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
     const matchesStatus =
@@ -72,7 +94,6 @@ export default function AdminEventsPage() {
   };
 
   // Get menu sections for admin role
-
   const menuSections = getMenuSectionsForRole("admin");
 
   return (
@@ -254,7 +275,9 @@ export default function AdminEventsPage() {
                             <div>
                               <p className="text-sm text-gray-500">Date</p>
                               <p className="font-medium text-gray-900">
-                                {new Date(event.start_time).toLocaleDateString()}
+                                {new Date(
+                                  event.start_time
+                                ).toLocaleDateString()}
                               </p>
                             </div>
                           </div>
