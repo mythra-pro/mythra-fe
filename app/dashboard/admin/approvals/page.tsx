@@ -35,7 +35,7 @@ export default function AdminApprovalsPage() {
   // Fetch pending events
   useEffect(() => {
     setLoading(true);
-    fetch('/api/events?status=draft')
+    fetch('/api/admin/events/pending')
       .then((res) => res.json())
       .then((data) => {
         setPendingEvents(data.events || []);
@@ -45,19 +45,23 @@ export default function AdminApprovalsPage() {
   }, []);
 
   const handleApprove = async (eventId: string) => {
+    if (!user.id) {
+      alert("User not authenticated");
+      return;
+    }
+
     try {
-      const response = await fetch('/api/admin/approve-event', {
+      const response = await fetch(`/api/admin/events/${eventId}/approve`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-wallet-address': user.walletAddress || '',
         },
-        body: JSON.stringify({ eventId, approved: true }),
+        body: JSON.stringify({ adminId: user.id }),
       });
 
       if (response.ok) {
         setPendingEvents(pendingEvents.filter((e) => e.id !== eventId));
-        alert("Event approved successfully!");
+        alert("Event approved successfully! Organizer can now create DAO questions.");
       } else {
         const data = await response.json();
         alert("Failed to approve event: " + (data.error || 'Unknown error'));
@@ -68,14 +72,21 @@ export default function AdminApprovalsPage() {
   };
 
   const handleReject = async (eventId: string) => {
+    if (!user.id) {
+      alert("User not authenticated");
+      return;
+    }
+
+    const reason = prompt("Please provide a reason for rejection:");
+    if (!reason) return;
+
     try {
-      const response = await fetch('/api/admin/approve-event', {
+      const response = await fetch(`/api/admin/events/${eventId}/reject`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-wallet-address': user.walletAddress || '',
         },
-        body: JSON.stringify({ eventId, approved: false }),
+        body: JSON.stringify({ adminId: user.id, reason }),
       });
 
       if (response.ok) {
