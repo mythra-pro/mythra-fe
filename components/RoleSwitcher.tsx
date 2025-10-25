@@ -65,14 +65,22 @@ export function RoleSwitcher({ currentRole, className }: RoleSwitcherProps) {
 
     const fetchRoles = async () => {
       try {
-        const response = await fetch(`/api/users/${publicKey.toString()}/roles`);
+        const walletAddress = publicKey.toString();
+        console.log("🔍 Fetching roles for wallet:", walletAddress);
+        
+        const response = await fetch(`/api/users/${walletAddress}/roles`);
         const data = await response.json();
         
-        if (data.success && data.roles.length > 0) {
+        console.log("📡 API Response:", data);
+        
+        if (data.success && data.roles && data.roles.length > 0) {
+          console.log("✅ Roles found:", data.roles);
           setAvailableRoles(data.roles);
+        } else {
+          console.log("⚠️ No roles found in response");
         }
       } catch (error) {
-        console.error("Failed to fetch user roles:", error);
+        console.error("❌ Failed to fetch user roles:", error);
       }
     };
 
@@ -90,10 +98,20 @@ export function RoleSwitcher({ currentRole, className }: RoleSwitcherProps) {
     router.push(`/dashboard/${newRole}`);
   };
 
+  // Debug: Log current state
+  console.log("🎭 RoleSwitcher State:", {
+    currentRole,
+    availableRoles,
+    shouldShow: availableRoles.length >= 2,
+  });
+
   // Don't show switcher if user only has one role
-  if (availableRoles.length <= 1) {
+  if (availableRoles.length < 2) {
+    console.log("⏭️ Hiding switcher - only 1 role available");
     return null;
   }
+  
+  console.log("✨ Showing switcher - multiple roles available");
 
   const CurrentRoleConfig = roleConfig[currentRole as keyof typeof roleConfig] || roleConfig.organizer;
   const CurrentIcon = CurrentRoleConfig.icon;
