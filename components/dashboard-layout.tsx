@@ -49,6 +49,7 @@ export function DashboardLayout({
 }: DashboardLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
+  const [isDisconnecting, setIsDisconnecting] = useState(false);
   const { disconnect, connected, publicKey } = useWallet();
   const router = useRouter();
 
@@ -60,30 +61,76 @@ export function DashboardLayout({
   // Only perform wallet checks after mounting on client
   useEffect(() => {
     if (!isMounted) return;
+    if (isDisconnecting) return; // Skip validation during disconnect
 
-    // Strict validation - must have connected wallet and user must match
+    // Gracefully handle disconnection - redirect instead of throwing
     if (!connected || !publicKey) {
-      throw new Error("Dashboard requires connected wallet");
+      console.warn("Wallet disconnected, redirecting to login...");
+      router.push("/login");
+      return;
     }
 
     if (user.walletAddress !== publicKey.toString()) {
-      throw new Error("User wallet address mismatch");
+      console.warn("User wallet address mismatch, redirecting to login...");
+      router.push("/login");
+      return;
     }
-  }, [isMounted, connected, publicKey, user.walletAddress]);
+  }, [isMounted, connected, publicKey, user.walletAddress, isDisconnecting, router]);
 
   // Don't render until mounted on client
   if (!isMounted) {
     return null;
   }
 
+  // Show loading during disconnect
+  if (isDisconnecting) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Disconnecting wallet...</p>
+        </div>
+      </div>
+    );
+  }
+
   const handleDisconnectWallet = async () => {
     try {
+      setIsDisconnecting(true);
       await disconnect();
+      
+      // Clear wallet adapter localStorage
+      if (typeof window !== 'undefined') {
+        // Clear all wallet-related localStorage keys
+        const keysToRemove = [
+          'walletName',
+          'walletAdapter',
+          'wallet-adapter',
+          'solana-wallet-adapter',
+        ];
+        keysToRemove.forEach(key => {
+          localStorage.removeItem(key);
+        });
+        
+        // Clear all localStorage keys that start with common wallet prefixes
+        Object.keys(localStorage).forEach(key => {
+          if (
+            key.includes('wallet') ||
+            key.includes('phantom') ||
+            key.includes('solflare') ||
+            key.includes('solana')
+          ) {
+            localStorage.removeItem(key);
+          }
+        });
+      }
+      
       // Redirect to login page after disconnect
       router.push("/login");
     } catch (error) {
       console.error("Error disconnecting wallet:", error);
       // Still redirect even if disconnect fails
+      setIsDisconnecting(false);
       router.push("/login");
     }
   };

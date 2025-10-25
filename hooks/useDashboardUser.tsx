@@ -25,8 +25,25 @@ export function useDashboardUser(role: UserRole): User {
     };
   }
 
+  // Client-side: redirect to login if wallet not connected
   if (!connected || !publicKey) {
-    throw new Error(`Wallet must be connected to access ${role} dashboard`);
+    // Use setTimeout to avoid React state update during render
+    if (typeof window !== 'undefined') {
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 0);
+    }
+    
+    // Return placeholder while redirecting
+    return {
+      id: 'redirecting',
+      name: 'Redirecting...',
+      email: 'redirect@mythra.tix',
+      role: role,
+      walletAddress: 'Redirecting',
+      avatar: '',
+      createdAt: new Date(),
+    };
   }
 
   const user = useMemo(() => {
