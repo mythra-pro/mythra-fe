@@ -4,6 +4,7 @@ export enum EventStatus {
   DRAFT = "draft",
   PUBLISHED = "published",
   ONGOING = "ongoing",
+  LIVE = "live",
   COMPLETED = "completed",
   CANCELLED = "cancelled",
 }
@@ -35,6 +36,8 @@ export interface EventData {
   maxTickets: number;
   ticketsSold: number;
   status: EventStatus;
+  verified?: boolean;
+  chain_verified?: boolean;
   coverImage?: string;
   category: string;
   createdAt: Date;

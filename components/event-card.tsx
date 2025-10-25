@@ -27,6 +27,7 @@ const statusColors = {
   draft: "bg-gray-500",
   published: "bg-green-500",
   ongoing: "bg-blue-500",
+  live: "bg-red-600",
   completed: "bg-purple-500",
   cancelled: "bg-red-500",
 };
