@@ -5,6 +5,7 @@ import { DashboardLayout } from "@/components/dashboard-layout";
 import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
 import { useDashboardUser } from "@/hooks/useDashboardUser";
 import EventCreationWizard from "@/app/_components/dashboard/EventCreationWizard";
+import { useRouter } from "next/navigation";
 import { Plus, Wand2 } from "lucide-react";
 import {
   Card,
@@ -17,7 +18,8 @@ import {
 // Force dynamic rendering - required for wallet-connected pages
 export const dynamic = "force-dynamic";
 
-export default function CreateEventPage() {
+export default function OrganizerCreatePage() {
+  const router = useRouter();
   const user = useDashboardUser("organizer");
   const menuSections = getMenuSectionsForRole("organizer");
 
@@ -69,6 +71,9 @@ export default function CreateEventPage() {
             <EventCreationWizard
               onSubmit={async (eventData) => {
                 try {
+                  console.log("📝 Submitting event data:", eventData);
+                  console.log("👤 User wallet:", user.walletAddress);
+                  
                   const res = await fetch("/api/events", {
                     method: "POST",
                     headers: {
@@ -78,17 +83,27 @@ export default function CreateEventPage() {
                     body: JSON.stringify(eventData),
                   });
 
+                  console.log("📡 Response status:", res.status);
                   const json = await res.json();
+                  console.log("📡 Response body:", json);
+                  
                   if (!res.ok) {
-                    console.error("Create event failed:", json);
-                    alert(json.error || "Failed to create event");
+                    console.error("❌ Create event failed:", json);
+                    alert(`Error: ${json.error || "Failed to create event"}`);
                     return;
                   }
 
-                  alert("Event created successfully!");
+                  console.log("✅ Event created successfully!");
+                  const eventId = json.event?.id || json.id;
+                  alert("Event created successfully! Event ID: " + eventId);
+                  
+                  // Redirect to organizer dashboard
+                  setTimeout(() => {
+                    router.push("/dashboard/organizer");
+                  }, 1500);
                 } catch (e: any) {
-                  console.error(e);
-                  alert("Unexpected error creating event");
+                  console.error("❌ Unexpected error:", e);
+                  alert("Unexpected error: " + e.message);
                 }
               }}
               onCancel={() => {
