@@ -39,10 +39,6 @@ export default function LoginPage() {
     }
   }, [connected, publicKey, selectedRole, router, isRedirecting]);
 
-  const handleRoleSelect = (role: string) => {
-    setSelectedRole(role);
-  };
-
   // Generate stable pseudo-random values for background animations (prevents hydration mismatch)
   const getStableRandom = (seed: number, min: number, max: number) => {
     const x = Math.sin(seed) * 10000;
@@ -153,7 +149,11 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="organizer" className="w-full">
+            <Tabs 
+              defaultValue="organizer" 
+              className="w-full"
+              onValueChange={(value) => setSelectedRole(value)}
+            >
               <TabsList className="grid w-full grid-cols-4 bg-white/30 backdrop-blur-md border border-white/20">
                 {roleCards.map((card) => (
                   <TabsTrigger
@@ -214,7 +214,6 @@ export default function LoginPage() {
                           <div className="wallet-adapter-button-wrapper max-w-xs mx-auto">
                             <WalletMultiButton
                               className="!w-full !bg-white !text-[#0077B6] hover:!bg-[#CAF0F8] !font-semibold !py-3 !rounded-md !transition-colors"
-                              onClick={() => handleRoleSelect(card.role)}
                             />
                           </div>
                           {connecting && (
