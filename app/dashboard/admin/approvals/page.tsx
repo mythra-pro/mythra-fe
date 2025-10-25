@@ -32,10 +32,19 @@ export default function AdminApprovalsPage() {
   const [pendingEvents, setPendingEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Debug: Log user info
+  useEffect(() => {
+    console.log("👤 Admin user loaded:", {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+    });
+  }, [user]);
+
   // Fetch pending events
   useEffect(() => {
     setLoading(true);
-    fetch('/api/admin/events/pending')
+    fetch("/api/admin/events/pending")
       .then((res) => res.json())
       .then((data) => {
         setPendingEvents(data.events || []);
@@ -45,6 +54,8 @@ export default function AdminApprovalsPage() {
   }, []);
 
   const handleApprove = async (eventId: string) => {
+    console.log("🔔 Approve clicked. User ID:", user.id);
+
     if (!user.id) {
       alert("User not authenticated");
       return;
@@ -52,19 +63,27 @@ export default function AdminApprovalsPage() {
 
     try {
       const response = await fetch(`/api/admin/events/${eventId}/approve`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ adminId: user.id }),
       });
 
+      console.log("📤 Approve request sent with adminId:", user.id);
+
       if (response.ok) {
+        const data = await response.json();
         setPendingEvents(pendingEvents.filter((e) => e.id !== eventId));
-        alert("Event approved successfully! Organizer can now create DAO questions.");
+        alert(
+          "✅ Event Approved!\n\n" +
+            "The event has been approved and DAO voting has been initiated.\n" +
+            "Investors can now vote on this event.\n\n" +
+            (data.message || "")
+        );
       } else {
         const data = await response.json();
-        alert("Failed to approve event: " + (data.error || 'Unknown error'));
+        alert("Failed to approve event: " + (data.error || "Unknown error"));
       }
     } catch (e: any) {
       alert("Error: " + e.message);
@@ -82,9 +101,9 @@ export default function AdminApprovalsPage() {
 
     try {
       const response = await fetch(`/api/admin/events/${eventId}/reject`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ adminId: user.id, reason }),
       });
@@ -94,7 +113,7 @@ export default function AdminApprovalsPage() {
         alert("Event rejected successfully!");
       } else {
         const data = await response.json();
-        alert("Failed to reject event: " + (data.error || 'Unknown error'));
+        alert("Failed to reject event: " + (data.error || "Unknown error"));
       }
     } catch (e: any) {
       alert("Error: " + e.message);
@@ -215,7 +234,9 @@ export default function AdminApprovalsPage() {
                                 <Calendar className="h-4 w-4" />
                                 <span className="font-medium">Date:</span>
                                 <span>
-                                  {new Date(event.start_time).toLocaleDateString()}
+                                  {new Date(
+                                    event.start_time
+                                  ).toLocaleDateString()}
                                 </span>
                               </div>
                               <div className="flex items-center gap-2 text-sm text-gray-600">

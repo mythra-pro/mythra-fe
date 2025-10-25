@@ -253,53 +253,6 @@ export default function OrganizerDashboard() {
                     </div>
                   </TabsContent>
                 </Tabs>
-
-                {/* Quick Actions */}
-                <Card className="bg-white border border-gray-200">
-                  <CardHeader>
-                    <CardTitle className="text-gray-900">
-                      Quick Actions
-                    </CardTitle>
-                    <CardDescription>
-                      Manage your events and campaigns
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="grid gap-4 md:grid-cols-3">
-                    <Link href="/dashboard/organizer/analytics">
-                      <Button
-                        variant="outline"
-                        className="w-full h-20 border-gray-200 hover:bg-blue-600 hover:text-white hover:border-blue-600"
-                      >
-                        <div className="text-center">
-                          <TrendingUp className="h-6 w-6 mx-auto mb-2" />
-                          <span>View Analytics</span>
-                        </div>
-                      </Button>
-                    </Link>
-                    <Link href="/dashboard/organizer/staff">
-                      <Button
-                        variant="outline"
-                        className="w-full h-20 border-gray-200 hover:bg-blue-600 hover:text-white hover:border-blue-600"
-                      >
-                        <div className="text-center">
-                          <Users className="h-6 w-6 mx-auto mb-2" />
-                          <span>Manage Staff</span>
-                        </div>
-                      </Button>
-                    </Link>
-                    <Link href="/dashboard/organizer/payouts">
-                      <Button
-                        variant="outline"
-                        className="w-full h-20 border-gray-200 hover:bg-blue-600 hover:text-white hover:border-blue-600"
-                      >
-                        <div className="text-center">
-                          <DollarSign className="h-6 w-6 mx-auto mb-2" />
-                          <span>View Payouts</span>
-                        </div>
-                      </Button>
-                    </Link>
-                  </CardContent>
-                </Card>
               </div>
             </DashboardLayout>
           );

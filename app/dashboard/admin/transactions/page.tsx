@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
-import { dummyUsers } from "@/lib/dummy-data";
+import { useDashboardUser } from "@/hooks/useDashboardUser";
 import {
   CreditCard,
   DollarSign,
@@ -34,86 +34,43 @@ import { motion } from "framer-motion";
 // Force dynamic rendering - required for wallet-connected pages
 export const dynamic = "force-dynamic";
 
-// Mock transaction data
-const mockTransactions = [
-  {
-    id: "txn_001",
-    type: "ticket_purchase",
-    amount: 89.99,
-    fee: 4.5,
-    status: "completed",
-    user: "Alice Johnson",
-    event: "Web3 Summit 2025",
-    date: "2024-12-25T10:30:00Z",
-    paymentMethod: "SOL Wallet",
-    blockchain: "Solana",
-    hash: "8f2d3c1b9e7a5f6d4c2a8b1e9f3d7c5a9e2f8d1c6b4a7e3f9d2c8a5b1e7f4c9d",
-  },
-  {
-    id: "txn_002",
-    type: "investment",
-    amount: 500.0,
-    fee: 25.0,
-    status: "completed",
-    user: "Bob Smith",
-    event: "AI Conference Jakarta",
-    date: "2024-12-24T15:45:00Z",
-    paymentMethod: "MetaMask",
-    blockchain: "Ethereum",
-    hash: "a3f7d9e2c8b5a1f6d4c9e7a2f8d1c6b3a5e9f2d7c4a8b1e6f3d9c2a7e5f8d1c",
-  },
-  {
-    id: "txn_003",
-    type: "payout",
-    amount: 1250.0,
-    fee: 62.5,
-    status: "pending",
-    user: "Carol Davis",
-    event: "Tech Meetup Series",
-    date: "2024-12-24T09:20:00Z",
-    paymentMethod: "Bank Transfer",
-    blockchain: "None",
-    hash: null,
-  },
-  {
-    id: "txn_004",
-    type: "refund",
-    amount: 75.0,
-    fee: 0.0,
-    status: "completed",
-    user: "David Wilson",
-    event: "Startup Pitch Night",
-    date: "2024-12-23T18:15:00Z",
-    paymentMethod: "Credit Card",
-    blockchain: "None",
-    hash: null,
-  },
-  {
-    id: "txn_005",
-    type: "ticket_purchase",
-    amount: 150.0,
-    fee: 7.5,
-    status: "failed",
-    user: "Eva Brown",
-    event: "Blockchain Workshop",
-    date: "2024-12-23T14:30:00Z",
-    paymentMethod: "SOL Wallet",
-    blockchain: "Solana",
-    hash: null,
-  },
-];
-
 export default function AdminTransactionsPage() {
-  const user = dummyUsers.find((u) => u.role === "admin")!;
+  const user = useDashboardUser("admin");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredTransactions = mockTransactions.filter((txn) => {
+  // Fetch transactions from Supabase
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    fetch("/api/transactions")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.transactions) {
+          setTransactions(data.transactions);
+        } else {
+          setError("Failed to load transactions");
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching transactions:", err);
+        setError("Error loading transactions");
+      })
+      .finally(() => setLoading(false));
+  }, []);
+  const filteredTransactions = transactions.filter((txn) => {
     const matchesSearch =
-      txn.user.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      txn.event.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      txn.id.toLowerCase().includes(searchQuery.toLowerCase());
+      (txn.user_name || txn.user || "")
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      (txn.event_name || txn.event || "")
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      (txn.id || "").toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || txn.status === statusFilter;
     const matchesType = typeFilter === "all" || txn.type === typeFilter;
     return matchesSearch && matchesStatus && matchesType;
@@ -148,16 +105,19 @@ export default function AdminTransactionsPage() {
   };
 
   // Calculate stats
-  const totalVolume = mockTransactions.reduce(
-    (sum, txn) => sum + txn.amount,
+  const totalVolume = transactions.reduce(
+    (sum: number, txn: any) => sum + (txn.amount || 0),
     0
   );
-  const totalFees = mockTransactions.reduce((sum, txn) => sum + txn.fee, 0);
-  const completedTransactions = mockTransactions.filter(
-    (txn) => txn.status === "completed"
+  const totalFees = transactions.reduce(
+    (sum: number, txn: any) => sum + (txn.fee || 0),
+    0
+  );
+  const completedTransactions = transactions.filter(
+    (txn: any) => txn.status === "completed"
   ).length;
-  const pendingTransactions = mockTransactions.filter(
-    (txn) => txn.status === "pending"
+  const pendingTransactions = transactions.filter(
+    (txn: any) => txn.status === "pending"
   ).length;
 
   // Get menu sections for admin role

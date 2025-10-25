@@ -2,6 +2,7 @@
 
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
+import { useDashboardUser } from "@/hooks/useDashboardUser";
 import { dummyUsers, dummyEvents } from "@/lib/dummy-data";
 import { Users, UserPlus, Shield, Calendar, DollarSign } from "lucide-react";
 import {
@@ -19,12 +20,11 @@ import { motion } from "framer-motion";
 export const dynamic = "force-dynamic";
 
 export default function OrganizerStaffPage() {
-  const user = dummyUsers.find((u) => u.role === "organizer")!;
+  const user = useDashboardUser("organizer");
   const myEvents = dummyEvents.filter((e) => e.organizerId === user.id);
   const myStaff = dummyUsers.filter((u) => u.role === "staff");
 
   // Get menu sections for organizer role
-
   const menuSections = getMenuSectionsForRole("organizer");
 
   return (

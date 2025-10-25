@@ -15,10 +15,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { User } from "@/app/types/user";
 import Image from "next/image";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { useRouter, usePathname } from "next/navigation";
 import { RoleSwitcher } from "@/components/RoleSwitcher";
-// Uncomment to add wallet button to dashboard
+// Uncomment to add auth button to dashboard
 // import { CustomWalletButton } from "@/components/program/WalletButton";
 
 export interface MenuItem {
@@ -50,94 +49,53 @@ export function DashboardLayout({
 }: DashboardLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
-  const [isDisconnecting, setIsDisconnecting] = useState(false);
-  const { disconnect, connected, publicKey } = useWallet();
   const router = useRouter();
   const pathname = usePathname();
-  
+
   // Extract current role from pathname
-  const currentRole = pathname?.split('/')[2] || 'organizer';
+  const currentRole = pathname?.split("/")[2] || "organizer";
 
   // Wait for client-side mount
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // Only perform wallet checks after mounting on client
+  // Check authentication (Web2 localStorage)
   useEffect(() => {
     if (!isMounted) return;
-    if (isDisconnecting) return; // Skip validation during disconnect
 
-    // Gracefully handle disconnection - redirect instead of throwing
-    if (!connected || !publicKey) {
-      console.warn("Wallet disconnected, redirecting to login...");
+    const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
+    const userEmail = localStorage.getItem("userEmail");
+
+    // Redirect if not authenticated
+    if (!isAuthenticated || !userEmail) {
+      console.warn("Not authenticated, redirecting to login...");
       router.push("/login");
       return;
     }
 
-    if (user.walletAddress !== publicKey.toString()) {
-      console.warn("User wallet address mismatch, redirecting to login...");
+    // Optional: Check if user email matches
+    if (user.email && user.email !== userEmail) {
+      console.warn("User email mismatch, redirecting to login...");
       router.push("/login");
       return;
     }
-  }, [isMounted, connected, publicKey, user.walletAddress, isDisconnecting, router]);
+  }, [isMounted, user.email, router]);
 
   // Don't render until mounted on client
   if (!isMounted) {
     return null;
   }
 
-  // Show loading during disconnect
-  if (isDisconnecting) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Disconnecting wallet...</p>
-        </div>
-      </div>
-    );
-  }
+  const handleLogout = () => {
+    // Clear authentication from localStorage
+    localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("userEmail");
+    localStorage.removeItem("displayName");
+    localStorage.removeItem("userRole");
 
-  const handleDisconnectWallet = async () => {
-    try {
-      setIsDisconnecting(true);
-      await disconnect();
-      
-      // Clear wallet adapter localStorage
-      if (typeof window !== 'undefined') {
-        // Clear all wallet-related localStorage keys
-        const keysToRemove = [
-          'walletName',
-          'walletAdapter',
-          'wallet-adapter',
-          'solana-wallet-adapter',
-        ];
-        keysToRemove.forEach(key => {
-          localStorage.removeItem(key);
-        });
-        
-        // Clear all localStorage keys that start with common wallet prefixes
-        Object.keys(localStorage).forEach(key => {
-          if (
-            key.includes('wallet') ||
-            key.includes('phantom') ||
-            key.includes('solflare') ||
-            key.includes('solana')
-          ) {
-            localStorage.removeItem(key);
-          }
-        });
-      }
-      
-      // Redirect to login page after disconnect
-      router.push("/login");
-    } catch (error) {
-      console.error("Error disconnecting wallet:", error);
-      // Still redirect even if disconnect fails
-      setIsDisconnecting(false);
-      router.push("/login");
-    }
+    // Redirect to login page
+    router.push("/login");
   };
 
   return (
@@ -186,8 +144,11 @@ export function DashboardLayout({
           {/* Right side */}
           <div className="flex items-center gap-3">
             {/* Role Switcher - Only shows if user has multiple roles */}
-            <RoleSwitcher currentRole={currentRole} className="hidden md:flex" />
-            
+            <RoleSwitcher
+              currentRole={currentRole}
+              className="hidden md:flex"
+            />
+
             <Button
               variant="ghost"
               size="icon"
@@ -221,20 +182,18 @@ export function DashboardLayout({
               <DropdownMenuContent align="end" className="w-80 bg-white z-100">
                 <DropdownMenuLabel>
                   <div className="flex flex-col space-y-1">
-                    <p className="text-xs text-muted-foreground">
-                      Wallet Address
-                    </p>
+                    <p className="text-xs text-muted-foreground">Email</p>
                     <p className="text-sm font-mono text-blue-600 break-all">
-                      {user.walletAddress}
+                      {user.email}
                     </p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="text-red-600 cursor-pointer"
-                  onClick={handleDisconnectWallet}
+                  onClick={handleLogout}
                 >
-                  Disconnect Wallet
+                  Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
-import { dummyUsers } from "@/lib/dummy-data";
+import { useDashboardUser } from "@/hooks/useDashboardUser";
 import {
   Users,
   UserPlus,
@@ -36,15 +36,42 @@ import { motion } from "framer-motion";
 export const dynamic = "force-dynamic";
 
 export default function AdminUsersPage() {
-  const user = dummyUsers.find((u) => u.role === "admin")!;
+  const user = useDashboardUser("admin");
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
-  const [users, setUsers] = useState(dummyUsers);
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch users from Supabase
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    fetch("/api/users")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.users) {
+          setUsers(data.users);
+        } else {
+          setError("Failed to load users");
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching users:", err);
+        setError("Error loading users");
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
   const filteredUsers = users.filter((u) => {
     const matchesSearch =
-      u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchQuery.toLowerCase());
+      (u.display_name || u.name || "")
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      (u.email || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (u.wallet_address || "")
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
     const matchesRole = roleFilter === "all" || u.role === roleFilter;
     return matchesSearch && matchesRole;
   });

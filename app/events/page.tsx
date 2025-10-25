@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { Search, Filter, Calendar, MapPin, DollarSign } from "lucide-react";
 import { EventCard } from "@/components/event-card";
-import { dummyEvents } from "@/lib/dummy-data";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -22,27 +21,61 @@ export default function EventsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("all");
   const [sortBy, setSortBy] = useState("date");
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredEvents = dummyEvents
+  // Fetch published events from Supabase (events that passed DAO voting)
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    // Only fetch published events (events that have passed DAO voting)
+    fetch("/api/events?status=published")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.events) {
+          setEvents(data.events);
+        } else {
+          setError("Failed to load events");
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching events:", err);
+        setError("Error loading events");
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filteredEvents = events
     .filter((event) => {
       const matchesSearch =
-        event.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        event.description.toLowerCase().includes(searchQuery.toLowerCase());
+        (event.name || event.title || "")
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        (event.description || "")
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
       const matchesCategory = category === "all" || event.category === category;
-      return matchesSearch && matchesCategory && event.status === "published";
+      return matchesSearch && matchesCategory;
     })
     .sort((a, b) => {
       if (sortBy === "date") {
-        return new Date(a.start_time || a.date || 0).getTime() - new Date(b.start_time || b.date || 0).getTime();
+        return (
+          new Date(a.start_time || a.date || 0).getTime() -
+          new Date(b.start_time || b.date || 0).getTime()
+        );
       } else if (sortBy === "price") {
-        return (a.priceInSOL || 0) - (b.priceInSOL || 0);
+        return (
+          (a.price_in_sol || a.priceInSOL || 0) -
+          (b.price_in_sol || b.priceInSOL || 0)
+        );
       }
       return 0;
     });
 
   const categories = [
     "all",
-    ...Array.from(new Set(dummyEvents.map((e) => e.category))),
+    ...Array.from(new Set(events.map((e) => e.category))),
   ];
 
   return (

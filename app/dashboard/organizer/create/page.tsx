@@ -73,7 +73,7 @@ export default function OrganizerCreatePage() {
                 try {
                   console.log("📝 Submitting event data:", eventData);
                   console.log("👤 User wallet:", user.walletAddress);
-                  
+
                   const res = await fetch("/api/events", {
                     method: "POST",
                     headers: {
@@ -86,7 +86,7 @@ export default function OrganizerCreatePage() {
                   console.log("📡 Response status:", res.status);
                   const json = await res.json();
                   console.log("📡 Response body:", json);
-                  
+
                   if (!res.ok) {
                     console.error("❌ Create event failed:", json);
                     alert(`Error: ${json.error || "Failed to create event"}`);
@@ -95,12 +95,22 @@ export default function OrganizerCreatePage() {
 
                   console.log("✅ Event created successfully!");
                   const eventId = json.event?.id || json.id;
-                  alert("Event created successfully! Event ID: " + eventId);
-                  
+                  alert(
+                    "🎉 Event Created Successfully!\n\n" +
+                      "📋 Next Steps:\n" +
+                      "1. Admin Review - Your event will be reviewed by admin\n" +
+                      "2. DAO Voting - Investors will vote on your event\n" +
+                      "3. Published - After DAO approval, tickets can be sold\n\n" +
+                      "⏳ Your event is now pending admin approval.\n" +
+                      "You cannot edit the event after submission.\n\n" +
+                      "Event ID: " +
+                      eventId
+                  );
+
                   // Redirect to organizer dashboard
                   setTimeout(() => {
                     router.push("/dashboard/organizer");
-                  }, 1500);
+                  }, 2500);
                 } catch (e: any) {
                   console.error("❌ Unexpected error:", e);
                   alert("Unexpected error: " + e.message);

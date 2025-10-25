@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
-import { SolanaProvider } from '@/lib/providers';
-import '@solana/wallet-adapter-react-ui/styles.css';
+// import { SolanaProvider } from '@/lib/providers';
+// import '@solana/wallet-adapter-react-ui/styles.css';
 
 const inter = Inter({
   subsets: ["latin"],
@@ -12,7 +12,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Mythra Tix",
-  description: "Event funding and ticketing on the blockchain",
+  description: "Event funding and ticketing platform",
   icons: {
     icon: "/favicon.svg",
   },
@@ -25,13 +25,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body 
+      <body
         className={`${inter.variable} antialiased font-sans`}
         suppressHydrationWarning
       >
-        <SolanaProvider>
-          {children}
-        </SolanaProvider>
+        {children}
         <Analytics />
       </body>
     </html>

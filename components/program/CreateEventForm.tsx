@@ -1,9 +1,3 @@
-/**
- * Create Event Form Component
- *
- * This component allows organizers to create new events
- */
-
 "use client";
 
 import { useState } from "react";
@@ -40,14 +34,11 @@ export function CreateEventForm() {
     setLoading(true);
 
     try {
-      // Initialize client (you need to import IDL)
-      const IDL = null; // Replace with actual IDL
+      const IDL = null;
       const client = new MythraClient(connection, wallet as any, IDL);
 
-      // Generate event ID if not provided
       const eventId = formData.eventId || `event-${Date.now()}`;
 
-      // Convert dates to unix timestamps
       const startTs = Math.floor(new Date(formData.startDate).getTime() / 1000);
       const endTs = Math.floor(new Date(formData.endDate).getTime() / 1000);
 
@@ -70,7 +61,6 @@ export function CreateEventForm() {
         `Event created successfully!\n\nEvent ID: ${eventId}\nTransaction: ${signature}`
       );
 
-      // Open explorer
       window.open(
         `https://explorer.solana.com/tx/${signature}?cluster=devnet`,
         "_blank"

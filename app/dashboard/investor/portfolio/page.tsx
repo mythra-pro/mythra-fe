@@ -3,6 +3,7 @@
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
 import { StatCard } from "@/components/stat-card";
+import { useDashboardUser } from "@/hooks/useDashboardUser";
 import { dummyUsers, dummyInvestments, dummyCampaigns } from "@/lib/dummy-data";
 import {
   TrendingUp,
@@ -27,7 +28,7 @@ import { motion } from "framer-motion";
 export const dynamic = "force-dynamic";
 
 export default function InvestorPortfolioPage() {
-  const user = dummyUsers.find((u) => u.role === "investor")!;
+  const user = useDashboardUser("investor");
   const myInvestments = dummyInvestments.filter(
     (i) => i.investorId === user.id
   );

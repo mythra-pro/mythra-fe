@@ -5,7 +5,8 @@ import { getServiceSupabase } from "@/lib/supabase/server";
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const status = searchParams.get("status"); // draft, published, live, cancelled
+    // Status filter: pending_approval, approved, dao_voting, published, live, completed, cancelled, rejected
+    const status = searchParams.get("status");
     const organizerId = searchParams.get("organizerId");
     const category = searchParams.get("category");
     const verified = searchParams.get("verified"); // true/false
@@ -22,8 +23,10 @@ export async function GET(req: Request) {
     const supabase = getServiceSupabase();
 
     let query = supabase
-    .from("events")
-    .select("*, organizer:users!events_organizer_id_fkey(id, display_name, wallet_address)");
+      .from("events")
+      .select(
+        "*, organizer:users!events_organizer_id_fkey(id, display_name, wallet_address)"
+      );
 
     // Apply filters
     if (status) {
@@ -93,10 +96,10 @@ function slugify(input: string) {
 export async function POST(req: Request) {
   try {
     console.log("📝 [POST /api/events] Received request");
-    
+
     const body = await req.json();
     console.log("📋 Request body:", body);
-    
+
     const {
       name,
       description,
@@ -106,6 +109,7 @@ export async function POST(req: Request) {
       priceInSOL,
       maxTickets,
       category,
+      status,
     } = body as {
       name: string;
       description?: string;
@@ -115,10 +119,17 @@ export async function POST(req: Request) {
       priceInSOL: number;
       maxTickets: number;
       category?: string;
+      status?: string;
     };
 
     // Validate required fields
-    if (!name || !date || !location || !maxTickets || priceInSOL === undefined) {
+    if (
+      !name ||
+      !date ||
+      !location ||
+      !maxTickets ||
+      priceInSOL === undefined
+    ) {
       console.error("❌ Missing required fields:", {
         name: !!name,
         date: !!date,
@@ -137,18 +148,18 @@ export async function POST(req: Request) {
 
     const desiredSlug = slugify(name);
     let finalSlug = desiredSlug;
-    
+
     // Ensure unique slug
     const { data: existing, error: slugError } = await supabase
       .from("events")
       .select("id")
       .eq("slug", desiredSlug)
       .limit(1);
-    
+
     if (slugError) {
       console.error("❌ Error checking slug:", slugError);
     }
-    
+
     if (existing && existing.length > 0) {
       finalSlug = `${desiredSlug}-${Date.now().toString(36)}`;
       console.log("🔄 Slug collision detected, using:", finalSlug);
@@ -157,7 +168,7 @@ export async function POST(req: Request) {
     // Get organizer via wallet header
     const wallet = req.headers.get("x-wallet-address")?.trim();
     let organizerId: string | null = null;
-    
+
     if (wallet) {
       console.log("🔍 Looking up organizer for wallet:", wallet);
       const { data: users, error: userError } = await supabase
@@ -165,11 +176,11 @@ export async function POST(req: Request) {
         .select("id")
         .eq("wallet_address", wallet)
         .limit(1);
-      
+
       if (userError) {
         console.error("❌ Error fetching user:", userError);
       }
-      
+
       organizerId = users && users.length > 0 ? users[0].id : null;
       console.log("👤 Organizer ID:", organizerId);
     } else {
@@ -186,7 +197,7 @@ export async function POST(req: Request) {
       end_time: endDate ? new Date(endDate).toISOString() : null,
       max_tickets: maxTickets,
       organizer_id: organizerId,
-      status: "draft",
+      status: status || "pending_approval", // Use provided status or default to pending_approval
     });
 
     const { data: eventRows, error: eventErr } = await supabase
@@ -201,7 +212,7 @@ export async function POST(req: Request) {
         end_time: endDate ? new Date(endDate).toISOString() : null,
         max_tickets: maxTickets,
         organizer_id: organizerId,
-        status: "draft",
+        status: status || "pending_approval", // Use provided status or default to pending_approval
       })
       .select("*")
       .single();
@@ -228,15 +239,17 @@ export async function POST(req: Request) {
 
     // Create default ticket tier
     console.log("🎫 Creating ticket tier for event:", eventId);
-    const { data: tierData, error: tierErr } = await supabase.from("ticket_tiers").insert({
-      event_id: eventId,
-      name: "General Admission",
-      price: priceInSOL,
-      supply_max: maxTickets,
-      description: "Default ticket tier",
-    })
-    .select("*")
-    .single();
+    const { data: tierData, error: tierErr } = await supabase
+      .from("ticket_tiers")
+      .insert({
+        event_id: eventId,
+        name: "General Admission",
+        price: priceInSOL,
+        supply_max: maxTickets,
+        description: "Default ticket tier",
+      })
+      .select("*")
+      .single();
 
     if (tierErr) {
       console.error("❌ Error creating ticket tier:", tierErr);
@@ -247,11 +260,14 @@ export async function POST(req: Request) {
     }
 
     console.log("✅ Ticket tier created successfully:", tierData);
-    return NextResponse.json({ 
-      success: true,
-      event: eventRows,
-      ticketTier: tierData
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        success: true,
+        event: eventRows,
+        ticketTier: tierData,
+      },
+      { status: 201 }
+    );
   } catch (e: any) {
     console.error("❌ Unexpected error in POST /api/events:", e);
     return NextResponse.json(

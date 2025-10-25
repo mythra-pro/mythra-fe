@@ -22,9 +22,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Force dynamic rendering - required for wallet-connected pages
-export const dynamic = "force-dynamic";
-
 export default function StaffCheckinPage() {
   const user = useDashboardUser("staff");
   const myEvents = dummyEvents.filter((e) => e.staffIds?.includes(user.id));
@@ -106,7 +103,9 @@ export default function StaffCheckinPage() {
                     <div className="p-3 bg-gradient-to-r from-[#CAF0F8] to-white rounded-lg">
                       <p className="text-xs text-gray-600">Event Date</p>
                       <p className="font-semibold text-[#03045E]">
-                        {new Date(selectedEvent.start_time || selectedEvent.date || '').toLocaleDateString()}
+                        {new Date(
+                          selectedEvent.start_time || selectedEvent.date || ""
+                        ).toLocaleDateString()}
                       </p>
                     </div>
                     <div className="p-3 bg-gradient-to-r from-[#90E0EF] to-white rounded-lg">
