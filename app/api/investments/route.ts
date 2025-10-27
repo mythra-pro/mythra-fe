@@ -74,10 +74,10 @@ export async function POST(req: Request) {
       );
     }
 
-    // Validate event exists
+    // Validate event exists and get vault cap + status
     const { data: event, error: eventError } = await supabase
       .from("events")
-      .select("id")
+      .select("id, vault_cap, status")
       .eq("id", eventId)
       .single();
 
@@ -86,6 +86,85 @@ export async function POST(req: Request) {
       return NextResponse.json(
         { error: "Event not found." },
         { status: 404 }
+      );
+    }
+
+    // Validate event status - must be approved or dao_voting to accept investments
+    if (event.status !== "approved" && event.status !== "dao_voting") {
+      console.error("❌ Event not eligible for investments. Status:", event.status);
+      return NextResponse.json(
+        { error: `Event is not accepting investments. Status must be 'approved' or 'dao_voting'. Current status: '${event.status}'` },
+        { status: 400 }
+      );
+    }
+
+    // Check vault cap (ALWAYS REQUIRED - every event must have a vault cap)
+    if (!event.vault_cap || event.vault_cap <= 0) {
+      console.error("❌ Event has invalid vault cap:", event.vault_cap);
+      return NextResponse.json(
+        { error: "Event configuration error: Invalid vault cap." },
+        { status: 500 }
+      );
+    }
+
+    // Calculate total invested so far
+    const { data: existingInvestments, error: investError } = await supabase
+      .from("investments")
+      .select("amount_sol")
+      .eq("event_id", eventId)
+      .eq("status", "confirmed");
+
+    if (investError) {
+      console.error("❌ Error checking investments:", investError);
+      return NextResponse.json(
+        { error: "Failed to check vault capacity" },
+        { status: 500 }
+      );
+    }
+
+    const totalInvested = existingInvestments?.reduce(
+      (sum, inv) => sum + parseFloat(inv.amount_sol.toString()),
+      0
+    ) || 0;
+
+    const remaining = event.vault_cap - totalInvested;
+
+    if (amountSol > remaining) {
+      console.error("❌ Investment exceeds vault capacity");
+      return NextResponse.json(
+        { 
+          error: `Investment exceeds vault capacity. Only ${remaining.toFixed(2)} SOL available (Vault: ${totalInvested.toFixed(2)}/${event.vault_cap} SOL)`,
+          remaining,
+          vaultCap: event.vault_cap,
+          totalInvested
+        },
+        { status: 400 }
+      );
+    }
+
+    if (remaining <= 0) {
+      console.error("❌ Vault is full");
+      return NextResponse.json(
+        { error: "Vault is full. No more investments can be accepted." },
+        { status: 400 }
+      );
+    }
+
+    console.log(`✅ Vault capacity check passed: ${totalInvested + amountSol}/${event.vault_cap} SOL`);
+
+    // Check if investor has already invested in this event (ONE INVESTMENT PER EVENT)
+    const { data: existingInvestment, error: checkError } = await supabase
+      .from("investments")
+      .select("id")
+      .eq("event_id", eventId)
+      .eq("investor_id", investorId)
+      .single();
+
+    if (existingInvestment) {
+      console.error("❌ Investor already invested in this event:", investorId);
+      return NextResponse.json(
+        { error: "You have already invested in this event. Each investor can only invest once per event." },
+        { status: 400 }
       );
     }
 

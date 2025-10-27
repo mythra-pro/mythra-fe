@@ -93,6 +93,9 @@ export interface EventData {
   dao_approval_votes?: number;
   dao_rejection_reason?: string;
   published_at?: Date;
+  // Ticket selling control
+  can_sell_tickets?: boolean;
+  selling_started_at?: Date;
   coverImage?: string;
   category: string;
   createdAt: Date;
@@ -186,6 +189,7 @@ export interface CreateEventFormData {
   maxTickets: number;
   category: string;
   coverImage?: File | string;
+  vaultCap: number; // Max investment amount in SOL (REQUIRED, must be > 0)
 }
 
 export interface CheckInData {

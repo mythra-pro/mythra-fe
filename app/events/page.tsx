@@ -25,16 +25,18 @@ export default function EventsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch published events from Supabase (events that passed DAO voting)
+  // Fetch live events (events that can sell tickets)
   useEffect(() => {
     setLoading(true);
     setError(null);
-    // Only fetch published events (events that have passed DAO voting)
-    fetch("/api/events?status=published")
+    // Fetch live events where ticket sales are enabled
+    fetch("/api/events?status=live")
       .then((res) => res.json())
       .then((data) => {
         if (data.events) {
-          setEvents(data.events);
+          // Filter to only show events with can_sell_tickets = true
+          const sellableEvents = data.events.filter((e: any) => e.can_sell_tickets);
+          setEvents(sellableEvents);
         } else {
           setError("Failed to load events");
         }
