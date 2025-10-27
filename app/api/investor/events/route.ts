@@ -40,10 +40,7 @@ export async function GET(req: Request) {
 
     if (error) {
       console.error("❌ Error fetching events:", error.message);
-      return NextResponse.json(
-        { error: error.message },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     console.log("✅ Found", events?.length || 0, "publishable events");

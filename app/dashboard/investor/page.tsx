@@ -163,14 +163,20 @@ export default function InvestorDashboard() {
           />
           <StatCard
             title="Total Investment Pool"
-            value={`${events.reduce((sum, e) => sum + (e.target_investment || 0), 0).toLocaleString()} SOL`}
+            value={`${events
+              .reduce((sum, e) => sum + (e.target_investment || 0), 0)
+              .toLocaleString()} SOL`}
             description="Across all events"
             icon={DollarSign}
             delay={0.1}
           />
           <StatCard
             title="Active Opportunities"
-            value={events.filter(e => (e.current_investment || 0) < (e.target_investment || 0)).length.toString()}
+            value={events
+              .filter(
+                (e) => (e.current_investment || 0) < (e.target_investment || 0)
+              )
+              .length.toString()}
             description="Not fully funded"
             icon={TrendingUp}
             delay={0.2}
@@ -187,19 +193,27 @@ export default function InvestorDashboard() {
         {/* Available Events for Investment */}
         <Card className="bg-white/90 border-[#48CAE4] shadow-xl">
           <CardHeader>
-            <CardTitle className="text-[#03045E]">Available Investment Opportunities</CardTitle>
-            <CardDescription>Browse and invest in published events with SOL</CardDescription>
+            <CardTitle className="text-[#03045E]">
+              Available Investment Opportunities
+            </CardTitle>
+            <CardDescription>
+              Browse and invest in published events with SOL
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {events.length === 0 ? (
-                <p className="text-center text-gray-500 py-8">No published events available for investment at this time.</p>
+                <p className="text-center text-gray-500 py-8">
+                  No published events available for investment at this time.
+                </p>
               ) : (
                 events.map((event, idx) => {
-                  const fundingProgress = event.target_investment 
-                    ? ((event.current_investment || 0) / event.target_investment) * 100 
+                  const fundingProgress = event.target_investment
+                    ? ((event.current_investment || 0) /
+                        event.target_investment) *
+                      100
                     : 0;
-                  
+
                   return (
                     <motion.div
                       key={event.id}
@@ -218,7 +232,8 @@ export default function InvestorDashboard() {
                                 {event.description || "No description provided"}
                               </p>
                               <p className="text-xs text-gray-500">
-                                Organized by: {event.organizer?.display_name || "Unknown"}
+                                Organized by:{" "}
+                                {event.organizer?.display_name || "Unknown"}
                               </p>
                             </div>
                             <Badge className="bg-green-500 text-white ml-4">
@@ -247,7 +262,9 @@ export default function InvestorDashboard() {
                               </p>
                             </div>
                             <div className="p-3 bg-white rounded-lg">
-                              <p className="text-xs text-gray-600">Token Symbol</p>
+                              <p className="text-xs text-gray-600">
+                                Token Symbol
+                              </p>
                               <p className="text-sm font-semibold text-[#03045E]">
                                 {event.token_symbol || "N/A"}
                               </p>
@@ -257,9 +274,11 @@ export default function InvestorDashboard() {
                           {/* Progress Bar */}
                           <div className="mb-4">
                             <div className="w-full bg-gray-200 rounded-full h-2.5">
-                              <div 
+                              <div
                                 className="bg-gradient-to-r from-[#0077B6] to-[#48CAE4] h-2.5 rounded-full transition-all"
-                                style={{ width: `${Math.min(fundingProgress, 100)}%` }}
+                                style={{
+                                  width: `${Math.min(fundingProgress, 100)}%`,
+                                }}
                               />
                             </div>
                           </div>
@@ -276,7 +295,11 @@ export default function InvestorDashboard() {
                                 step="0.1"
                                 placeholder="Amount in SOL"
                                 className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0077B6]"
-                                value={investingEventId === event.id ? investAmount : ""}
+                                value={
+                                  investingEventId === event.id
+                                    ? investAmount
+                                    : ""
+                                }
                                 onChange={(e) => {
                                   setInvestingEventId(event.id);
                                   setInvestAmount(e.target.value);
@@ -285,14 +308,24 @@ export default function InvestorDashboard() {
                               />
                               <Button
                                 onClick={() => handleInvest(event.id)}
-                                disabled={submitting || !investAmount || investingEventId !== event.id}
+                                disabled={
+                                  submitting ||
+                                  !investAmount ||
+                                  investingEventId !== event.id
+                                }
                                 className="bg-[#0077B6] hover:bg-[#0096C7] text-white px-6"
                               >
-                                {submitting && investingEventId === event.id ? "Investing..." : "Invest"}
+                                {submitting && investingEventId === event.id
+                                  ? "Investing..."
+                                  : "Invest"}
                               </Button>
                             </div>
                             <p className="text-xs text-gray-600 mt-2">
-                              Estimated USD: ${investAmount ? (parseFloat(investAmount) * 150).toFixed(2) : "0.00"} (1 SOL ≈ $150)
+                              Estimated USD: $
+                              {investAmount
+                                ? (parseFloat(investAmount) * 150).toFixed(2)
+                                : "0.00"}{" "}
+                              (1 SOL ≈ $150)
                             </p>
                           </div>
                         </CardContent>
