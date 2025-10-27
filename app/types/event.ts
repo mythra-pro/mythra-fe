@@ -119,6 +119,18 @@ export interface EventData {
     available: number;
     benefits: string[];
   }>;
+  // Ticket tiers from database
+  ticket_tiers?: Array<{
+    id: string;
+    event_id: string;
+    name: string;
+    description?: string;
+    price: number;
+    supply_max: number;
+    supply_available?: number;
+    created_at?: Date;
+  }>;
+  price_in_sol?: number;
 }
 
 export interface TicketData {

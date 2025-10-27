@@ -9,6 +9,7 @@ import { EventCard } from "@/components/event-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -27,25 +28,62 @@ export default function EventsPage() {
 
   // Fetch live events (events that can sell tickets)
   useEffect(() => {
-    setLoading(true);
-    setError(null);
-    // Fetch live events where ticket sales are enabled
-    fetch("/api/events?status=live")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.events) {
-          // Filter to only show events with can_sell_tickets = true
-          const sellableEvents = data.events.filter((e: any) => e.can_sell_tickets);
-          setEvents(sellableEvents);
-        } else {
+    const fetchEventsWithTicketCounts = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        // Fetch live events where ticket sales are enabled
+        const eventsRes = await fetch("/api/events?status=live");
+        const eventsData = await eventsRes.json();
+        
+        if (!eventsData.events) {
           setError("Failed to load events");
+          return;
         }
-      })
-      .catch((err) => {
+        
+        // Filter to only show events with can_sell_tickets = true
+        const sellableEvents = eventsData.events.filter((e: any) => e.can_sell_tickets);
+        
+        // Fetch sold tickets count for each event
+        const eventsWithCounts = await Promise.all(
+          sellableEvents.map(async (event: any) => {
+            try {
+              const ticketsRes = await fetch(`/api/tickets?eventId=${event.id}`);
+              const ticketsData = await ticketsRes.json();
+              const soldCount = ticketsData.tickets?.length || 0;
+              
+              return {
+                ...event,
+                soldTickets: soldCount,
+                totalTickets: event.max_tickets || 0,
+              };
+            } catch (err) {
+              console.error(`Error fetching tickets for event ${event.id}:`, err);
+              return {
+                ...event,
+                soldTickets: 0,
+                totalTickets: event.max_tickets || 0,
+              };
+            }
+          })
+        );
+        
+        // Filter out sold-out events (0 available tickets)
+        const availableEvents = eventsWithCounts.filter(
+          (event) => (event.totalTickets - event.soldTickets) > 0
+        );
+        
+        setEvents(availableEvents);
+      } catch (err) {
         console.error("Error fetching events:", err);
         setError("Error loading events");
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchEventsWithTicketCounts();
   }, []);
 
   const filteredEvents = events
@@ -97,19 +135,17 @@ export default function EventsPage() {
               <span className="text-2xl font-bold text-gray-900">Mythra</span>
             </Link>
             <div className="flex items-center gap-4">
-              <Link href="/login">
+              <Link href="/dashboard/customer">
                 <Button
                   variant="ghost"
                   className="text-gray-700 hover:bg-gray-100 cursor-pointer"
                 >
-                  Sign In
+                  My Tickets
                 </Button>
               </Link>
-              <Link href="/login">
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer">
-                  Connect Wallet
-                </Button>
-              </Link>
+              <Badge variant="outline" className="text-sm px-3 py-1">
+                Public Marketplace
+              </Badge>
             </div>
           </div>
         </div>

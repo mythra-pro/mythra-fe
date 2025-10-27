@@ -25,7 +25,7 @@ export async function GET(req: Request) {
     let query = supabase
       .from("events")
       .select(
-        "*, organizer:users!events_organizer_id_fkey(id, display_name, wallet_address)"
+        "*, organizer:users!events_organizer_id_fkey(id, display_name, wallet_address), ticket_tiers(*)"
       );
 
     // Apply filters
