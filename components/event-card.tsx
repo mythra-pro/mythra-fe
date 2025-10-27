@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { Calendar, MapPin, Ticket, TrendingUp } from "lucide-react";
+import { Calendar, MapPin, Ticket, TrendingUp, DollarSign } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -124,7 +124,17 @@ export function EventCard({
                 <Ticket className="h-4 w-4 text-green-600" />
               </div>
               <span className="text-gray-700 font-medium">
-                {event.soldTickets} / {event.totalTickets} tickets sold
+                {(event.totalTickets || 0) - (event.soldTickets || 0)} tickets available
+              </span>
+            </div>
+
+            {/* Ticket Price */}
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                <DollarSign className="h-4 w-4 text-blue-600" />
+              </div>
+              <span className="font-bold text-blue-600">
+                {event.ticket_tiers?.[0]?.price || event.price_in_sol || event.priceInSOL || 0} SOL
               </span>
             </div>
 

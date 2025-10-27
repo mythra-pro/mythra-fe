@@ -76,6 +76,7 @@ export function NFTTicketCard({
   const [eventData, setEventData] = useState<any>(null);
   const [showEventModal, setShowEventModal] = useState(false);
   const [loadingEvent, setLoadingEvent] = useState(false);
+  const [qrSecondsLeft, setQrSecondsLeft] = useState(60);
   
   // Generate unique QR data with timestamp
   const qrData = JSON.stringify({
@@ -109,15 +110,26 @@ export function NFTTicketCard({
     }
   }, [qrData, showQRModal]);
   
-  // Auto-refresh QR every minute
+  // Auto-refresh QR every minute with visible countdown
   useEffect(() => {
-    if (showQRModal) {
-      const interval = setInterval(() => {
-        setQrTimestamp(Date.now());
-      }, 60000); // 60 seconds
-      
-      return () => clearInterval(interval);
-    }
+    if (!showQRModal) return;
+
+    // Reset countdown whenever modal opens
+    setQrSecondsLeft(60);
+
+    const tick = setInterval(() => {
+      setQrSecondsLeft((prev) => {
+        if (prev <= 1) {
+          // Trigger a new timestamp (causes regenerate via qrData dep)
+          setQrTimestamp(Date.now());
+          console.log('🔄 QR Code regenerated at', new Date().toLocaleTimeString());
+          return 60; // restart countdown
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(tick);
   }, [showQRModal]);
   
   // Fetch event data
@@ -304,10 +316,7 @@ export function NFTTicketCard({
                   </div>
                 )}
                 <p className="text-xs text-gray-500 mt-4">
-                  Refreshes every 60 seconds
-                </p>
-                <p className="text-xs text-gray-400 mt-1 font-mono">
-                  {new Date(qrTimestamp).toLocaleTimeString()}
+                  Auto-refreshes every 60 seconds
                 </p>
               </div>
             </div>

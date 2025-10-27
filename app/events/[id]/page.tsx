@@ -38,6 +38,8 @@ export default function EventDetailPage({
   const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [soldTickets, setSoldTickets] = useState(0);
+  const [availableTickets, setAvailableTickets] = useState(0);
   
   // Purchase modal state
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
@@ -53,25 +55,46 @@ export default function EventDetailPage({
   const [ownerEmail, setOwnerEmail] = useState("");
 
   useEffect(() => {
-    setLoading(true);
-    setError(null);
-    fetch(`/api/events/${id}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Event not found");
-        return res.json();
-      })
-      .then((data) => {
-        if (data.event) {
-          setEvent(data.event);
-        } else {
+    const fetchEventData = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        // Fetch event details
+        const eventRes = await fetch(`/api/events/${id}`);
+        if (!eventRes.ok) throw new Error("Event not found");
+        const eventData = await eventRes.json();
+        
+        if (!eventData.event) {
           setError("Event not found");
+          return;
         }
-      })
-      .catch((err) => {
+        
+        setEvent(eventData.event);
+        
+        // Fetch sold tickets count
+        const ticketsRes = await fetch(`/api/tickets?eventId=${id}`);
+        const ticketsData = await ticketsRes.json();
+        const sold = ticketsData.tickets?.length || 0;
+        
+        setSoldTickets(sold);
+        
+        // Calculate available tickets
+        const maxTickets = eventData.event.max_tickets || eventData.event.maxTickets || 0;
+        const available = Math.max(0, maxTickets - sold);
+        setAvailableTickets(available);
+        
+        console.log(`📊 Tickets: ${sold} sold, ${available} available out of ${maxTickets} max`);
+        
+      } catch (err: any) {
         console.error("Error fetching event:", err);
         setError(err.message || "Error loading event");
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchEventData();
   }, [id]);
 
   const handlePurchaseTicket = async () => {
@@ -80,11 +103,23 @@ export default function EventDetailPage({
       return;
     }
 
+    // Check if tickets are available
+    if (availableTickets <= 0) {
+      setPurchaseError("Sorry, this event is sold out!");
+      return;
+    }
+
+    // Check if quantity exceeds available tickets
+    if (quantity > availableTickets) {
+      setPurchaseError(`Only ${availableTickets} ticket(s) available. Please reduce your quantity.`);
+      return;
+    }
+
     setPurchasing(true);
     setPurchaseError(null);
 
     try {
-      const priceInSOL = selectedTier?.price || event.priceInSOL || event.price_in_sol || 0;
+      const priceInSOL = selectedTier?.price || event.ticket_tiers?.[0]?.price || 0;
       
       const purchaseData = {
         eventId: id,
@@ -123,7 +158,7 @@ export default function EventDetailPage({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading event details...</p>
@@ -134,7 +169,7 @@ export default function EventDetailPage({
 
   if (!event || error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <Card className="p-12 text-center bg-white border border-gray-200">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             Event Not Found
@@ -153,7 +188,7 @@ export default function EventDetailPage({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
@@ -169,11 +204,11 @@ export default function EventDetailPage({
               <div className="h-8 w-8 rounded-lg bg-blue-600" />
               <span className="text-xl font-bold text-gray-900">Mythra</span>
             </Link>
-            <Link href="/login">
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                Connect Wallet
-              </Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-sm">
+                Public Event
+              </Badge>
+            </div>
           </div>
         </div>
       </header>
@@ -435,10 +470,10 @@ export default function EventDetailPage({
                           </div>
                           <div className="text-right">
                             <p className="text-3xl font-bold text-blue-600">
-                              {event.priceInSOL || event.price_in_sol || 0} SOL
+                              {event.ticket_tiers?.[0]?.price || 0} SOL
                             </p>
                             <p className="text-sm text-gray-500">
-                              {event.max_tickets || event.maxTickets || 0} available
+                              {availableTickets} available ({soldTickets} sold)
                             </p>
                           </div>
                         </div>
@@ -451,8 +486,9 @@ export default function EventDetailPage({
                             setPurchaseError(null);
                             setPurchaseSuccess(false);
                           }}
+                          disabled={availableTickets <= 0}
                         >
-                          Buy Ticket
+                          {availableTickets <= 0 ? "Sold Out" : "Buy Ticket"}
                         </Button>
                       </CardContent>
                     </Card>
@@ -548,7 +584,7 @@ export default function EventDetailPage({
             <div className="space-y-4">
               {/* Quantity Selector */}
               <div className="space-y-2">
-                <Label>Quantity</Label>
+                <Label>Quantity (Max: {availableTickets})</Label>
                 <div className="flex items-center gap-4">
                   <Button
                     type="button"
@@ -564,8 +600,8 @@ export default function EventDetailPage({
                     type="button"
                     variant="outline"
                     size="icon"
-                    onClick={() => setQuantity(quantity + 1)}
-                    disabled={purchasing}
+                    onClick={() => setQuantity(Math.min(availableTickets, quantity + 1))}
+                    disabled={purchasing || quantity >= availableTickets}
                   >
                     <Plus className="h-4 w-4" />
                   </Button>
@@ -614,13 +650,13 @@ export default function EventDetailPage({
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-600">Price per ticket:</span>
                   <span className="font-semibold">
-                    {selectedTier?.price || event?.priceInSOL || event?.price_in_sol || 0} SOL
+                    {selectedTier?.price || event?.ticket_tiers?.[0]?.price || 0} SOL
                   </span>
                 </div>
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total:</span>
                   <span className="text-blue-600">
-                    {((selectedTier?.price || event?.priceInSOL || event?.price_in_sol || 0) * quantity).toFixed(2)} SOL
+                    {((selectedTier?.price || event?.ticket_tiers?.[0]?.price || 0) * quantity).toFixed(2)} SOL
                   </span>
                 </div>
               </div>

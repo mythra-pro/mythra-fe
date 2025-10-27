@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { Html5Qrcode } from "html5-qrcode";
 import { CheckInData, TicketData } from "@/app/types/event";
-import { QrCode, CheckCircle, XCircle, Camera, Keyboard } from "lucide-react";
+import { QrCode, CheckCircle, XCircle, Camera, Keyboard, AlertCircle, Volume2, VolumeX } from "lucide-react";
 
 interface CheckInScannerProps {
   eventId: string;
@@ -20,6 +21,8 @@ export default function CheckInScanner({
   const [scanMode, setScanMode] = useState<"qr" | "manual">("qr");
   const [ticketInput, setTicketInput] = useState("");
   const [isScanning, setIsScanning] = useState(false);
+  const [cameraPermission, setCameraPermission] = useState<"granted" | "denied" | "prompt">("prompt");
+  const [soundEnabled, setSoundEnabled] = useState(true);
   const [lastScanResult, setLastScanResult] = useState<{
     success: boolean;
     message: string;
@@ -33,6 +36,48 @@ export default function CheckInScanner({
       name?: string;
     }>
   >([]);
+  const [offlineQueue, setOfflineQueue] = useState<CheckInData[]>([]);
+  const [lastScannedTicket, setLastScannedTicket] = useState<string>("");
+  
+  const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
+  const scannerDivId = "qr-reader";
+  const successAudioRef = useRef<HTMLAudioElement | null>(null);
+  const errorAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Load offline queue from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem(`checkin-queue-${eventId}`);
+    if (stored) {
+      setOfflineQueue(JSON.parse(stored));
+    }
+  }, [eventId]);
+
+  // Save offline queue
+  useEffect(() => {
+    if (offlineQueue.length > 0) {
+      localStorage.setItem(`checkin-queue-${eventId}`, JSON.stringify(offlineQueue));
+    }
+  }, [offlineQueue, eventId]);
+
+  // Process offline queue when online
+  useEffect(() => {
+    const processQueue = async () => {
+      if (navigator.onLine && offlineQueue.length > 0) {
+        const item = offlineQueue[0];
+        try {
+          await onCheckIn(item);
+          setOfflineQueue(prev => prev.slice(1));
+        } catch (e) {
+          console.error("Failed to process offline queue item:", e);
+        }
+      }
+    };
+    
+    window.addEventListener('online', processQueue);
+    processQueue();
+    
+    return () => window.removeEventListener('online', processQueue);
+  }, [offlineQueue, onCheckIn]);
 
   const handleManualCheckIn = async () => {
     if (!ticketInput.trim()) return;
