@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import QRCode from "qrcode";
 import {
   ExternalLink,
   Calendar,
@@ -71,9 +72,42 @@ export function NFTTicketCard({
   // QR Code state
   const [showQRModal, setShowQRModal] = useState(false);
   const [qrTimestamp, setQrTimestamp] = useState(Date.now());
+  const [qrImageUrl, setQrImageUrl] = useState<string>("");
   const [eventData, setEventData] = useState<any>(null);
   const [showEventModal, setShowEventModal] = useState(false);
   const [loadingEvent, setLoadingEvent] = useState(false);
+  
+  // Generate unique QR data with timestamp
+  const qrData = JSON.stringify({
+    ticketId: ticket.id,
+    mintPubkey: (ticket as any).mint_pubkey,
+    eventId: ticket.eventId,
+    timestamp: qrTimestamp,
+    status: ticket.status,
+  });
+  
+  // Generate QR code image
+  useEffect(() => {
+    const generateQR = async () => {
+      try {
+        const url = await QRCode.toDataURL(qrData, {
+          width: 400,
+          margin: 2,
+          color: {
+            dark: '#000000',
+            light: '#FFFFFF'
+          }
+        });
+        setQrImageUrl(url);
+      } catch (err) {
+        console.error('Failed to generate QR code:', err);
+      }
+    };
+    
+    if (showQRModal) {
+      generateQR();
+    }
+  }, [qrData, showQRModal]);
   
   // Auto-refresh QR every minute
   useEffect(() => {
@@ -85,15 +119,6 @@ export function NFTTicketCard({
       return () => clearInterval(interval);
     }
   }, [showQRModal]);
-  
-  // Generate unique QR data with timestamp
-  const qrData = JSON.stringify({
-    ticketId: ticket.id,
-    mintPubkey: (ticket as any).mint_pubkey,
-    eventId: ticket.eventId,
-    timestamp: qrTimestamp,
-    status: ticket.status,
-  });
   
   // Fetch event data
   const fetchEventData = async () => {
@@ -264,9 +289,20 @@ export function NFTTicketCard({
           <div className="space-y-4">
             <div className="bg-white p-6 rounded-lg border-2 border-gray-200 flex items-center justify-center">
               <div className="text-center">
-                <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-8 rounded-xl">
-                  <QrCode className="h-48 w-48 text-white" />
-                </div>
+                {qrImageUrl ? (
+                  <div className="p-4 bg-white rounded-xl border-2 border-gray-300">
+                    <img 
+                      src={qrImageUrl} 
+                      alt="Ticket QR Code" 
+                      className="w-80 h-80"
+                    />
+                  </div>
+                ) : (
+                  <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-8 rounded-xl">
+                    <QrCode className="h-48 w-48 text-white" />
+                    <p className="text-white mt-2">Generating...</p>
+                  </div>
+                )}
                 <p className="text-xs text-gray-500 mt-4">
                   Refreshes every 60 seconds
                 </p>
