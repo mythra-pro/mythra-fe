@@ -38,13 +38,14 @@ export async function POST(
 
     const supabase = getServiceSupabase();
 
-    // Update event status to approved
+    // Update event status directly to dao_voting (combines approval + DAO voting start)
     const { data: event, error } = await supabase
       .from("events")
       .update({
-        status: "approved",
+        status: "dao_voting",
         approved_by: adminId,
         approved_at: new Date().toISOString(),
+        dao_voting_started_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)
@@ -52,25 +53,8 @@ export async function POST(
       .single();
 
     if (error) {
-      console.error("❌ Error approving event:", error);
+      console.error("❌ Error approving event and starting DAO voting:", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    // Automatically start DAO voting after approval
-    const { error: daoError } = await supabase
-      .from("events")
-      .update({
-        status: "dao_voting",
-        dao_voting_started_at: new Date().toISOString(),
-      })
-      .eq("id", id);
-
-    if (daoError) {
-      console.warn(
-        "⚠️ Event approved but failed to start DAO voting:",
-        daoError
-      );
-      // Don't fail the approval if DAO voting start fails
     }
 
     console.log("✅ Event approved and DAO voting started:", event.id);

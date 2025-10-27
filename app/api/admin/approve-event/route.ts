@@ -35,8 +35,11 @@ export async function POST(req: Request) {
     const { data: event, error } = await supabase
       .from("events")
       .update({
-        status: approved ? "published" : "rejected",
+        status: approved ? "dao_voting" : "rejected",
         approved_by: approvedBy,
+        approved_at: approved ? new Date().toISOString() : null,
+        dao_voting_started_at: approved ? new Date().toISOString() : null,
+        rejected_at: !approved ? new Date().toISOString() : null,
         updated_at: new Date().toISOString(),
       })
       .eq("id", eventId)
