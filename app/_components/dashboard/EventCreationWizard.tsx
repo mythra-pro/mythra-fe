@@ -30,6 +30,7 @@ export default function EventCreationWizard({
     priceInSOL: 0,
     maxTickets: 0,
     category: "",
+    vaultCap: 0, // REQUIRED: max investment in SOL
   });
 
   const [errors, setErrors] = useState<
@@ -68,6 +69,10 @@ export default function EventCreationWizard({
         newErrors.priceInSOL = "Price must be greater than 0";
       if (formData.maxTickets <= 0)
         newErrors.maxTickets = "Max tickets must be greater than 0";
+      if (!formData.vaultCap || formData.vaultCap <= 0)
+        newErrors.vaultCap = "Vault cap is required and must be greater than 0";
+      if (formData.vaultCap > 10000)
+        newErrors.vaultCap = "Vault cap cannot exceed 10,000 SOL";
     }
 
     setErrors(newErrors);
@@ -322,6 +327,42 @@ export default function EventCreationWizard({
             {errors.maxTickets && (
               <p className="text-red-500 text-sm mt-1">{errors.maxTickets}</p>
             )}
+          </div>
+
+          {/* Vault Cap (Investment Limit) - REQUIRED */}
+          <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-lg border border-purple-200">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <DollarSign className="inline mr-2" />
+              Investment Vault Cap (SOL) *
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              min="0.01"
+              max="10000"
+              required
+              value={formData.vaultCap || ""}
+              onChange={(e) =>
+                updateFormData("vaultCap", e.target.value ? parseFloat(e.target.value) : 0)
+              }
+              className={`w-full px-4 py-3 border ${
+                errors.vaultCap ? "border-red-500" : "border-gray-300"
+              } rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent`}
+              placeholder="e.g., 100"
+            />
+            {errors.vaultCap && (
+              <p className="text-red-500 text-sm mt-1">{errors.vaultCap}</p>
+            )}
+            <p className="text-xs text-gray-600 mt-2">
+              💡 <strong>Vault Cap:</strong> Maximum total investment amount for this event.
+              Example: Set to 100 SOL to cap total investments at 100 SOL.
+            </p>
+            <p className="text-xs text-yellow-700 font-semibold mt-1">
+              ⚠️ REQUIRED: Must be between 0.01 SOL and 10,000 SOL (first-come, first-served).
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              Once the vault reaches this cap, no more investments will be accepted.
+            </p>
           </div>
 
           {/* Summary */}

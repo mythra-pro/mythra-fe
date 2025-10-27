@@ -116,6 +116,7 @@ export async function POST(req: Request) {
       maxTickets,
       category,
       status,
+      vaultCap,
     } = body as {
       name: string;
       description?: string;
@@ -126,6 +127,7 @@ export async function POST(req: Request) {
       maxTickets: number;
       category?: string;
       status?: string;
+      vaultCap?: number | null;
     };
 
     // Validate required fields
@@ -134,17 +136,27 @@ export async function POST(req: Request) {
       !date ||
       !location ||
       !maxTickets ||
-      priceInSOL === undefined
+      priceInSOL === undefined ||
+      vaultCap === undefined ||
+      vaultCap === null
     ) {
-      console.error("❌ Missing required fields:", {
-        name: !!name,
-        date: !!date,
-        location: !!location,
-        maxTickets: !!maxTickets,
-        priceInSOL: priceInSOL !== undefined,
-      });
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: "Missing required fields. Vault cap is now required." },
+        { status: 400 }
+      );
+    }
+
+    // Validate vault_cap limits
+    if (vaultCap <= 0) {
+      return NextResponse.json(
+        { error: "Vault cap must be greater than 0 SOL" },
+        { status: 400 }
+      );
+    }
+
+    if (vaultCap > 10000) {
+      return NextResponse.json(
+        { error: "Vault cap cannot exceed 10,000 SOL" },
         { status: 400 }
       );
     }
@@ -252,6 +264,7 @@ export async function POST(req: Request) {
         max_tickets: maxTickets,
         organizer_id: organizerId,
         status: status || "pending_approval", // Use provided status or default to pending_approval
+        vault_cap: vaultCap, // Max investment amount (REQUIRED, 0.01 - 10000 SOL)
       })
       .select("*")
       .single();

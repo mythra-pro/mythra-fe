@@ -28,6 +28,7 @@ export default function OrganizerDashboard() {
   const [events, setEvents] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [startingSellingEventId, setStartingSellingEventId] = useState<string | null>(null);
 
   // Ensure user exists in DB (non-blocking)
   useEffect(() => {
@@ -79,6 +80,61 @@ export default function OrganizerDashboard() {
       .catch((e) => console.error("Failed to fetch stats:", e))
       .finally(() => setLoading(false));
   }, [user.id]);
+
+  const handleStartSelling = async (eventId: string) => {
+    if (!user.id) {
+      alert("User not authenticated");
+      return;
+    }
+
+    const confirmed = confirm(
+      "Are you sure you want to start selling tickets for this event? This will make the event live and enable ticket sales. Make sure all investors have completed voting on DAO questions."
+    );
+
+    if (!confirmed) return;
+
+    setStartingSellingEventId(eventId);
+
+    try {
+      const res = await fetch(`/api/events/${eventId}/start-selling`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ organizerId: user.id }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.error || "Failed to start selling tickets");
+        if (data.details) {
+          console.log("Validation details:", data.details);
+          alert(
+            `Validation failed:\n` +
+            `- Total Questions: ${data.details.totalQuestions}\n` +
+            `- Total Investors: ${data.details.totalInvestors}\n` +
+            `- Votes Received: ${data.details.votesReceived}\n` +
+            `- Votes Required: ${data.details.votesRequired}\n\n` +
+            `All investors must complete voting on all questions before ticket sales can begin.`
+          );
+        }
+        return;
+      }
+
+      alert("✅ Success! Ticket sales have been enabled for this event.");
+      
+      // Refresh events
+      fetch(`/api/events?organizerId=${user.id}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setEvents(data.events || []);
+        });
+    } catch (e: any) {
+      console.error("Error starting ticket sales:", e);
+      alert("Failed to start selling tickets. Please try again.");
+    } finally {
+      setStartingSellingEventId(null);
+    }
+  };
 
   const menuSections = getMenuSectionsForRole("organizer");
 
@@ -163,7 +219,13 @@ export default function OrganizerDashboard() {
 
                 {/* Events Overview */}
                 <Tabs defaultValue="active" className="w-full">
-                  <TabsList className="grid w-full max-w-2xl grid-cols-4 bg-white border border-gray-200">
+                  <TabsList className="grid w-full max-w-2xl grid-cols-5 bg-white border border-gray-200">
+                    <TabsTrigger
+                      value="pending"
+                      className="data-[state=active]:bg-yellow-600 data-[state=active]:text-white"
+                    >
+                      Pending
+                    </TabsTrigger>
                     <TabsTrigger
                       value="active"
                       className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
@@ -190,6 +252,41 @@ export default function OrganizerDashboard() {
                     </TabsTrigger>
                   </TabsList>
 
+                  <TabsContent value="pending" className="mt-6">
+                    <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <p className="text-sm text-yellow-900">
+                        <strong>⏳ Awaiting Admin Approval:</strong> These events are pending review by admin. 
+                        You'll be notified once they are approved or if any changes are needed.
+                      </p>
+                    </div>
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                      {myEvents
+                        .filter((e) => e.status === "pending_approval")
+                        .map((event, idx) => (
+                          <EventCard
+                            key={event.id}
+                            event={event}
+                            delay={idx * 0.1}
+                            showActions
+                            onStartSelling={handleStartSelling}
+                          />
+                        ))}
+                    </div>
+                    {myEvents.filter((e) => e.status === "pending_approval").length === 0 && (
+                      <Card className="bg-white border border-gray-200">
+                        <CardContent className="p-12 text-center">
+                          <Calendar className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                          <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                            No pending events
+                          </h3>
+                          <p className="text-gray-500">
+                            Events awaiting admin approval will appear here.
+                          </p>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </TabsContent>
+
                   <TabsContent value="active" className="mt-6">
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                       {myEvents
@@ -200,6 +297,7 @@ export default function OrganizerDashboard() {
                             event={event}
                             delay={idx * 0.1}
                             showActions
+                            onStartSelling={handleStartSelling}
                           />
                         ))}
                     </div>
@@ -235,6 +333,7 @@ export default function OrganizerDashboard() {
                             event={event}
                             delay={idx * 0.1}
                             showActions
+                            onStartSelling={handleStartSelling}
                           />
                         ))}
                     </div>
@@ -264,6 +363,7 @@ export default function OrganizerDashboard() {
                             event={event}
                             delay={idx * 0.1}
                             showActions
+                            onStartSelling={handleStartSelling}
                           />
                         ))}
                     </div>
@@ -291,6 +391,7 @@ export default function OrganizerDashboard() {
                           event={event}
                           delay={idx * 0.1}
                           showActions
+                          onStartSelling={handleStartSelling}
                         />
                       ))}
                     </div>

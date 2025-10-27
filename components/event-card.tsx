@@ -21,6 +21,7 @@ interface EventCardProps {
   showActions?: boolean;
   onEdit?: () => void;
   onDelete?: () => void;
+  onStartSelling?: (eventId: string) => void;
 }
 
 const statusColors = {
@@ -40,6 +41,7 @@ export function EventCard({
   event,
   delay = 0,
   showActions = false,
+  onStartSelling,
 }: EventCardProps) {
   const soldPercentage =
     ((event.soldTickets || 0) / (event.totalTickets || 1)) * 100;
@@ -164,26 +166,51 @@ export function EventCard({
             </Button>
           </Link>
           {showActions && (
-            <>
+            <div className="flex-1 flex gap-2 flex-wrap">
+              {/* DAO Questions Button */}
               {(event.status === "approved" || event.status === "dao_voting") && (
                 <Link href={`/dashboard/organizer/dao-questions/${event.id}`}>
                   <Button
                     variant="outline"
-                    className="h-12 border-purple-200 text-purple-700 hover:bg-purple-600 hover:text-white hover:border-purple-600 rounded-xl font-medium transition-all px-6 cursor-pointer"
+                    className="h-12 border-purple-200 text-purple-700 hover:bg-purple-600 hover:text-white hover:border-purple-600 rounded-xl font-medium transition-all px-4 cursor-pointer"
                   >
                     DAO Questions
                   </Button>
                 </Link>
               )}
+              
+              {/* View DAO Results Button */}
+              {(event.status === "dao_voting" || event.status === "live" || event.dao_completed) && (
+                <Link href={`/dashboard/organizer/dao-results/${event.id}`}>
+                  <Button
+                    variant="outline"
+                    className="h-12 border-green-200 text-green-700 hover:bg-green-600 hover:text-white hover:border-green-600 rounded-xl font-medium transition-all px-4 cursor-pointer"
+                  >
+                    View Results
+                  </Button>
+                </Link>
+              )}
+              
+              {/* Start Selling Tickets Button */}
+              {(event.status === "approved" || event.status === "dao_voting") && !event.can_sell_tickets && onStartSelling && (
+                <Button
+                  onClick={() => onStartSelling(event.id)}
+                  className="h-12 bg-yellow-600 hover:bg-yellow-700 text-white rounded-xl font-medium transition-all px-4"
+                >
+                  Start Selling
+                </Button>
+              )}
+              
+              {/* Edit Button */}
               <Link href={`/dashboard/organizer/events/${event.id}/edit`}>
                 <Button
                   variant="outline"
-                  className="h-12 border-gray-200 text-gray-700 hover:bg-blue-600 hover:text-white hover:border-blue-600 rounded-xl font-medium transition-all px-6 cursor-pointer"
+                  className="h-12 border-gray-200 text-gray-700 hover:bg-blue-600 hover:text-white hover:border-blue-600 rounded-xl font-medium transition-all px-4 cursor-pointer"
                 >
                   Edit
                 </Button>
               </Link>
-            </>
+            </div>
           )}
         </CardFooter>
       </Card>

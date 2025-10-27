@@ -17,10 +17,17 @@ import {
   CheckCircle,
   Twitter,
   Facebook,
+  X,
+  Loader2,
+  Plus,
+  Minus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function EventDetailPage({
   params,
@@ -31,6 +38,19 @@ export default function EventDetailPage({
   const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Purchase modal state
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [selectedTier, setSelectedTier] = useState<any>(null);
+  const [quantity, setQuantity] = useState(1);
+  const [purchasing, setPurchasing] = useState(false);
+  const [purchaseError, setPurchaseError] = useState<string | null>(null);
+  const [purchaseSuccess, setPurchaseSuccess] = useState(false);
+  
+  // User info for ticket purchase
+  const [ownerWallet, setOwnerWallet] = useState("");
+  const [ownerName, setOwnerName] = useState("");
+  const [ownerEmail, setOwnerEmail] = useState("");
 
   useEffect(() => {
     setLoading(true);
@@ -53,6 +73,53 @@ export default function EventDetailPage({
       })
       .finally(() => setLoading(false));
   }, [id]);
+
+  const handlePurchaseTicket = async () => {
+    if (!ownerWallet.trim()) {
+      setPurchaseError("Please enter a wallet address or email");
+      return;
+    }
+
+    setPurchasing(true);
+    setPurchaseError(null);
+
+    try {
+      const priceInSOL = selectedTier?.price || event.priceInSOL || event.price_in_sol || 0;
+      
+      const purchaseData = {
+        eventId: id,
+        tierId: selectedTier?.id || null,
+        buyerWallet: ownerWallet.trim(),  // Changed from ownerWallet to buyerWallet
+        quantity: quantity,
+      };
+
+      console.log("🎫 Purchasing ticket with data:", purchaseData);
+      
+      const res = await fetch("/api/tickets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(purchaseData),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to purchase ticket");
+      }
+
+      setPurchaseSuccess(true);
+      setTimeout(() => {
+        setShowPurchaseModal(false);
+        // Optionally reload event data to show updated ticket count
+        window.location.reload();
+      }, 2000);
+    } catch (e: any) {
+      console.error("Purchase error:", e);
+      setPurchaseError(e.message || "Failed to purchase ticket");
+    } finally {
+      setPurchasing(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -122,13 +189,19 @@ export default function EventDetailPage({
               transition={{ duration: 0.6 }}
             >
               <Card className="overflow-hidden bg-white border border-gray-200 p-0">
-                <div className="relative h-96 w-full">
-                  <Image
-                    src={event.coverImage || ""}
-                    alt={event.name}
-                    fill
-                    className="object-cover"
-                  />
+                <div className="relative h-96 w-full bg-gradient-to-br from-blue-500 to-blue-600">
+                  {event.coverImage && event.coverImage.trim() !== "" ? (
+                    <Image
+                      src={event.coverImage}
+                      alt={event.name}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <Calendar className="h-24 w-24 text-white opacity-50" />
+                    </div>
+                  )}
                   <div className="absolute top-4 left-4 flex gap-2">
                     <Badge className="bg-gray-900 text-white text-sm">
                       {event.category}
@@ -263,7 +336,8 @@ export default function EventDetailPage({
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {event.ticketTypes?.map((ticketType: any, idx: number) => (
+                  {event.ticketTypes && event.ticketTypes.length > 0 ? (
+                    event.ticketTypes.map((ticketType: any, idx: number) => (
                     <motion.div
                       key={ticketType.id}
                       initial={{ opacity: 0, x: -20 }}
@@ -331,6 +405,13 @@ export default function EventDetailPage({
                           <Button
                             className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                             disabled={ticketType.available === 0}
+                            onClick={() => {
+                              setSelectedTier(ticketType);
+                              setQuantity(1);
+                              setShowPurchaseModal(true);
+                              setPurchaseError(null);
+                              setPurchaseSuccess(false);
+                            }}
                           >
                             {ticketType.available === 0
                               ? "Sold Out"
@@ -339,7 +420,43 @@ export default function EventDetailPage({
                         </CardContent>
                       </Card>
                     </motion.div>
-                  ))}
+                    ))
+                  ) : (
+                    <Card className="bg-gray-50 border border-gray-200">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <div>
+                            <h3 className="text-xl font-bold text-gray-900">
+                              General Admission
+                            </h3>
+                            <p className="text-sm text-gray-600 mt-1">
+                              Standard event ticket
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-3xl font-bold text-blue-600">
+                              {event.priceInSOL || event.price_in_sol || 0} SOL
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              {event.max_tickets || event.maxTickets || 0} available
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12"
+                          onClick={() => {
+                            setSelectedTier(null);
+                            setQuantity(1);
+                            setShowPurchaseModal(true);
+                            setPurchaseError(null);
+                            setPurchaseSuccess(false);
+                          }}
+                        >
+                          Buy Ticket
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>
@@ -416,6 +533,149 @@ export default function EventDetailPage({
           </div>
         </div>
       </div>
+
+      {/* Purchase Modal */}
+      <Dialog open={showPurchaseModal} onOpenChange={setShowPurchaseModal}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Purchase Ticket</DialogTitle>
+            <DialogDescription>
+              {selectedTier ? selectedTier.name : event?.name}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {!purchaseSuccess ? (
+            <div className="space-y-4">
+              {/* Quantity Selector */}
+              <div className="space-y-2">
+                <Label>Quantity</Label>
+                <div className="flex items-center gap-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    disabled={purchasing}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <span className="text-2xl font-bold w-12 text-center">{quantity}</span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setQuantity(quantity + 1)}
+                    disabled={purchasing}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Wallet Address */}
+              <div className="space-y-2">
+                <Label htmlFor="wallet">Wallet Address or Email *</Label>
+                <Input
+                  id="wallet"
+                  placeholder="0x... or your@email.com"
+                  value={ownerWallet}
+                  onChange={(e) => setOwnerWallet(e.target.value)}
+                  disabled={purchasing}
+                />
+              </div>
+
+              {/* Name (Optional) */}
+              <div className="space-y-2">
+                <Label htmlFor="name">Name (Optional)</Label>
+                <Input
+                  id="name"
+                  placeholder="John Doe"
+                  value={ownerName}
+                  onChange={(e) => setOwnerName(e.target.value)}
+                  disabled={purchasing}
+                />
+              </div>
+
+              {/* Email (Optional) */}
+              <div className="space-y-2">
+                <Label htmlFor="email">Email (Optional)</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="john@example.com"
+                  value={ownerEmail}
+                  onChange={(e) => setOwnerEmail(e.target.value)}
+                  disabled={purchasing}
+                />
+              </div>
+
+              {/* Price Summary */}
+              <div className="border-t pt-4">
+                <div className="flex justify-between mb-2">
+                  <span className="text-gray-600">Price per ticket:</span>
+                  <span className="font-semibold">
+                    {selectedTier?.price || event?.priceInSOL || event?.price_in_sol || 0} SOL
+                  </span>
+                </div>
+                <div className="flex justify-between text-lg font-bold">
+                  <span>Total:</span>
+                  <span className="text-blue-600">
+                    {((selectedTier?.price || event?.priceInSOL || event?.price_in_sol || 0) * quantity).toFixed(2)} SOL
+                  </span>
+                </div>
+              </div>
+
+              {/* Error Message */}
+              {purchaseError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                  {purchaseError}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="py-8 text-center">
+              <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                Purchase Successful!
+              </h3>
+              <p className="text-gray-600">
+                Your {quantity} ticket(s) have been purchased.
+              </p>
+              <p className="text-sm text-gray-500 mt-2">
+                Redirecting...
+              </p>
+            </div>
+          )}
+
+          {!purchaseSuccess && (
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowPurchaseModal(false)}
+                disabled={purchasing}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={handlePurchaseTicket}
+                disabled={purchasing}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {purchasing ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  `Purchase ${quantity} Ticket${quantity > 1 ? 's' : ''}`
+                )}
+              </Button>
+            </DialogFooter>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
