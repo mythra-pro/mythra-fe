@@ -1,12 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
 import { useDashboardUser } from "@/hooks/useDashboardUser";
 import { StatCard } from "@/components/stat-card";
-import { CampaignCard } from "@/components/campaign-card";
-import { dummyInvestments, dummyCampaigns } from "@/lib/dummy-data";
 import { Target, DollarSign, TrendingUp, Award, Vote } from "lucide-react";
 import {
   Card,
@@ -17,37 +15,121 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
 // Force dynamic rendering - required for wallet-connected pages
 export const dynamic = "force-dynamic";
 
+interface Event {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  start_date: string;
+  end_date: string;
+  location: string;
+  min_ticket_price: number;
+  event_image: string;
+  status: string;
+  target_investment: number;
+  current_investment: number;
+  target_roi: number;
+  token_name: string;
+  token_symbol: string;
+  organizer: {
+    id: string;
+    display_name: string;
+    wallet_address: string;
+  };
+}
+
 export default function InvestorDashboard() {
   const user = useDashboardUser("investor");
-
-  useEffect(() => {
-    fetch("/api/users/upsert", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        walletAddress: user.walletAddress,
-        displayName: user.name,
-        email: user.email,
-      }),
-    }).catch((e) => console.error("Failed to upsert user:", e));
-  }, [user.walletAddress, user.name, user.email]);
-  const myInvestments = dummyInvestments.filter(
-    (i) => i.investorId === user.id
-  );
-  const activeCampaigns = dummyCampaigns.filter((c) => c.status === "active");
-
-  const totalInvested = myInvestments.reduce((sum, i) => sum + i.amount, 0);
-  const totalDaoTokens = myInvestments.reduce((sum, i) => sum + i.daoTokens, 0);
-  const portfolioValue = totalInvested * 1.15; // Mock 15% return
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [investingEventId, setInvestingEventId] = useState<string | null>(null);
+  const [investAmount, setInvestAmount] = useState<string>("");
+  const [submitting, setSubmitting] = useState(false);
 
   // Get menu sections
   const menuSections = getMenuSectionsForRole("investor");
+
+  // Fetch publishable events
+  useEffect(() => {
+    console.log("📋 Fetching publishable events for investor...");
+    setLoading(true);
+    fetch("/api/investor/events")
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("✅ Events fetched:", data.events?.length || 0);
+        setEvents(data.events || []);
+      })
+      .catch((e) => {
+        console.error("❌ Failed to fetch events:", e);
+        alert("Failed to load events: " + e.message);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleInvest = async (eventId: string) => {
+    if (!investAmount || parseFloat(investAmount) <= 0) {
+      alert("Please enter a valid investment amount");
+      return;
+    }
+
+    const amountInSOL = parseFloat(investAmount);
+    setSubmitting(true);
+
+    try {
+      console.log("💰 Submitting investment...");
+      console.log("   Event ID:", eventId);
+      console.log("   Investor ID:", user.id);
+      console.log("   Amount:", amountInSOL, "SOL");
+
+      const response = await fetch("/api/investor/invest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventId,
+          investorId: user.id,
+          amountInSOL,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Investment failed");
+      }
+
+      console.log("✅ Investment successful:", data.investment);
+
+      alert(
+        `✅ Investment Successful!\n\n` +
+          `Amount: ${amountInSOL} SOL\n` +
+          `USD Value: $${data.investment.amountInUSD}\n` +
+          `Status: ${data.investment.status}\n\n` +
+          `Investment ID: ${data.investment.id}`
+      );
+
+      // Reset form
+      setInvestAmount("");
+      setInvestingEventId(null);
+
+      // Refresh events list
+      fetch("/api/investor/events")
+        .then((res) => res.json())
+        .then((data) => setEvents(data.events || []));
+    } catch (e: any) {
+      console.error("❌ Investment error:", e);
+      alert("Investment failed: " + e.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <DashboardLayout user={user} menuSections={menuSections}>
@@ -73,194 +155,155 @@ export default function InvestorDashboard() {
         {/* Stats Grid */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatCard
-            title="Total Invested"
-            value={`$${totalInvested.toLocaleString()}`}
-            description="Across all campaigns"
-            icon={DollarSign}
+            title="Available Events"
+            value={events.length.toString()}
+            description="Published events"
+            icon={Target}
             delay={0}
           />
           <StatCard
-            title="Portfolio Value"
-            value={`$${portfolioValue.toLocaleString()}`}
-            description="+15% ROI"
-            icon={TrendingUp}
-            trend={{ value: 15, isPositive: true }}
+            title="Total Investment Pool"
+            value={`${events.reduce((sum, e) => sum + (e.target_investment || 0), 0).toLocaleString()} SOL`}
+            description="Across all events"
+            icon={DollarSign}
             delay={0.1}
           />
           <StatCard
-            title="DAO Tokens"
-            value={totalDaoTokens.toLocaleString()}
-            description="Governance power"
-            icon={Vote}
+            title="Active Opportunities"
+            value={events.filter(e => (e.current_investment || 0) < (e.target_investment || 0)).length.toString()}
+            description="Not fully funded"
+            icon={TrendingUp}
             delay={0.2}
           />
           <StatCard
-            title="Active Investments"
-            value={myInvestments.length}
-            description="Campaigns supported"
-            icon={Target}
+            title="My Investments"
+            value="0"
+            description="Coming soon"
+            icon={Vote}
             delay={0.3}
           />
         </div>
 
-        {/* My Investments */}
+        {/* Available Events for Investment */}
         <Card className="bg-white/90 border-[#48CAE4] shadow-xl">
           <CardHeader>
-            <CardTitle className="text-[#03045E]">My Investments</CardTitle>
-            <CardDescription>Your active campaign investments</CardDescription>
+            <CardTitle className="text-[#03045E]">Available Investment Opportunities</CardTitle>
+            <CardDescription>Browse and invest in published events with SOL</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {myInvestments.map((investment, idx) => {
-                const campaign = dummyCampaigns.find(
-                  (c) => c.id === investment.campaignId
-                )!;
-                const reward = campaign.rewards.find(
-                  (r) => r.id === investment.rewardId
-                );
+            <div className="space-y-4">
+              {events.length === 0 ? (
+                <p className="text-center text-gray-500 py-8">No published events available for investment at this time.</p>
+              ) : (
+                events.map((event, idx) => {
+                  const fundingProgress = event.target_investment 
+                    ? ((event.current_investment || 0) / event.target_investment) * 100 
+                    : 0;
+                  
+                  return (
+                    <motion.div
+                      key={event.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.1 }}
+                    >
+                      <Card className="bg-gradient-to-r from-white to-[#CAF0F8] border-[#48CAE4]">
+                        <CardContent className="p-6">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1">
+                              <h3 className="text-xl font-bold text-[#03045E] mb-2">
+                                {event.title}
+                              </h3>
+                              <p className="text-sm text-gray-600 mb-2">
+                                {event.description || "No description provided"}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                Organized by: {event.organizer?.display_name || "Unknown"}
+                              </p>
+                            </div>
+                            <Badge className="bg-green-500 text-white ml-4">
+                              Published
+                            </Badge>
+                          </div>
 
-                return (
-                  <motion.div
-                    key={investment.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.1 }}
-                  >
-                    <Card className="bg-gradient-to-r from-white to-[#CAF0F8] border-[#48CAE4]">
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1">
-                            <h3 className="text-lg font-bold text-[#03045E] mb-1">
-                              {campaign.eventName}
-                            </h3>
-                            <p className="text-sm text-gray-600">
-                              {campaign.title}
-                            </p>
-                          </div>
-                          <Badge className="bg-green-500 text-white">
-                            {investment.status}
-                          </Badge>
-                        </div>
-
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                          <div className="p-2 bg-white rounded-lg">
-                            <p className="text-xs text-gray-600">Invested</p>
-                            <p className="text-lg font-bold text-[#0077B6]">
-                              ${investment.amount}
-                            </p>
-                          </div>
-                          <div className="p-2 bg-white rounded-lg">
-                            <p className="text-xs text-gray-600">DAO Tokens</p>
-                            <p className="text-lg font-bold text-[#0077B6]">
-                              {investment.daoTokens}
-                            </p>
-                          </div>
-                          <div className="p-2 bg-white rounded-lg">
-                            <p className="text-xs text-gray-600">Reward Tier</p>
-                            <p className="text-sm font-semibold text-[#03045E] truncate">
-                              {reward?.title || "N/A"}
-                            </p>
-                          </div>
-                          <div className="p-2 bg-white rounded-lg">
-                            <p className="text-xs text-gray-600">Date</p>
-                            <p className="text-sm font-semibold text-[#03045E]">
-                              {new Date(
-                                investment.investedAt
-                              ).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-
-                        {reward && (
-                          <div className="mt-3 p-3 bg-gradient-to-r from-[#48CAE4]/20 to-[#90E0EF]/20 rounded-lg border border-[#48CAE4]">
-                            <p className="text-xs font-semibold text-[#03045E] mb-1">
-                              Reward Benefits:
-                            </p>
-                            <div className="flex flex-wrap gap-1">
-                              {reward.benefits.map((benefit, i) => (
-                                <Badge
-                                  key={i}
-                                  variant="outline"
-                                  className="text-xs"
-                                >
-                                  {benefit}
-                                </Badge>
-                              ))}
+                          {/* Investment Stats */}
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                            <div className="p-3 bg-white rounded-lg">
+                              <p className="text-xs text-gray-600">Target</p>
+                              <p className="text-lg font-bold text-[#0077B6]">
+                                {event.target_investment || 0} SOL
+                              </p>
+                            </div>
+                            <div className="p-3 bg-white rounded-lg">
+                              <p className="text-xs text-gray-600">Current</p>
+                              <p className="text-lg font-bold text-[#0077B6]">
+                                {event.current_investment || 0} SOL
+                              </p>
+                            </div>
+                            <div className="p-3 bg-white rounded-lg">
+                              <p className="text-xs text-gray-600">Progress</p>
+                              <p className="text-lg font-bold text-[#0077B6]">
+                                {fundingProgress.toFixed(1)}%
+                              </p>
+                            </div>
+                            <div className="p-3 bg-white rounded-lg">
+                              <p className="text-xs text-gray-600">Token Symbol</p>
+                              <p className="text-sm font-semibold text-[#03045E]">
+                                {event.token_symbol || "N/A"}
+                              </p>
                             </div>
                           </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                );
-              })}
+
+                          {/* Progress Bar */}
+                          <div className="mb-4">
+                            <div className="w-full bg-gray-200 rounded-full h-2.5">
+                              <div 
+                                className="bg-gradient-to-r from-[#0077B6] to-[#48CAE4] h-2.5 rounded-full transition-all"
+                                style={{ width: `${Math.min(fundingProgress, 100)}%` }}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Investment Form */}
+                          <div className="mt-4 p-4 bg-gradient-to-r from-[#48CAE4]/20 to-[#90E0EF]/20 rounded-lg border border-[#48CAE4]">
+                            <p className="text-sm font-semibold text-[#03045E] mb-3">
+                              Invest in this event:
+                            </p>
+                            <div className="flex gap-2">
+                              <input
+                                type="number"
+                                min="0.1"
+                                step="0.1"
+                                placeholder="Amount in SOL"
+                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0077B6]"
+                                value={investingEventId === event.id ? investAmount : ""}
+                                onChange={(e) => {
+                                  setInvestingEventId(event.id);
+                                  setInvestAmount(e.target.value);
+                                }}
+                                disabled={submitting}
+                              />
+                              <Button
+                                onClick={() => handleInvest(event.id)}
+                                disabled={submitting || !investAmount || investingEventId !== event.id}
+                                className="bg-[#0077B6] hover:bg-[#0096C7] text-white px-6"
+                              >
+                                {submitting && investingEventId === event.id ? "Investing..." : "Invest"}
+                              </Button>
+                            </div>
+                            <p className="text-xs text-gray-600 mt-2">
+                              Estimated USD: ${investAmount ? (parseFloat(investAmount) * 150).toFixed(2) : "0.00"} (1 SOL ≈ $150)
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  );
+                })
+              )}
             </div>
           </CardContent>
         </Card>
-
-        {/* Active Campaigns */}
-        <Card className="bg-white/80 border-[#48CAE4]">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-[#03045E]">
-                  Active Campaigns
-                </CardTitle>
-                <CardDescription>
-                  Discover new investment opportunities
-                </CardDescription>
-              </div>
-              <Link href="/dashboard/investor/campaigns">
-                <Button
-                  variant="outline"
-                  className="border-[#0077B6] text-[#0077B6] hover:bg-[#0077B6] hover:text-white"
-                >
-                  View All
-                </Button>
-              </Link>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-              {activeCampaigns.slice(0, 2).map((campaign, idx) => (
-                <CampaignCard
-                  key={campaign.id}
-                  campaign={campaign}
-                  delay={idx * 0.1}
-                />
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Rewards & Benefits */}
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card className="bg-gradient-to-br from-[#0077B6] to-[#0096C7] border-0 text-white">
-            <CardContent className="p-6">
-              <Award className="h-10 w-10 mb-3" />
-              <h3 className="text-2xl font-bold mb-1">
-                {myInvestments.length}
-              </h3>
-              <p className="text-white/90">Rewards Claimed</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-[#48CAE4] to-[#90E0EF] border-0 text-white">
-            <CardContent className="p-6">
-              <Vote className="h-10 w-10 mb-3" />
-              <h3 className="text-2xl font-bold mb-1">{totalDaoTokens}</h3>
-              <p className="text-white/90">Voting Power</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-[#0096C7] to-[#48CAE4] border-0 text-white">
-            <CardContent className="p-6">
-              <TrendingUp className="h-10 w-10 mb-3" />
-              <h3 className="text-2xl font-bold mb-1">15%</h3>
-              <p className="text-white/90">Average ROI</p>
-            </CardContent>
-          </Card>
-        </div>
 
         {/* Quick Actions */}
         <Card className="bg-white/80 border-[#48CAE4]">
