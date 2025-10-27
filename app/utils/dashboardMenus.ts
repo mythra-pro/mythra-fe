@@ -144,9 +144,14 @@ export function getMenuSectionsForRole(role: UserRole): MenuSection[] {
           title: "Investments",
           items: [
             {
+              title: "Opportunities",
+              href: "/dashboard/investor/opportunities",
+              icon: Target,
+            },
+            {
               title: "Active Campaigns",
               href: "/dashboard/investor/campaigns",
-              icon: Target,
+              icon: Briefcase,
             },
             {
               title: "Voting",

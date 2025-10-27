@@ -31,7 +31,13 @@ export async function GET(req: Request) {
     // Apply filters
     if (status) {
       console.log("🔍 Filtering by status:", status);
-      query = query.eq("status", status);
+      // Support multiple statuses separated by commas
+      const statuses = status.split(",").map((s) => s.trim());
+      if (statuses.length === 1) {
+        query = query.eq("status", statuses[0]);
+      } else {
+        query = query.in("status", statuses);
+      }
     }
     if (organizerId) {
       console.log("🔍 Filtering by organizerId:", organizerId);
