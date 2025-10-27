@@ -25,12 +25,11 @@ export const dynamic = "force-dynamic";
 
 export default function OrganizerDashboard() {
   const user = useDashboardUser("organizer");
-  const [userId, setUserId] = useState<string | null>(null);
   const [events, setEvents] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  // Upsert user and get user ID
+  // Ensure user exists in DB (non-blocking)
   useEffect(() => {
     fetch("/api/users/upsert", {
       method: "POST",
@@ -43,21 +42,24 @@ export default function OrganizerDashboard() {
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data.user?.id) {
-          setUserId(data.user.id);
-        }
+        console.log("✅ User upserted:", data.user?.id);
       })
       .catch((e) => console.error("Failed to upsert user:", e));
   }, [user.walletAddress, user.name, user.email]);
 
-  // Fetch events and stats when userId is available
+  // Fetch events and stats using user.id from useDashboardUser
   useEffect(() => {
-    if (!userId) return;
+    // user.id is already available from localStorage via useDashboardUser
+    if (!user.id) {
+      console.error("❌ No user.id available");
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
 
     // Fetch events
-    fetch(`/api/events?organizerId=${userId}`)
+    fetch(`/api/events?organizerId=${user.id}`)
       .then((res) => res.json())
       .then((data) => {
         console.log("📊 Fetched events:", data.events);
@@ -69,14 +71,14 @@ export default function OrganizerDashboard() {
       .catch((e) => console.error("Failed to fetch events:", e));
 
     // Fetch stats
-    fetch(`/api/stats/organizer?organizerId=${userId}`)
+    fetch(`/api/stats/organizer?organizerId=${user.id}`)
       .then((res) => res.json())
       .then((data) => {
         setStats(data.stats);
       })
       .catch((e) => console.error("Failed to fetch stats:", e))
       .finally(() => setLoading(false));
-  }, [userId]);
+  }, [user.id]);
 
   const menuSections = getMenuSectionsForRole("organizer");
 
@@ -161,12 +163,18 @@ export default function OrganizerDashboard() {
 
                 {/* Events Overview */}
                 <Tabs defaultValue="active" className="w-full">
-                  <TabsList className="grid w-full max-w-md grid-cols-3 bg-white border border-gray-200">
+                  <TabsList className="grid w-full max-w-2xl grid-cols-4 bg-white border border-gray-200">
                     <TabsTrigger
                       value="active"
                       className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
                     >
                       Active
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="approved"
+                      className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+                    >
+                      Approved
                     </TabsTrigger>
                     <TabsTrigger
                       value="draft"
@@ -205,6 +213,41 @@ export default function OrganizerDashboard() {
                           </h3>
                           <p className="text-gray-500">
                             Create your first event to get started!
+                          </p>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="approved" className="mt-6">
+                    <div className="mb-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                      <p className="text-sm text-purple-900">
+                        <strong>⚡ Action Required:</strong> These events are approved by admin. 
+                        Click "DAO Questions" to set up investor voting questions before you can start selling tickets.
+                      </p>
+                    </div>
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                      {myEvents
+                        .filter((e) => e.status === "approved" || e.status === "dao_voting")
+                        .map((event, idx) => (
+                          <EventCard
+                            key={event.id}
+                            event={event}
+                            delay={idx * 0.1}
+                            showActions
+                          />
+                        ))}
+                    </div>
+                    {myEvents.filter((e) => e.status === "approved" || e.status === "dao_voting").length ===
+                      0 && (
+                      <Card className="bg-white border border-gray-200">
+                        <CardContent className="p-12 text-center">
+                          <Calendar className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                          <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                            No approved events
+                          </h3>
+                          <p className="text-gray-500">
+                            Events approved by admin will appear here.
                           </p>
                         </CardContent>
                       </Card>

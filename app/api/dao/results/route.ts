@@ -33,7 +33,7 @@ export async function GET(req: Request) {
 
     // Get all votes for this event
     const { data: votes, error: votesError } = await supabase
-      .from("dao_votes")
+      .from("dao_question_votes")
       .select("question_id, option_id")
       .eq("event_id", eventId);
 

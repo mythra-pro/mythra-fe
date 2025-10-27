@@ -41,7 +41,7 @@ export async function POST(
       .eq("event_id", id);
 
     const { data: votes } = await supabase
-      .from("dao_votes")
+      .from("dao_question_votes")
       .select("investor_id")
       .eq("event_id", id);
 

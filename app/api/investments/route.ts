@@ -59,6 +59,36 @@ export async function POST(req: Request) {
 
     const supabase = getServiceSupabase();
 
+    // Validate investor exists
+    const { data: investor, error: investorError } = await supabase
+      .from("users")
+      .select("id")
+      .eq("id", investorId)
+      .single();
+
+    if (investorError || !investor) {
+      console.error("❌ Investor not found:", investorId);
+      return NextResponse.json(
+        { error: "Investor not found. Please ensure the user exists." },
+        { status: 404 }
+      );
+    }
+
+    // Validate event exists
+    const { data: event, error: eventError } = await supabase
+      .from("events")
+      .select("id")
+      .eq("id", eventId)
+      .single();
+
+    if (eventError || !event) {
+      console.error("❌ Event not found:", eventId);
+      return NextResponse.json(
+        { error: "Event not found." },
+        { status: 404 }
+      );
+    }
+
     // Insert investment
     const { data: investment, error } = await supabase
       .from("investments")

@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       .from("events")
       .select(`
         *,
-        organizer:users!organizer_id(id, wallet_address, display_name),
+        organizer:users!events_organizer_id_fkey(id, wallet_address, display_name),
         ticket_tiers(*)
       `)
       .order("created_at", { ascending: false });

@@ -167,25 +167,58 @@ export async function POST(req: Request) {
 
     // Get organizer via wallet header
     const wallet = req.headers.get("x-wallet-address")?.trim();
-    let organizerId: string | null = null;
+    
+    if (!wallet) {
+      console.error("❌ No wallet address provided in headers");
+      return NextResponse.json(
+        { error: "Wallet address is required. Please connect your wallet." },
+        { status: 401 }
+      );
+    }
 
-    if (wallet) {
-      console.log("🔍 Looking up organizer for wallet:", wallet);
-      const { data: users, error: userError } = await supabase
+    console.log("🔍 Looking up organizer for wallet:", wallet);
+    
+    // Get or create user - ensures user exists before creating event
+    let { data: user } = await supabase
+      .from("users")
+      .select("id")
+      .eq("wallet_address", wallet)
+      .single();
+
+    if (!user) {
+      console.log("👤 User not found, creating new user...");
+      const { data: newUser, error: userError } = await supabase
         .from("users")
+        .insert({ 
+          wallet_address: wallet,
+          civic_auth_verified: false,
+          reputation_score: 0,
+        })
         .select("id")
-        .eq("wallet_address", wallet)
-        .limit(1);
+        .single();
 
       if (userError) {
-        console.error("❌ Error fetching user:", userError);
+        console.error("❌ Error creating user:", userError);
+        return NextResponse.json(
+          { error: "Failed to create user: " + userError.message },
+          { status: 500 }
+        );
       }
-
-      organizerId = users && users.length > 0 ? users[0].id : null;
-      console.log("👤 Organizer ID:", organizerId);
-    } else {
-      console.warn("⚠️ No wallet address provided in headers");
+      
+      user = newUser;
+      console.log("✅ New user created:", user?.id);
     }
+
+    if (!user || !user.id) {
+      console.error("❌ Failed to get or create user");
+      return NextResponse.json(
+        { error: "Failed to get or create user. Please try again." },
+        { status: 500 }
+      );
+    }
+
+    const organizerId = user.id;
+    console.log("👤 Organizer ID:", organizerId);
 
     // Insert event
     console.log("📝 Inserting event with data:", {

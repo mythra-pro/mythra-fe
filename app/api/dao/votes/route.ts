@@ -11,7 +11,7 @@ export async function GET(req: Request) {
     const supabase = getServiceSupabase();
 
     let query = supabase
-      .from("dao_votes")
+      .from("dao_question_votes")
       .select("*, question:dao_questions(*), option:dao_options(*)");
 
     if (eventId) {
@@ -61,7 +61,7 @@ export async function POST(req: Request) {
 
     // Check if investor has already voted on this question
     const { data: existingVote } = await supabase
-      .from("dao_votes")
+      .from("dao_question_votes")
       .select("id")
       .eq("question_id", questionId)
       .eq("investor_id", investorId)
@@ -92,7 +92,7 @@ export async function POST(req: Request) {
 
     // Insert vote
     const { data: vote, error } = await supabase
-      .from("dao_votes")
+      .from("dao_question_votes")
       .insert({
         question_id: questionId,
         option_id: optionId,

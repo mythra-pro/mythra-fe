@@ -24,13 +24,12 @@ export const dynamic = "force-dynamic";
 
 export default function StaffDashboard() {
   const user = useDashboardUser("staff");
-  const [userId, setUserId] = useState<string | null>(null);
   const [checkins, setCheckins] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [scanInput, setScanInput] = useState("");
 
-  // Upsert user and get user ID
+  // Ensure user exists in DB (non-blocking)
   useEffect(() => {
     fetch("/api/users/upsert", {
       method: "POST",
@@ -43,19 +42,21 @@ export default function StaffDashboard() {
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data.user?.id) {
-          setUserId(data.user.id);
-        }
+        console.log("✅ User upserted:", data.user?.id);
       })
       .catch((e) => console.error("Failed to upsert user:", e));
   }, [user.walletAddress, user.name, user.email]);
 
-  // Fetch check-ins when userId is available
+  // Fetch check-ins using user.id from useDashboardUser
   useEffect(() => {
-    if (!userId) return;
+    if (!user.id) {
+      console.error("❌ No user.id available");
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
-    fetch(`/api/checkins?staffId=${userId}`)
+    fetch(`/api/checkins?staffId=${user.id}`)
       .then((res) => res.json())
       .then((data) => {
         setCheckins(data.checkins || []);
@@ -70,7 +71,7 @@ export default function StaffDashboard() {
       })
       .catch((e) => console.error("Failed to fetch check-ins:", e))
       .finally(() => setLoading(false));
-  }, [userId]);
+  }, [user.id]);
 
   // Get menu sections for staff role
   const menuSections = getMenuSectionsForRole("staff");

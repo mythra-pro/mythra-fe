@@ -164,14 +164,26 @@ export function EventCard({
             </Button>
           </Link>
           {showActions && (
-            <Link href={`/dashboard/organizer/events/${event.id}/edit`}>
-              <Button
-                variant="outline"
-                className="h-12 border-gray-200 text-gray-700 hover:bg-blue-600 hover:text-white hover:border-blue-600 rounded-xl font-medium transition-all px-6 cursor-pointer"
-              >
-                Edit
-              </Button>
-            </Link>
+            <>
+              {(event.status === "approved" || event.status === "dao_voting") && (
+                <Link href={`/dashboard/organizer/dao-questions/${event.id}`}>
+                  <Button
+                    variant="outline"
+                    className="h-12 border-purple-200 text-purple-700 hover:bg-purple-600 hover:text-white hover:border-purple-600 rounded-xl font-medium transition-all px-6 cursor-pointer"
+                  >
+                    DAO Questions
+                  </Button>
+                </Link>
+              )}
+              <Link href={`/dashboard/organizer/events/${event.id}/edit`}>
+                <Button
+                  variant="outline"
+                  className="h-12 border-gray-200 text-gray-700 hover:bg-blue-600 hover:text-white hover:border-blue-600 rounded-xl font-medium transition-all px-6 cursor-pointer"
+                >
+                  Edit
+                </Button>
+              </Link>
+            </>
           )}
         </CardFooter>
       </Card>

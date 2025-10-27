@@ -11,11 +11,13 @@ export async function GET(
     const supabase = getServiceSupabase();
 
     // Try to find by ID first, then by slug
+    // Use explicit foreign key constraint name to avoid ambiguity
+    // when events table has multiple relationships to users table
     let query = supabase
       .from("events")
       .select(`
         *,
-        organizer:users(id, display_name, wallet_address, email),
+        organizer:users!events_organizer_id_fkey(id, display_name, wallet_address, email),
         ticket_tiers(*)
       `);
 
