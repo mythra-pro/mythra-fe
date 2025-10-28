@@ -37,6 +37,19 @@ const statusColors = {
   cancelled: "bg-red-500",
 };
 
+const statusLabels = {
+  draft: "Draft",
+  pending_approval: "⏳ Pending Approval",
+  approved: "✅ Approved",
+  rejected: "❌ Rejected",
+  dao_voting: "✅ Approved - DAO Voting",
+  published: "Published",
+  ongoing: "Ongoing",
+  live: "🔴 Live",
+  completed: "Completed",
+  cancelled: "Cancelled",
+};
+
 export function EventCard({
   event,
   delay = 0,
@@ -76,7 +89,7 @@ export function EventCard({
                   statusColors[event.status]
                 )}
               >
-                {event.status}
+                {statusLabels[event.status] || event.status}
               </Badge>
             </div>
             <div className="absolute top-4 left-4">
