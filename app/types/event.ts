@@ -183,8 +183,6 @@ export interface PayoutData {
   eventId: string;
   organizerWallet: string;
   totalAmount: number; // in SOL
-  organizerAmount: number; // 95% in SOL
-  platformFee: number; // 5% in SOL
   status: "pending" | "processing" | "completed" | "failed";
   transactionSignature?: string;
   processedAt?: Date;

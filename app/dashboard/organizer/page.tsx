@@ -24,7 +24,7 @@ import { WalletErrorBoundary } from "@/components/WalletErrorBoundary";
 export const dynamic = "force-dynamic";
 
 export default function OrganizerDashboard() {
-  const user = useDashboardUser("organizer");
+  const { user, isLoading: userLoading } = useDashboardUser("organizer");
   const [events, setEvents] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -32,12 +32,14 @@ export default function OrganizerDashboard() {
 
   // Ensure user exists in DB (non-blocking)
   useEffect(() => {
+    if (!user) return;
+    
     fetch("/api/users/upsert", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         walletAddress: user.walletAddress,
-        displayName: user.name,
+        displayName: user.displayName,
         email: user.email,
       }),
     })
@@ -46,24 +48,25 @@ export default function OrganizerDashboard() {
         console.log("✅ User upserted:", data.user?.id);
       })
       .catch((e) => console.error("Failed to upsert user:", e));
-  }, [user.walletAddress, user.name, user.email]);
+  }, [user]);
 
   // Fetch events and stats using user.id from useDashboardUser
   useEffect(() => {
     // user.id is already available from localStorage via useDashboardUser
-    if (!user.id) {
+    if (!user || !user.id) {
       console.error("❌ No user.id available");
       setLoading(false);
       return;
     }
 
     setLoading(true);
+    const userId = user.id; // Capture for closure
 
     // Fetch events
-    fetch(`/api/events?organizerId=${user.id}`)
+    fetch(`/api/events?organizerId=${userId}`)
       .then((res) => res.json())
       .then((data) => {
-        console.log("📊 Fetched events for organizer:", user.id);
+        console.log("📊 Fetched events for organizer:", userId);
         console.log("📊 Total events:", data.events?.length);
         console.log("📊 All events:", data.events);
         console.log("🔍 Events with live status:", data.events?.filter((e: any) => e.status === "live"));
@@ -83,17 +86,17 @@ export default function OrganizerDashboard() {
       .catch((e) => console.error("Failed to fetch events:", e));
 
     // Fetch stats
-    fetch(`/api/stats/organizer?organizerId=${user.id}`)
+    fetch(`/api/stats/organizer?organizerId=${userId}`)
       .then((res) => res.json())
       .then((data) => {
         setStats(data.stats);
       })
       .catch((e) => console.error("Failed to fetch stats:", e))
       .finally(() => setLoading(false));
-  }, [user.id]);
+  }, [user]);
 
   const handleStartSelling = async (eventId: string) => {
-    if (!user.id) {
+    if (!user || !user.id) {
       alert("User not authenticated");
       return;
     }
@@ -149,10 +152,21 @@ export default function OrganizerDashboard() {
 
   const menuSections = getMenuSectionsForRole("organizer");
 
+  // Show loading state - AFTER all hooks
+  if (userLoading || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl">Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <WalletErrorBoundary>
       <DashboardGuard role="organizer">
-        {(user) => {
+        {(guardUser) => {
+          // Use guardUser from DashboardGuard
+          const displayUser = guardUser || user;
           // Use real data from API
           const myEvents = events;
           const totalRevenue = stats?.totalRevenue || 0;
@@ -198,7 +212,7 @@ export default function OrganizerDashboard() {
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                   <div>
                     <h1 className="text-4xl font-bold text-gray-900">
-                      Welcome back, {user.name.split(" ")[0]}!
+                      Welcome back, {displayUser.displayName.split(" ")[0]}!
                     </h1>
                     <p className="text-gray-600 mt-2">
                       Here's what's happening with your events today.

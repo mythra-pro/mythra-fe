@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServiceSupabase } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -41,44 +42,49 @@ export async function GET(
 }
 
 /**
- * Mock function - replace with actual Supabase query
+ * Fetch user roles from database by wallet address
  */
 async function fetchUserRolesFromDB(wallet: string): Promise<string[]> {
-  // TODO: Implement actual Supabase query:
-  /*
-  const { data, error } = await supabase
-    .from('user_roles')
-    .select(`
-      roles (
-        name
-      )
-    `)
-    .eq('user_id', (
-      await supabase
-        .from('users')
-        .select('id')
-        .eq('wallet_address', wallet)
-        .single()
-    ).data?.id)
-    .eq('status', 'active');
-  
-  return data?.map(ur => ur.roles.name) || [];
-  */
-
-  // Mock data for development
-  // Most users have only 1 role, some power users have multiple
-  const multiRoleWallets = [
-    'Cm46ieDFKRiRHjY8LdVegP9U3ndabXoKic6pVQ7uasRt', // Test wallet 1
-    '3Bdy3rjj9XpZrtCQqcTxdJxLAQM6Ncw33hDPGe2zqUnA', // Test wallet 2 (current user)
-    'B43gicVW5rsfibDNHzaHkjdX7sDbo7sdiWhSwLDcndmW'
-  ];
-
-  if (multiRoleWallets.includes(wallet)) {
-    // User with multiple roles
-    return ['organizer', 'investor', 'customer'];
+  try {
+    const supabase = getServiceSupabase();
+    
+    // First, get the user ID by wallet address
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('wallet_address', wallet)
+      .maybeSingle();
+    
+    if (userError) {
+      console.error('Error fetching user:', userError);
+      return [];
+    }
+    
+    if (!userData) {
+      console.log('No user found for wallet:', wallet);
+      return [];
+    }
+    
+    // Get all ACTIVE roles for this user
+    const { data: userRoles, error: rolesError } = await supabase
+      .from('user_roles')
+      .select('roles(name)')
+      .eq('user_id', userData.id)
+      .eq('status', 'active');  // Only fetch active roles
+    
+    if (rolesError) {
+      console.error('Error fetching roles:', rolesError);
+      return [];
+    }
+    
+    // Extract role names from the nested structure
+    const roles = userRoles?.map((ur: any) => ur.roles.name) || [];
+    
+    console.log(`✅ Fetched ${roles.length} active roles for wallet ${wallet}:`, roles);
+    
+    return roles;
+  } catch (error) {
+    console.error('Error in fetchUserRolesFromDB:', error);
+    return [];
   }
-
-  // Default: single role (organizer)
-  // When Supabase is integrated, this will query the actual user_roles table
-  return ['organizer'];
 }

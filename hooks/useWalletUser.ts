@@ -1,89 +1,77 @@
 "use client";
 
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useMemo } from "react";
-import { User, UserRole } from "@/app/types/user";
+import { useMemo, useEffect, useState } from "react";
+
+export interface WalletUser {
+  id: string;
+  walletAddress: string;
+  email: string;
+  displayName: string;
+  role: string;
+  roles: string[];
+  hasProfile: boolean;
+}
 
 /**
- * Custom hook to get user data from connected wallet
- * STRICT: No fallback, must have wallet connected
+ * Hook to get user information from the connected Solana wallet
+ * Fetches real user data from localStorage after authentication
  */
-export function useWalletUser(role: UserRole): User {
-  const { publicKey, connected } = useWallet();
+export const useWalletUser = (): WalletUser | null => {
+  const { publicKey, connected, disconnect } = useWallet();
+  const [user, setUser] = useState<WalletUser | null>(null);
 
-  if (!connected || !publicKey) {
-    throw new Error("Wallet must be connected to access user data");
-  }
+  useEffect(() => {
+    if (!connected || !publicKey) {
+      setUser(null);
+      return;
+    }
 
-  const user = useMemo(() => {
-    const walletAddress = publicKey.toString();
+    // Get user data from localStorage (set after authentication)
+    const userId = localStorage.getItem("userId");
+    const userEmail = localStorage.getItem("userEmail");
+    const displayName = localStorage.getItem("displayName");
+    const walletAddress = localStorage.getItem("walletAddress");
+    const userRole = localStorage.getItem("userRole");
+    const isAuthenticated = localStorage.getItem("isAuthenticated");
 
-    // Generate user data from wallet address
-    const user: User = {
-      id: walletAddress, // Use wallet address as user ID
-      name: generateNameFromAddress(walletAddress),
-      email: generateEmailFromAddress(walletAddress),
-      role: role,
-      walletAddress: walletAddress,
-      avatar: generateAvatarUrl(walletAddress),
-      createdAt: new Date(),
-    };
-
-    return user;
-  }, [publicKey, role]);
+    // Verify wallet address matches
+    const connectedWallet = publicKey.toString();
+    
+    if (
+      isAuthenticated === "true" &&
+      userId &&
+      userEmail &&
+      walletAddress === connectedWallet
+    ) {
+      setUser({
+        id: userId,
+        walletAddress: connectedWallet,
+        email: userEmail,
+        displayName: displayName || "Unknown",
+        role: userRole || "customer",
+        roles: [userRole || "customer"],
+        hasProfile: true,
+      });
+    } else if (walletAddress && walletAddress !== connectedWallet) {
+      // Wallet mismatch - clear localStorage and disconnect
+      console.warn("⚠️ Wallet mismatch detected. Clearing session.");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("userEmail");
+      localStorage.removeItem("displayName");
+      localStorage.removeItem("walletAddress");
+      localStorage.removeItem("userRole");
+      localStorage.removeItem("isAuthenticated");
+      disconnect();
+      setUser(null);
+    } else {
+      // Not authenticated yet
+      setUser(null);
+    }
+  }, [connected, publicKey, disconnect]);
 
   return user;
-}
-/**
- * Generate a readable name from wallet address
- */
-function generateNameFromAddress(address: string): string {
-  // Use first 4 and last 4 characters of address
-  const prefix = address.slice(0, 4);
-  const suffix = address.slice(-4);
-  return `User ${prefix}...${suffix}`;
-}
-
-/**
- * Generate email from wallet address
- */
-function generateEmailFromAddress(address: string): string {
-  const prefix = address.slice(0, 8);
-  return `${prefix}@mythra.tix`;
-}
-
-/**
- * Generate avatar URL using DiceBear API or similar
- * This creates consistent avatars based on wallet address
- */
-function generateAvatarUrl(address: string): string {
-  // Using DiceBear API for consistent avatar generation
-  return `https://api.dicebear.com/7.x/avataaars/svg?seed=${address}`;
-}
-
-/**
- * Hook to check if user has specific role
- */
-export function useHasRole(
-  expectedRole: UserRole,
-  userRole: UserRole
-): boolean {
-  const user = useWalletUser(userRole);
-  return user.role === expectedRole;
-}
-
-/**
- * Hook to get wallet balance (optional - requires additional RPC call)
- */
-export function useWalletBalance() {
-  const { publicKey } = useWallet();
-  // You can implement balance fetching here if needed
-  // import { useConnection } from "@solana/wallet-adapter-react";
-  // const { connection } = useConnection();
-  // const [balance, setBalance] = useState(0);
-  // useEffect to fetch balance from connection.getBalance(publicKey)
-  return 0; // Placeholder
-}
+};
 
 /**
  * Get truncated wallet address for display

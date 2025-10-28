@@ -20,7 +20,11 @@ export const dynamic = "force-dynamic";
 
 export default function OrganizerCreatePage() {
   const router = useRouter();
-  const user = useDashboardUser("organizer");
+  const { user, isLoading: userLoading } = useDashboardUser("organizer");
+  
+  if (userLoading || !user) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
   const menuSections = getMenuSectionsForRole("organizer");
 
   // Ensure user exists in DB on mount

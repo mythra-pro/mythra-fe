@@ -164,7 +164,6 @@ export class MythraClient {
     startTs: number;
     endTs: number;
     totalSupply: number;
-    platformSplitBps: number;
     treasury: PublicKey;
   }) {
     const [eventPda] = getEventPDA(this.wallet.publicKey, params.eventId);
@@ -175,8 +174,7 @@ export class MythraClient {
         params.metadataUri,
         new anchor.BN(params.startTs),
         new anchor.BN(params.endTs),
-        params.totalSupply,
-        params.platformSplitBps
+        params.totalSupply
       )
       .accountsPartial({
         event: eventPda,

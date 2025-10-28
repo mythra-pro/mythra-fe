@@ -28,7 +28,11 @@ import { motion } from "framer-motion";
 export const dynamic = "force-dynamic";
 
 export default function InvestorPortfolioPage() {
-  const user = useDashboardUser("investor");
+  const { user, isLoading: userLoading } = useDashboardUser("investor");
+  
+  if (userLoading || !user) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
   const myInvestments = dummyInvestments.filter(
     (i) => i.investorId === user.id
   );

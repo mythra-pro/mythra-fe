@@ -57,7 +57,11 @@ type EventWithDetails = Event & {
 
 export default function InvestorOpportunitiesPage() {
   const router = useRouter();
-  const user = useDashboardUser("investor");
+  const { user, isLoading: userLoading } = useDashboardUser("investor");
+  
+  if (userLoading || !user) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
   
   const [events, setEvents] = useState<EventWithDetails[]>([]);
   const [loading, setLoading] = useState(true);

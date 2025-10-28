@@ -28,7 +28,11 @@ import { motion } from "framer-motion";
 export const dynamic = "force-dynamic";
 
 export default function AdminApprovalsPage() {
-  const user = useDashboardUser("admin");
+  const { user, isLoading: userLoading } = useDashboardUser("admin");
+  
+  if (userLoading || !user) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
   const [pendingEvents, setPendingEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 

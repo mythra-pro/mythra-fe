@@ -35,7 +35,11 @@ import { motion } from "framer-motion";
 export const dynamic = "force-dynamic";
 
 export default function AdminTransactionsPage() {
-  const user = useDashboardUser("admin");
+  const { user, isLoading: userLoading } = useDashboardUser("admin");
+  
+  if (userLoading || !user) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");

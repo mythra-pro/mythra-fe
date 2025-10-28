@@ -25,7 +25,11 @@ import {
 export const dynamic = "force-dynamic";
 
 export default function OrganizerAnalyticsPage() {
-  const user = useDashboardUser("organizer");
+  const { user, isLoading: userLoading } = useDashboardUser("organizer");
+  
+  if (userLoading || !user) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
   const [stats, setStats] = useState<any>(null);
   const [myEvents, setMyEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

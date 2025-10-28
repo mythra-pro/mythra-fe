@@ -27,8 +27,14 @@ export const SolanaProvider: FC<SolanaProviderProps> = ({ children }) => {
   }, []);
 
   // Configure supported wallets
+  // NOTE: OKX Wallet will be auto-detected by the wallet adapter if the browser extension is installed
+  // No specific adapter needed - it implements the Solana Wallet Standard
   const wallets = useMemo(
-    () => [new PhantomWalletAdapter(), new SolflareWalletAdapter()],
+    () => [
+      new PhantomWalletAdapter(),
+      new SolflareWalletAdapter(),
+      // OKX Wallet auto-detected via Wallet Standard (no adapter needed)
+    ],
     []
   );
 

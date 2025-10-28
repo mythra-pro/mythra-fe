@@ -21,34 +21,39 @@ import Link from "next/link";
 export const dynamic = "force-dynamic";
 
 export default function CustomerDashboard() {
-  const user = useDashboardUser("customer");
+  const { user, isLoading: userLoading } = useDashboardUser("customer");
   const [tickets, setTickets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Upsert user
   useEffect(() => {
+    if (!user) return;
+    
     fetch("/api/users/upsert", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         walletAddress: user.walletAddress,
-        displayName: user.name,
+        displayName: user.displayName,
         email: user.email,
       }),
     }).catch((e) => console.error("Failed to upsert user:", e));
-  }, [user.walletAddress, user.name, user.email]);
+  }, [user]);
 
   // Fetch tickets
   useEffect(() => {
-    setLoading(true);
-    fetch(`/api/tickets?owner=${user.walletAddress}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setTickets(data.tickets || []);
-      })
-      .catch((e) => console.error("Failed to fetch tickets:", e))
-      .finally(() => setLoading(false));
-  }, [user.walletAddress]);
+    if (!user || !user.walletAddress) return;
+    
+    if (user.walletAddress) {
+      fetch(`/api/tickets?owner=${user.walletAddress}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setTickets(data.tickets || []);
+        })
+        .catch((e) => console.error("Failed to fetch tickets:", e))
+        .finally(() => setLoading(false));
+    }
+  }, [user?.walletAddress]);
 
   const myTickets = tickets;
   const activeTickets = myTickets.filter((t) => t.status === "active").length;
@@ -59,6 +64,14 @@ export default function CustomerDashboard() {
   // Get menu sections for customer role
   const menuSections = getMenuSectionsForRole("customer");
 
+  if (userLoading || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl">Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <DashboardLayout user={user} menuSections={menuSections}>
       <div className="space-y-6">
@@ -66,7 +79,7 @@ export default function CustomerDashboard() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-4xl font-bold text-[#03045E]">
-              Welcome, {user.name.split(" ")[0]}!
+              Welcome, {user.displayName.split(" ")[0]}!
             </h1>
             <p className="text-gray-600 mt-2">
               Manage your NFT tickets and explore upcoming events.

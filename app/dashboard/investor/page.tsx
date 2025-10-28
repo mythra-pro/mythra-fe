@@ -47,7 +47,11 @@ interface Event {
 }
 
 export default function InvestorDashboard() {
-  const user = useDashboardUser("investor");
+  const { user, isLoading: userLoading } = useDashboardUser("investor");
+  
+  if (userLoading || !user) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [investingEventId, setInvestingEventId] = useState<string | null>(null);

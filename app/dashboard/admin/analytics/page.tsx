@@ -24,14 +24,18 @@ import { StatCard } from "@/components/stat-card";
 export const dynamic = "force-dynamic";
 
 export default function AdminAnalyticsPage() {
-  const user = useDashboardUser("admin");
+  const { user, isLoading } = useDashboardUser("admin");
+  
+  // Show loading state
+  if (isLoading || !user) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
 
   // Mock analytics data
   const analyticsData = {
     totalUsers: 15420,
     totalEvents: 1847,
     totalRevenue: 2450000,
-    platformFees: 122500,
     userGrowth: 18.2,
     eventGrowth: 23.4,
     revenueGrowth: 31.5,
@@ -70,7 +74,7 @@ export default function AdminAnalyticsPage() {
         </div>
 
         {/* Key Metrics */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <StatCard
             title="Total Users"
             value={analyticsData.totalUsers.toLocaleString()}
@@ -90,18 +94,10 @@ export default function AdminAnalyticsPage() {
           <StatCard
             title="Total Revenue"
             value={`$${(analyticsData.totalRevenue / 1000000).toFixed(1)}M`}
-            description="Gross revenue"
+            description="Total platform revenue"
             icon={DollarSign}
             trend={{ value: analyticsData.revenueGrowth, isPositive: true }}
             delay={0.2}
-          />
-          <StatCard
-            title="Platform Fees"
-            value={`$${(analyticsData.platformFees / 1000).toFixed(0)}K`}
-            description="5% commission"
-            icon={TrendingUp}
-            trend={{ value: analyticsData.revenueGrowth, isPositive: true }}
-            delay={0.3}
           />
         </div>
 

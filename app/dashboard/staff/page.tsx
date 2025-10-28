@@ -23,7 +23,11 @@ import { motion } from "framer-motion";
 export const dynamic = "force-dynamic";
 
 export default function StaffDashboard() {
-  const user = useDashboardUser("staff");
+  const { user, isLoading: userLoading } = useDashboardUser("staff");
+  
+  if (userLoading || !user) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
   const [checkins, setCheckins] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

@@ -35,7 +35,11 @@ type Event = {
 export default function DAOQuestionsPage() {
   const params = useParams();
   const router = useRouter();
-  const user = useDashboardUser("organizer");
+  const { user, isLoading: userLoading } = useDashboardUser("organizer");
+  
+  if (userLoading || !user) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
   const eventId = params.eventId as string;
 
   const [event, setEvent] = useState<Event | null>(null);

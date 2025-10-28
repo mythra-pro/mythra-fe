@@ -20,7 +20,11 @@ import { motion } from "framer-motion";
 export const dynamic = "force-dynamic";
 
 export default function OrganizerStaffPage() {
-  const user = useDashboardUser("organizer");
+  const { user, isLoading: userLoading } = useDashboardUser("organizer");
+  
+  if (userLoading || !user) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
   const myEvents = dummyEvents.filter((e) => e.organizerId === user.id);
   const myStaff = dummyUsers.filter((u) => u.role === "staff");
 

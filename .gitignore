@@ -50,3 +50,6 @@ supabase/migrations
 
 # sql file
 *.sql
+
+# bash file
+*.sh

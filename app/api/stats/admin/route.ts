@@ -32,8 +32,6 @@ export async function GET() {
       return sum + (t.ticket_tier?.price || 0);
     }, 0) || 0;
 
-    const platformFee = totalRevenue * 0.05; // 5% platform fee
-
     // Get check-ins
     const { count: totalCheckins } = await supabase
       .from("checkins")
@@ -45,7 +43,6 @@ export async function GET() {
       publishedEvents,
       pendingApprovals,
       totalRevenue,
-      platformFee,
       totalCheckins: totalCheckins || 0,
     };
 
