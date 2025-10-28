@@ -63,10 +63,21 @@ export default function OrganizerDashboard() {
     fetch(`/api/events?organizerId=${user.id}`)
       .then((res) => res.json())
       .then((data) => {
-        console.log("📊 Fetched events:", data.events);
+        console.log("📊 Fetched events for organizer:", user.id);
+        console.log("📊 Total events:", data.events?.length);
+        console.log("📊 All events:", data.events);
         console.log("🔍 Events with live status:", data.events?.filter((e: any) => e.status === "live"));
         console.log("✅ Events with verified:", data.events?.filter((e: any) => e.verified));
         console.log("⛓️ Events with chain_verified:", data.events?.filter((e: any) => e.chain_verified));
+        
+        // Check for specific event
+        const specificEvent = data.events?.find((e: any) => e.id === "7e86d71a-ca40-49a7-90eb-dd177cbb97f7");
+        if (specificEvent) {
+          console.log("✅ FOUND event 7e86d71a-ca40-49a7-90eb-dd177cbb97f7:", specificEvent);
+        } else {
+          console.log("❌ Event 7e86d71a-ca40-49a7-90eb-dd177cbb97f7 NOT found in fetched events");
+        }
+        
         setEvents(data.events || []);
       })
       .catch((e) => console.error("Failed to fetch events:", e));
@@ -164,6 +175,25 @@ export default function OrganizerDashboard() {
           return (
             <DashboardLayout user={user} menuSections={menuSections}>
               <div className="space-y-6">
+                {/* Approval Notification Banner */}
+                {myEvents.filter((e) => e.status === "dao_voting" || e.status === "approved").length > 0 && (
+                  <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded-lg">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0">
+                        <svg className="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div className="ml-3">
+                        <p className="text-sm font-medium text-green-800">
+                          🎉 You have {myEvents.filter((e) => e.status === "dao_voting" || e.status === "approved").length} approved event(s)! 
+                          Click the "Approved" tab to set up DAO questions and start selling tickets.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                   <div>
@@ -318,11 +348,24 @@ export default function OrganizerDashboard() {
                   </TabsContent>
 
                   <TabsContent value="approved" className="mt-6">
-                    <div className="mb-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
-                      <p className="text-sm text-purple-900">
-                        <strong>⚡ Action Required:</strong> These events are approved by admin. 
-                        Click "DAO Questions" to set up investor voting questions before you can start selling tickets.
-                      </p>
+                    <div className="mb-4 p-4 bg-gradient-to-r from-green-50 to-purple-50 border-2 border-green-300 rounded-lg shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0">
+                          <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-green-900 mb-1">
+                            ✅ Admin Approved - Ready for Next Steps!
+                          </p>
+                          <p className="text-sm text-gray-700">
+                            These events have been approved by admin and are now in <strong>DAO Voting</strong> status. 
+                            Next step: Click "DAO Questions" button on each event card to set up investor voting questions. 
+                            After investors complete voting, you can start selling tickets.
+                          </p>
+                        </div>
+                      </div>
                     </div>
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                       {myEvents
