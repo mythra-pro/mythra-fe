@@ -19,7 +19,6 @@ export function CreateEventForm() {
     totalSupply: 100,
     startDate: "",
     endDate: "",
-    platformFee: 5, // 5%
     treasury: "",
   });
 
@@ -42,9 +41,6 @@ export function CreateEventForm() {
       const startTs = Math.floor(new Date(formData.startDate).getTime() / 1000);
       const endTs = Math.floor(new Date(formData.endDate).getTime() / 1000);
 
-      // Platform fee in basis points
-      const platformSplitBps = formData.platformFee * 100;
-
       // Create event
       const signature = await client.createEvent({
         eventId,
@@ -52,7 +48,6 @@ export function CreateEventForm() {
         startTs,
         endTs,
         totalSupply: formData.totalSupply,
-        platformSplitBps,
         treasury: new PublicKey(formData.treasury),
       });
 
@@ -73,7 +68,6 @@ export function CreateEventForm() {
         totalSupply: 100,
         startDate: "",
         endDate: "",
-        platformFee: 5,
         treasury: "",
       });
     } catch (error: any) {
@@ -177,27 +171,6 @@ export function CreateEventForm() {
           />
         </div>
 
-        {/* Platform Fee */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Platform Fee (%)
-          </label>
-          <input
-            type="number"
-            value={formData.platformFee}
-            onChange={(e) =>
-              setFormData({ ...formData, platformFee: Number(e.target.value) })
-            }
-            min="0"
-            max="100"
-            step="0.1"
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-          <p className="text-xs text-gray-500 mt-1">
-            Percentage of ticket sales that goes to the platform
-          </p>
-        </div>
-
         {/* Treasury */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -214,7 +187,7 @@ export function CreateEventForm() {
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
           />
           <p className="text-xs text-gray-500 mt-1">
-            Wallet address where platform fees will be sent
+            Treasury wallet address for event funds
           </p>
         </div>
 

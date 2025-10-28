@@ -19,11 +19,13 @@ import { StatCard } from "@/components/stat-card";
 export const dynamic = "force-dynamic";
 
 export default function OrganizerPayoutsPage() {
-  const user = useDashboardUser("organizer");
+  const { user, isLoading: userLoading } = useDashboardUser("organizer");
+  
+  if (userLoading || !user) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
   const myEvents = dummyEvents.filter((e) => e.organizerId === user.id);
   const totalRevenue = myEvents.reduce((sum, e) => sum + (e.revenue || 0), 0);
-  const platformFee = totalRevenue * 0.05; // 5% platform fee
-  const netRevenue = totalRevenue - platformFee;
 
   // Get menu sections for organizer role
 
@@ -43,35 +45,28 @@ export default function OrganizerPayoutsPage() {
         </div>
 
         {/* Revenue Overview */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <StatCard
             title="Total Revenue"
             value={`$${totalRevenue.toLocaleString()}`}
-            description="Gross earnings"
+            description="Total earnings"
             icon={DollarSign}
             delay={0}
           />
           <StatCard
-            title="Platform Fees"
-            value={`$${platformFee.toLocaleString()}`}
-            description="5% commission"
-            icon={CreditCard}
-            delay={0.1}
-          />
-          <StatCard
-            title="Net Revenue"
-            value={`$${netRevenue.toLocaleString()}`}
-            description="After platform fees"
+            title="Your Revenue"
+            value={`$${totalRevenue.toLocaleString()}`}
+            description="Available earnings"
             icon={TrendingUp}
             trend={{ value: 23.4, isPositive: true }}
-            delay={0.2}
+            delay={0.1}
           />
           <StatCard
             title="Events"
             value={myEvents.length}
             description="Revenue generating"
             icon={Calendar}
-            delay={0.3}
+            delay={0.2}
           />
         </div>
 
@@ -90,7 +85,7 @@ export default function OrganizerPayoutsPage() {
             <PayoutManagement
               eventId="all-events"
               eventName="All Events"
-              totalRevenue={netRevenue}
+              totalRevenue={totalRevenue}
               organizerWallet={user.walletAddress || ""}
               payouts={[]}
             />
@@ -133,25 +128,17 @@ export default function OrganizerPayoutsPage() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 gap-3">
                       <div className="p-3 bg-white rounded-lg">
-                        <p className="text-xs text-gray-600">Gross Revenue</p>
+                        <p className="text-xs text-gray-600">Total Revenue</p>
                         <p className="text-lg font-bold text-[#0077B6]">
                           ${event.revenue?.toLocaleString() || "0"}
                         </p>
                       </div>
                       <div className="p-3 bg-white rounded-lg">
-                        <p className="text-xs text-gray-600">
-                          Platform Fee (5%)
-                        </p>
-                        <p className="text-lg font-bold text-red-500">
-                          -${((event.revenue || 0) * 0.05).toLocaleString()}
-                        </p>
-                      </div>
-                      <div className="p-3 bg-white rounded-lg">
-                        <p className="text-xs text-gray-600">Net Revenue</p>
+                        <p className="text-xs text-gray-600">Your Earnings</p>
                         <p className="text-lg font-bold text-green-500">
-                          ${((event.revenue || 0) * 0.95).toLocaleString()}
+                          ${event.revenue?.toLocaleString() || "0"}
                         </p>
                       </div>
                     </div>
@@ -197,14 +184,14 @@ export default function OrganizerPayoutsPage() {
               </div>
               <div>
                 <h4 className="font-semibold text-[#03045E] mb-2">
-                  Fee Structure
+                  Payout Details
                 </h4>
                 <ul className="text-sm text-gray-700 space-y-1">
-                  <li>• Platform fee: 5% of gross revenue</li>
-                  <li>• Payment processing: 2.9% + $0.30 per transaction</li>
+                  <li>• 100% of revenue goes to organizers</li>
+                  <li>• No platform fees or commissions</li>
                   <li>• No additional withdrawal fees</li>
                   <li>
-                    • Volume discounts available for high-revenue organizers
+                    • Instant payouts available for all organizers
                   </li>
                 </ul>
               </div>

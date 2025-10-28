@@ -1,84 +1,74 @@
 "use client";
 
-import { User, UserRole } from "@/app/types/user";
-import { useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useWallet } from "@solana/wallet-adapter-react";
+
+// User roles for redirection
+export type UserRole = "customer" | "investor" | "organizer" | "staff" | "admin";
+
+export interface DashboardUser {
+  id: string;
+  name: string; // Required by User type
+  email: string;
+  displayName: string;
+  walletAddress?: string;
+  avatar?: string; // Required by User type
+  role: UserRole;
+  createdAt: Date; // Required by User type
+  isWalletAuth: boolean;
+}
 
 /**
- * Hook to get user data from localStorage for dashboard pages
- * STRICT: Must be authenticated, no fallback
+ * Hook to get current user and verify dashboard access
+ * Supports both wallet-based and email-based authentication
  */
-export function useDashboardUser(role: UserRole): User {
-  // During build/SSR, return a placeholder to prevent build errors
-  if (typeof window === "undefined") {
-    return {
-      id: "build-placeholder",
-      name: "Build Placeholder",
-      email: "build@placeholder.com",
-      role: role,
-      walletAddress: "BuildPlaceholder",
-      avatar: "",
-      createdAt: new Date(),
-    };
-  }
-
-  // Get user data from localStorage
-  const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
-  const userEmail = localStorage.getItem("userEmail");
-  const displayName = localStorage.getItem("displayName");
-
-  // Client-side: redirect to login if not authenticated
-  if (!isAuthenticated || !userEmail) {
-    // Use setTimeout to avoid React state update during render
-    if (typeof window !== "undefined") {
-      setTimeout(() => {
-        window.location.href = "/login";
-      }, 0);
-    }
-
-    // Return placeholder while redirecting
-    return {
-      id: "redirecting",
-      name: "Redirecting...",
-      email: "redirect@mythra.tix",
-      role: role,
-      walletAddress: "Redirecting",
-      avatar: "",
-      createdAt: new Date(),
-    };
-  }
-
-  const user = useMemo(() => {
-    // Get UUID from localStorage (stored during login)
+export const useDashboardUser = (expectedRole: UserRole) => {
+  const router = useRouter();
+  const [user, setUser] = useState<DashboardUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    // Get user from localStorage
     const userId = localStorage.getItem("userId");
+    const userEmail = localStorage.getItem("userEmail");
+    const displayName = localStorage.getItem("displayName");
+    const walletAddress = localStorage.getItem("walletAddress");
+    const userRole = localStorage.getItem("userRole");
+    const isAuthenticated = localStorage.getItem("isAuthenticated");
 
-    console.log("🔍 useDashboardUser - userId from localStorage:", userId);
-    console.log(
-      "🔍 useDashboardUser - userEmail from localStorage:",
-      userEmail
-    );
-
-    if (!userId) {
-      // DO NOT fallback to email-based ID - require valid UUID
-      console.error("❌ No userId (UUID) found in localStorage!");
-      throw new Error(
-        "User ID (UUID) not found in localStorage. Please log in again."
-      );
+    if (isAuthenticated !== "true" || !userId || !userEmail) {
+      // Not authenticated - redirect to login
+      router.push("/login");
+      return;
     }
 
-    const userName = displayName || userEmail?.split("@")[0] || "User";
+    // Note: We don't check wallet mismatch here because dashboard pages
+    // don't have WalletProvider. Wallet mismatch is checked in login flow.
 
-    return {
-      id: userId, // Use UUID from localStorage!
-      name: userName,
-      email: userEmail || "",
-      role: role,
-      walletAddress: userEmail || "",
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userEmail}`,
-      createdAt: new Date(),
-    };
-  }, [userEmail, displayName, role]);
+    if (!userRole || userRole !== expectedRole) {
+      // Wrong role - redirect to correct dashboard
+      router.push(`/dashboard/${userRole || "customer"}`);
+      return;
+    }
 
-  return user;
+    // Authenticated and correct role
+    const isWalletAuth = !!walletAddress;
+    setUser({
+      id: userId,
+      name: displayName || "Unknown User", // Map displayName to name
+      email: userEmail,
+      displayName: displayName || "Unknown User",
+      walletAddress: walletAddress || undefined,
+      avatar: undefined, // Optional field
+      role: userRole as UserRole,
+      createdAt: new Date(), // Set to current date (could be fetched from DB)
+      isWalletAuth,
+    });
+    setIsLoading(false);
+  }, [expectedRole, router]);
+
+  return { user, isLoading };
 }
 
 /**
@@ -86,7 +76,7 @@ export function useDashboardUser(role: UserRole): User {
  */
 interface DashboardGuardProps {
   role: UserRole;
-  children: (user: User) => React.ReactNode;
+  children: (user: DashboardUser) => React.ReactNode;
   fallback?: React.ReactNode;
 }
 
@@ -144,28 +134,19 @@ export function DashboardGuard({
   }
 
   // Get user data
-  try {
-    const user = useDashboardUser(role);
-    return <>{children(user)}</>;
-  } catch (error) {
-    console.error("Authentication error:", error);
+  const { user, isLoading } = useDashboardUser(role);
+  
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-red-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
-          <div className="text-red-600 mb-4">
-            <h2 className="text-2xl font-bold mb-2">Authentication Error</h2>
-            <p className="mb-4">
-              {error instanceof Error ? error.message : "Unknown error"}
-            </p>
-          </div>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-6 py-3 bg-red-600 text-white font-semibold rounded-full hover:bg-red-700 w-full"
-          >
-            Reload & Try Again
-          </button>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
       </div>
     );
   }
+  
+  if (!user) {
+    return null; // Will redirect via hook
+  }
+  
+  return <>{children(user)}</>;
 }

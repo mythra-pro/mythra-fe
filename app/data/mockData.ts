@@ -235,8 +235,6 @@ export const mockPayouts: PayoutData[] = [
     eventId: "evt_004",
     organizerWallet: "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU",
     totalAmount: 642, // 856 tickets * 0.75 SOL
-    organizerAmount: 609.9, // 95%
-    platformFee: 32.1, // 5%
     status: "completed",
     transactionSignature: "5xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsTxHash",
     processedAt: new Date("2025-10-10"),
@@ -247,8 +245,6 @@ export const mockPayouts: PayoutData[] = [
     eventId: "evt_001",
     organizerWallet: "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU",
     totalAmount: 171,
-    organizerAmount: 162.45, // 95%
-    platformFee: 8.55, // 5%
     status: "pending",
     createdAt: new Date("2025-10-05"),
   },

@@ -28,7 +28,11 @@ import { useState } from "react";
 export const dynamic = "force-dynamic";
 
 export default function InvestorCampaignsPage() {
-  const user = useDashboardUser("investor");
+  const { user, isLoading: userLoading } = useDashboardUser("investor");
+  
+  if (userLoading || !user) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");

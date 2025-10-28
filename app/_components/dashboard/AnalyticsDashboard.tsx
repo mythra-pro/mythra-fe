@@ -23,8 +23,6 @@ export default function AnalyticsDashboard({
     checkInTrend,
   } = analytics;
 
-  const organizerPayout = totalRevenue * 0.95;
-  const platformFee = totalRevenue * 0.05;
   const ticketsSoldPercentage = (ticketsSold / maxTickets) * 100;
 
   // Find max values for chart scaling
@@ -81,10 +79,7 @@ export default function AnalyticsDashboard({
               <span className="text-lg text-gray-500"> SOL</span>
             </p>
             <p className="text-sm text-green-600 font-medium">
-              Your Payout: {organizerPayout.toFixed(2)} SOL
-            </p>
-            <p className="text-xs text-gray-500">
-              Platform Fee: {platformFee.toFixed(2)} SOL (5%)
+              Your Payout: {totalRevenue.toFixed(2)} SOL
             </p>
           </div>
         </div>

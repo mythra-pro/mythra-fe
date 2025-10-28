@@ -29,22 +29,24 @@ import Link from "next/link";
 export const dynamic = "force-dynamic";
 
 export default function AdminDashboard() {
-  const user = useDashboardUser("admin");
+  const { user, isLoading: userLoading } = useDashboardUser("admin");
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   // Upsert user
   useEffect(() => {
+    if (!user) return;
+    
     fetch("/api/users/upsert", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         walletAddress: user.walletAddress,
-        displayName: user.name,
+        displayName: user.displayName,
         email: user.email,
       }),
     }).catch((e) => console.error("Failed to upsert user:", e));
-  }, [user.walletAddress, user.name, user.email]);
+  }, [user]);
 
   // Fetch admin stats
   useEffect(() => {
@@ -60,11 +62,19 @@ export default function AdminDashboard() {
 
   const pendingApprovals = stats?.pendingApprovals || 0;
   const totalRevenue = stats?.totalRevenue || 0;
-  const platformFee = stats?.platformFee || 0;
   const totalPoolBalance = 0; // TODO: Add pool balance to stats API
 
   // Get menu sections
   const menuSections = getMenuSectionsForRole("admin");
+
+  // Loading state
+  if (userLoading || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <DashboardLayout user={user} menuSections={menuSections}>
@@ -99,7 +109,7 @@ export default function AdminDashboard() {
           <StatCard
             title="Platform Revenue"
             value={`${totalRevenue.toFixed(2)} SOL`}
-            description={`Fee: ${platformFee.toFixed(2)} SOL`}
+            description="Total platform revenue"
             icon={DollarSign}
             trend={{ value: 25.4, isPositive: true }}
             delay={0.2}
@@ -178,20 +188,12 @@ export default function AdminDashboard() {
                     {totalRevenue.toFixed(2)} SOL
                   </span>
                 </div>
-                <div className="flex justify-between items-center p-3 bg-gradient-to-r from-[#90E0EF] to-white rounded-lg">
-                  <span className="font-medium text-[#03045E]">
-                    Platform Fee (5%)
-                  </span>
-                  <span className="text-xl font-bold text-[#0077B6]">
-                    {platformFee.toFixed(2)} SOL
-                  </span>
-                </div>
                 <div className="flex justify-between items-center p-3 bg-gradient-to-r from-[#48CAE4] to-white rounded-lg">
                   <span className="font-medium text-[#03045E]">
                     Organizer Share
                   </span>
                   <span className="text-xl font-bold text-[#0077B6]">
-                    {(totalRevenue - platformFee).toFixed(2)} SOL
+                    {totalRevenue.toFixed(2)} SOL
                   </span>
                 </div>
               </div>

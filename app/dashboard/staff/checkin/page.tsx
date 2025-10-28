@@ -25,7 +25,11 @@ import {
 } from "@/components/ui/select";
 
 export default function StaffCheckinPage() {
-  const user = useDashboardUser("staff");
+  const { user, isLoading: userLoading } = useDashboardUser("staff");
+  
+  if (userLoading || !user) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
   const myEvents = dummyEvents.filter((e) => e.staffIds?.includes(user.id));
   const [selectedEventId, setSelectedEventId] = useState(myEvents[0]?.id || "");
   const selectedEvent = myEvents.find((e) => e.id === selectedEventId);

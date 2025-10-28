@@ -31,18 +31,15 @@ export default function PayoutManagement({
   const [isProcessing, setIsProcessing] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
 
-  const organizerAmount = totalRevenue * 0.95;
-  const platformFee = totalRevenue * 0.05;
-
   const totalPaid = payouts
     .filter((p) => p.status === "completed")
-    .reduce((sum, p) => sum + p.organizerAmount, 0);
+    .reduce((sum, p) => sum + p.totalAmount, 0);
 
   const pendingAmount = payouts
     .filter((p) => p.status === "pending" || p.status === "processing")
-    .reduce((sum, p) => sum + p.organizerAmount, 0);
+    .reduce((sum, p) => sum + p.totalAmount, 0);
 
-  const availableForPayout = organizerAmount - totalPaid - pendingAmount;
+  const availableForPayout = totalRevenue - totalPaid - pendingAmount;
 
   const handleRequestPayout = async () => {
     if (!onRequestPayout || availableForPayout <= 0) return;
@@ -124,11 +121,11 @@ export default function PayoutManagement({
               <Wallet className="text-2xl text-green-600" />
             </div>
             <span className="text-xs font-medium text-gray-500">
-              YOUR SHARE (95%)
+              YOUR SHARE
             </span>
           </div>
           <p className="text-3xl font-bold text-gray-900">
-            {organizerAmount.toFixed(2)}
+            {totalRevenue.toFixed(2)}
             <span className="text-lg text-gray-500"> SOL</span>
           </p>
         </div>
@@ -170,24 +167,14 @@ export default function PayoutManagement({
         <div className="space-y-4">
           <div className="flex justify-between items-center p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg">
             <div>
-              <p className="font-medium text-gray-900">Your Earnings (95%)</p>
+              <p className="font-medium text-gray-900">Your Earnings</p>
               <p className="text-sm text-gray-600">
                 Transferred to: {organizerWallet.substring(0, 8)}...
                 {organizerWallet.substring(organizerWallet.length - 6)}
               </p>
             </div>
             <p className="text-2xl font-bold text-green-700">
-              {organizerAmount.toFixed(2)} SOL
-            </p>
-          </div>
-
-          <div className="flex justify-between items-center p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
-            <div>
-              <p className="font-medium text-gray-900">Platform Fee (5%)</p>
-              <p className="text-sm text-gray-600">Mythra service fee</p>
-            </div>
-            <p className="text-2xl font-bold text-blue-700">
-              {platformFee.toFixed(2)} SOL
+              {totalRevenue.toFixed(2)} SOL
             </p>
           </div>
         </div>
@@ -235,9 +222,6 @@ export default function PayoutManagement({
                     Amount
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Platform Fee
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
@@ -252,10 +236,7 @@ export default function PayoutManagement({
                       {payout.createdAt.toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                      {payout.organizerAmount.toFixed(2)} SOL
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {payout.platformFee.toFixed(2)} SOL
+                      {payout.totalAmount.toFixed(2)} SOL
                     </td>
                     <td className="px-6 py-4">
                       {getStatusBadge(payout.status)}

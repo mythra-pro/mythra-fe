@@ -93,7 +93,11 @@ const mockProposals = [
 ];
 
 export default function InvestorVotingPage() {
-  const user = useDashboardUser("investor");
+  const { user, isLoading: userLoading } = useDashboardUser("investor");
+  
+  if (userLoading || !user) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
   const [votedProposals, setVotedProposals] = useState<Set<string>>(new Set());
 
   const activeProposals = mockProposals.filter((p) => p.status === "active");

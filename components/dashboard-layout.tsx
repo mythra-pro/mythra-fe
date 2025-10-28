@@ -4,21 +4,11 @@ import { ReactNode, useState, useEffect } from "react";
 import { Menu, X, Bell, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { User } from "@/app/types/user";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { RoleSwitcher } from "@/components/RoleSwitcher";
-// Uncomment to add auth button to dashboard
-// import { CustomWalletButton } from "@/components/program/WalletButton";
+import { CustomWalletButton } from "@/components/program/WalletButton";
 
 export interface MenuItem {
   title: string;
@@ -158,45 +148,8 @@ export function DashboardLayout({
               <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-blue-600" />
             </Button>
 
-            {/* Wallet Button - Optional, uncomment if needed */}
-            {/* <CustomWalletButton /> */}
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="relative h-10 gap-2 px-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
-                >
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.avatar} alt="Wallet User" />
-                    <AvatarFallback className="bg-blue-600 text-white">
-                      {(user.walletAddress || "").slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="hidden md:inline-block text-sm font-mono">
-                    {(user.walletAddress || "").slice(0, 4)}...
-                    {(user.walletAddress || "").slice(-4)}
-                  </span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80 bg-white z-100">
-                <DropdownMenuLabel>
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-xs text-muted-foreground">Email</p>
-                    <p className="text-sm font-mono text-blue-600 break-all">
-                      {user.email}
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-red-600 cursor-pointer"
-                  onClick={handleLogout}
-                >
-                  Sign Out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* Wallet Button - Shows user info & logout */}
+            <CustomWalletButton />
           </div>
         </div>
       </header>

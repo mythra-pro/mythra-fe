@@ -24,7 +24,11 @@ import {
 } from "@/components/ui/select";
 
 export default function StaffCheckinPageComplete() {
-  const user = useDashboardUser("staff");
+  const { user, isLoading: userLoading } = useDashboardUser("staff");
+  
+  if (userLoading || !user) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
   const menuSections = getMenuSectionsForRole("staff");
 
   const [events, setEvents] = useState<any[]>([]);

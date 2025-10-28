@@ -51,7 +51,11 @@ export default function VotePage() {
   const router = useRouter();
   const params = useParams();
   const eventId = params.eventId as string;
-  const user = useDashboardUser("investor");
+  const { user, isLoading: userLoading } = useDashboardUser("investor");
+  
+  if (userLoading || !user) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
 
   const [event, setEvent] = useState<Event | null>(null);
   const [questions, setQuestions] = useState<DAOQuestion[]>([]);
