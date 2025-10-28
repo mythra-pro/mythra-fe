@@ -7,7 +7,6 @@ import { DashboardLayout } from "@/components/dashboard-layout";
 import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
 import { useDashboardUser } from "@/hooks/useDashboardUser";
 import CheckInScanner from "@/app/_components/dashboard/CheckInScanner";
-import { dummyEvents } from "@/lib/dummy-data";
 import { QrCode, Calendar, Users, CheckCircle } from "lucide-react";
 import {
   Card,
@@ -27,33 +26,42 @@ import {
 export default function StaffCheckinPage() {
   const { user, isLoading: userLoading } = useDashboardUser("staff");
   
-  if (userLoading || !user) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
-  }
-  const myEvents = dummyEvents.filter((e) => e.staffIds?.includes(user.id));
-  const [selectedEventId, setSelectedEventId] = useState(myEvents[0]?.id || "");
-  const selectedEvent = myEvents.find((e) => e.id === selectedEventId);
+  // IMPORTANT: All hooks must be called BEFORE any conditional returns (Rules of Hooks)
+  const [selectedEventId, setSelectedEventId] = useState("");
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const menuSections = getMenuSectionsForRole("staff");
 
-  // Ensure user exists in DB on mount
+  // Fetch staff events
   useEffect(() => {
-    const upsertUser = async () => {
+    if (userLoading || !user) return;
+    
+    const fetchEvents = async () => {
       try {
-        await fetch("/api/users/upsert", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            walletAddress: user.walletAddress,
-            displayName: user.name,
-            email: user.email,
-          }),
-        });
-      } catch (e) {
-        console.error("Failed to upsert user:", e);
+        setLoading(true);
+        const res = await fetch(`/api/events?staffId=${user?.id}`);
+        const data = await res.json();
+        setEvents(data.events || []);
+        if (data.events && data.events.length > 0 && !selectedEventId) {
+          setSelectedEventId(data.events[0].id);
+        }
+      } catch (err) {
+        console.error("Error fetching events:", err);
+      } finally {
+        setLoading(false);
       }
     };
-    upsertUser();
-  }, [user.walletAddress, user.name, user.email]);
+    fetchEvents();
+  }, [userLoading, user]);
+  
+  // Loading state - render AFTER all hooks
+  if (userLoading || !user || loading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
+  
+  // Compute values after user is loaded
+  const myEvents = events;
+  const selectedEvent = myEvents.find((e) => e.id === selectedEventId);
 
   return (
     <DashboardLayout user={user} menuSections={menuSections}>

@@ -49,9 +49,7 @@ interface Event {
 export default function InvestorDashboard() {
   const { user, isLoading: userLoading } = useDashboardUser("investor");
   
-  if (userLoading || !user) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
-  }
+  // IMPORTANT: All hooks must be called BEFORE any conditional returns (Rules of Hooks)
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [investingEventId, setInvestingEventId] = useState<string | null>(null);
@@ -63,6 +61,8 @@ export default function InvestorDashboard() {
 
   // Fetch publishable events
   useEffect(() => {
+    if (userLoading || !user) return;
+    
     console.log("📋 Fetching publishable events for investor...");
     setLoading(true);
     fetch("/api/investor/events")
@@ -76,7 +76,12 @@ export default function InvestorDashboard() {
         alert("Failed to load events: " + e.message);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [userLoading, user]);
+  
+  // Loading state - render AFTER all hooks
+  if (userLoading || !user) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
 
   const handleInvest = async (eventId: string) => {
     if (!investAmount || parseFloat(investAmount) <= 0) {

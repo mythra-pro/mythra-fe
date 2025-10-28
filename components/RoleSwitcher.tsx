@@ -120,11 +120,13 @@ export function RoleSwitcher({ currentRole, className }: RoleSwitcherProps) {
     // Map buyer → customer (database has "buyer", app has "customer" dashboard)
     const dashboardRole = newRole === 'buyer' ? 'customer' : newRole;
     
+    console.log("🔄 Switching role to:", dashboardRole);
+    
     // Update localStorage
     localStorage.setItem("userRole", dashboardRole);
 
-    // Redirect to new dashboard
-    router.push(`/dashboard/${dashboardRole}`);
+    // Force a hard reload to ensure clean state
+    window.location.href = `/dashboard/${dashboardRole}`;
   };
 
   // Debug: Log current state

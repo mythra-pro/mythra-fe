@@ -60,14 +60,10 @@ export default function AdminDashboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  const pendingApprovals = stats?.pendingApprovals || 0;
-  const totalRevenue = stats?.totalRevenue || 0;
-  const totalPoolBalance = 0; // TODO: Add pool balance to stats API
-
   // Get menu sections
   const menuSections = getMenuSectionsForRole("admin");
 
-  // Loading state
+  // Loading state - render AFTER all hooks
   if (userLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -75,6 +71,11 @@ export default function AdminDashboard() {
       </div>
     );
   }
+
+  // Compute values after user is loaded
+  const pendingApprovals = stats?.pendingApprovals || 0;
+  const totalRevenue = stats?.totalRevenue || 0;
+  const totalPoolBalance = 0; // TODO: Add pool balance to stats API
 
   return (
     <DashboardLayout user={user} menuSections={menuSections}>

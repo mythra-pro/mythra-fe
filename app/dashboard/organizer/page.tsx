@@ -52,9 +52,15 @@ export default function OrganizerDashboard() {
 
   // Fetch events and stats using user.id from useDashboardUser
   useEffect(() => {
+    // Wait for user to be loaded
+    if (userLoading) {
+      console.log("⏳ Waiting for user to load...");
+      return;
+    }
+
     // user.id is already available from localStorage via useDashboardUser
     if (!user || !user.id) {
-      console.error("❌ No user.id available");
+      console.error("❌ No user.id available", { user, userLoading });
       setLoading(false);
       return;
     }
@@ -93,7 +99,7 @@ export default function OrganizerDashboard() {
       })
       .catch((e) => console.error("Failed to fetch stats:", e))
       .finally(() => setLoading(false));
-  }, [user]);
+  }, [user, userLoading]);
 
   const handleStartSelling = async (eventId: string) => {
     if (!user || !user.id) {
@@ -190,18 +196,29 @@ export default function OrganizerDashboard() {
             <DashboardLayout user={user} menuSections={menuSections}>
               <div className="space-y-6">
                 {/* Approval Notification Banner */}
-                {myEvents.filter((e) => e.status === "dao_voting" || e.status === "approved").length > 0 && (
+                {myEvents.filter((e) => 
+                  e.status === "investment_window" || 
+                  e.status === "dao_process" ||
+                  // Legacy statuses
+                  e.status === "dao_voting" || 
+                  e.status === "approved"
+                ).length > 0 && (
                   <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded-lg">
                     <div className="flex items-center">
                       <div className="flex-shrink-0">
-                        <svg className="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                       </div>
                       <div className="ml-3">
                         <p className="text-sm font-medium text-green-800">
-                          🎉 You have {myEvents.filter((e) => e.status === "dao_voting" || e.status === "approved").length} approved event(s)! 
-                          Click the "Approved" tab to set up DAO questions and start selling tickets.
+                          🎉 You have {myEvents.filter((e) => 
+                            e.status === "investment_window" || 
+                            e.status === "dao_process" ||
+                            e.status === "dao_voting" || 
+                            e.status === "approved"
+                          ).length} approved event(s)! 
+                          Click the "Investment & DAO" tab to set up DAO questions and manage your events.
                         </p>
                       </div>
                     </div>
@@ -263,36 +280,36 @@ export default function OrganizerDashboard() {
 
                 {/* Events Overview */}
                 <Tabs defaultValue="active" className="w-full">
-                  <TabsList className="grid w-full max-w-2xl grid-cols-5 bg-white border border-gray-200">
+                  <TabsList className="inline-flex h-12 w-full items-center justify-start rounded-lg bg-gray-100 p-1 gap-2">
                     <TabsTrigger
                       value="pending"
-                      className="data-[state=active]:bg-yellow-600 data-[state=active]:text-white"
+                      className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-yellow-600 data-[state=active]:text-white data-[state=active]:shadow"
                     >
-                      Pending
+                      ⏳ Pending
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="investment"
+                      className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-purple-600 data-[state=active]:text-white data-[state=active]:shadow"
+                    >
+                      💰 Investment & DAO
                     </TabsTrigger>
                     <TabsTrigger
                       value="active"
-                      className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                      className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow"
                     >
-                      Active
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="approved"
-                      className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
-                    >
-                      Approved
+                      🎫 Selling/Active
                     </TabsTrigger>
                     <TabsTrigger
                       value="draft"
-                      className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                      className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-gray-600 data-[state=active]:text-white data-[state=active]:shadow"
                     >
-                      Draft
+                      📝 Draft
                     </TabsTrigger>
                     <TabsTrigger
                       value="all"
-                      className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                      className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow"
                     >
-                      All Events
+                      📋 All Events
                     </TabsTrigger>
                   </TabsList>
 
@@ -331,10 +348,34 @@ export default function OrganizerDashboard() {
                     )}
                   </TabsContent>
 
-                  <TabsContent value="active" className="mt-6">
+                  <TabsContent value="investment" className="mt-6">
+                    <div className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-purple-300 rounded-lg shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0">
+                          <svg className="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-purple-900 mb-1">
+                            💰 Investment Window & DAO Voting
+                          </p>
+                          <p className="text-sm text-gray-700">
+                            <strong>Investment Window:</strong> Accepting investor contributions.<br/>
+                            <strong>DAO Process:</strong> Investors voting on event questions. Click "DAO Questions" to manage voting.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                       {myEvents
-                        .filter((e) => e.status === "live" && e.verified && e.chain_verified)
+                        .filter((e) => 
+                          e.status === "investment_window" || 
+                          e.status === "dao_process" ||
+                          // Legacy statuses
+                          e.status === "approved" || 
+                          e.status === "dao_voting"
+                        )
                         .map((event, idx) => (
                           <EventCard
                             key={event.id}
@@ -345,8 +386,61 @@ export default function OrganizerDashboard() {
                           />
                         ))}
                     </div>
-                    {myEvents.filter((e) => e.status === "live" && e.verified && e.chain_verified).length ===
-                      0 && (
+                    {myEvents.filter((e) => 
+                      e.status === "investment_window" || 
+                      e.status === "dao_process" ||
+                      e.status === "approved" || 
+                      e.status === "dao_voting"
+                    ).length === 0 && (
+                      <Card className="bg-white border border-gray-200">
+                        <CardContent className="p-12 text-center">
+                          <Calendar className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                          <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                            No events in investment or DAO phase
+                          </h3>
+                          <p className="text-gray-500">
+                            Events approved by admin will appear here for investment and DAO voting.
+                          </p>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="active" className="mt-6">
+                    <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-sm text-green-900">
+                        <strong>🎫 Selling & Active Events:</strong> Tickets are being sold, or event is currently happening.
+                      </p>
+                    </div>
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                      {myEvents
+                        .filter((e) => 
+                          e.status === "selling_tickets" || 
+                          e.status === "waiting_for_event" ||
+                          e.status === "event_running" ||
+                          // Legacy statuses
+                          e.status === "live" ||
+                          e.status === "published" ||
+                          e.status === "ongoing"
+                        )
+                        .map((event, idx) => (
+                          <EventCard
+                            key={event.id}
+                            event={event}
+                            delay={idx * 0.1}
+                            showActions
+                            onStartSelling={handleStartSelling}
+                          />
+                        ))}
+                    </div>
+                    {myEvents.filter((e) => 
+                      e.status === "selling_tickets" || 
+                      e.status === "waiting_for_event" ||
+                      e.status === "event_running" ||
+                      e.status === "live" ||
+                      e.status === "published" ||
+                      e.status === "ongoing"
+                    ).length === 0 && (
                       <Card className="bg-white border border-gray-200">
                         <CardContent className="p-12 text-center">
                           <Calendar className="h-12 w-12 mx-auto text-gray-400 mb-4" />
@@ -354,56 +448,7 @@ export default function OrganizerDashboard() {
                             No active events
                           </h3>
                           <p className="text-gray-500">
-                            Create your first event to get started!
-                          </p>
-                        </CardContent>
-                      </Card>
-                    )}
-                  </TabsContent>
-
-                  <TabsContent value="approved" className="mt-6">
-                    <div className="mb-4 p-4 bg-gradient-to-r from-green-50 to-purple-50 border-2 border-green-300 rounded-lg shadow-sm">
-                      <div className="flex items-start gap-3">
-                        <div className="flex-shrink-0">
-                          <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-green-900 mb-1">
-                            ✅ Admin Approved - Ready for Next Steps!
-                          </p>
-                          <p className="text-sm text-gray-700">
-                            These events have been approved by admin and are now in <strong>DAO Voting</strong> status. 
-                            Next step: Click "DAO Questions" button on each event card to set up investor voting questions. 
-                            After investors complete voting, you can start selling tickets.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                      {myEvents
-                        .filter((e) => e.status === "approved" || e.status === "dao_voting")
-                        .map((event, idx) => (
-                          <EventCard
-                            key={event.id}
-                            event={event}
-                            delay={idx * 0.1}
-                            showActions
-                            onStartSelling={handleStartSelling}
-                          />
-                        ))}
-                    </div>
-                    {myEvents.filter((e) => e.status === "approved" || e.status === "dao_voting").length ===
-                      0 && (
-                      <Card className="bg-white border border-gray-200">
-                        <CardContent className="p-12 text-center">
-                          <Calendar className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                          <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                            No approved events
-                          </h3>
-                          <p className="text-gray-500">
-                            Events approved by admin will appear here.
+                            Events with ticket sales or currently running will appear here.
                           </p>
                         </CardContent>
                       </Card>

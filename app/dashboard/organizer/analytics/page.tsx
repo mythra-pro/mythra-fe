@@ -26,60 +26,21 @@ export const dynamic = "force-dynamic";
 
 export default function OrganizerAnalyticsPage() {
   const { user, isLoading: userLoading } = useDashboardUser("organizer");
-  
-  if (userLoading || !user) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
-  }
   const [stats, setStats] = useState<any>(null);
   const [myEvents, setMyEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Ensure user exists in DB (non-blocking)
-  useEffect(() => {
-    fetch("/api/users/upsert", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        walletAddress: user.walletAddress,
-        displayName: user.name,
-        email: user.email,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("✅ User upserted:", data.user?.id);
-      })
-      .catch((e) => console.error("Failed to upsert user:", e));
-  }, [user.walletAddress, user.name, user.email]);
-
-  // Fetch stats using user.id from useDashboardUser
-  useEffect(() => {
-    if (!user.id) {
-      console.error("❌ No user.id available");
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    Promise.all([
-      fetch(`/api/stats/organizer?organizerId=${user.id}`).then(res => res.json()),
-      fetch(`/api/events?organizerId=${user.id}`).then(res => res.json())
-    ])
-      .then(([statsData, eventsData]) => {
-        setStats(statsData.stats);
-        setMyEvents(eventsData.events || []);
-      })
-      .catch((e) => console.error("Failed to fetch data:", e))
-      .finally(() => setLoading(false));
-  }, [user.id]);
-
-  const totalRevenue = stats?.totalRevenue || 0;
-  const totalAttendees = stats?.totalTicketsSold || 0;
-  const totalEvents = stats?.totalEvents || 0;
-  const avgRevenuePerEvent = totalEvents > 0 ? totalRevenue / totalEvents : 0;
-
-  // Get menu sections for organizer role
   const menuSections = getMenuSectionsForRole("organizer");
+  
+  // Mock stats
+  const totalRevenue = 0;
+  const totalTicketsSold = 0;
+  const totalEvents = 0;
+  const totalAttendees = 0;
+  const avgRevenuePerEvent = 0;
+
+  if (userLoading || !user) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
 
   return (
     <DashboardLayout user={user} menuSections={menuSections}>

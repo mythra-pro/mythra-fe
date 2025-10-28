@@ -4,7 +4,6 @@ import { useState } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
 import { useDashboardUser } from "@/hooks/useDashboardUser";
-import { dummyUsers } from "@/lib/dummy-data";
 import {
   Vote,
   CheckCircle,
@@ -94,54 +93,36 @@ const mockProposals = [
 
 export default function InvestorVotingPage() {
   const { user, isLoading: userLoading } = useDashboardUser("investor");
-  
-  if (userLoading || !user) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
-  }
   const [votedProposals, setVotedProposals] = useState<Set<string>>(new Set());
-
-  const activeProposals = mockProposals.filter((p) => p.status === "active");
-  const userDaoTokens = 1250; // Mock user's DAO tokens
-
-  const handleVote = (proposalId: string, voteType: "for" | "against") => {
-    setVotedProposals((prev) => new Set([...prev, proposalId]));
-    // In a real app, you would make an API call here
-    alert(
-      `Voted ${voteType} on proposal ${proposalId} with ${userDaoTokens} tokens`
-    );
+  const userDaoTokens = 0;
+  const menuSections = getMenuSectionsForRole("investor");
+  const activeProposals = mockProposals.filter((p: any) => p.status === "active");
+  
+  const getTypeColor = (type: string) => {
+    const colors: Record<string, string> = {
+      "Event Approval": "bg-blue-500",
+      "Budget Request": "bg-green-500",
+      "Community Vote": "bg-purple-500",
+    };
+    return colors[type] || "bg-gray-500";
   };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case "active":
-        return "bg-blue-500";
-      case "passed":
-        return "bg-green-500";
-      case "rejected":
-        return "bg-red-500";
-      default:
-        return "bg-gray-500";
-    }
+    const colors: Record<string, string> = {
+      active: "bg-green-500",
+      passed: "bg-blue-500",
+      rejected: "bg-red-500",
+    };
+    return colors[status] || "bg-gray-500";
   };
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case "platform":
-        return "bg-purple-500";
-      case "feature":
-        return "bg-blue-500";
-      case "tokenomics":
-        return "bg-yellow-500";
-      case "partnership":
-        return "bg-green-500";
-      default:
-        return "bg-gray-500";
-    }
+  const handleVote = (_proposalId: string, _voteType: string) => {
+    alert(`Voted ${_voteType} on proposal ${_proposalId}`);
   };
 
-  // Get menu sections for investor role
-
-  const menuSections = getMenuSectionsForRole("investor");
+  if (userLoading || !user) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
 
   return (
     <DashboardLayout user={user} menuSections={menuSections}>

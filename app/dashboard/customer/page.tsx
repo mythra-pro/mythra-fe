@@ -55,15 +55,10 @@ export default function CustomerDashboard() {
     }
   }, [user?.walletAddress]);
 
-  const myTickets = tickets;
-  const activeTickets = myTickets.filter((t) => t.status === "active").length;
-  const totalSpent = myTickets.reduce((sum, t) => {
-    return sum + (t.ticket_tier?.price || 0);
-  }, 0);
-
   // Get menu sections for customer role
   const menuSections = getMenuSectionsForRole("customer");
 
+  // Loading state - render AFTER all hooks
   if (userLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -71,6 +66,13 @@ export default function CustomerDashboard() {
       </div>
     );
   }
+
+  // Compute values after user is loaded
+  const myTickets = tickets;
+  const activeTickets = myTickets.filter((t) => t.status === "active").length;
+  const totalSpent = myTickets.reduce((sum, t) => {
+    return sum + (t.ticket_tier?.price || 0);
+  }, 0);
 
   return (
     <DashboardLayout user={user} menuSections={menuSections}>

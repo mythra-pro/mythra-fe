@@ -1,10 +1,10 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
 import PayoutManagement from "@/app/_components/dashboard/PayoutManagement";
 import { useDashboardUser } from "@/hooks/useDashboardUser";
-import { dummyUsers, dummyEvents } from "@/lib/dummy-data";
 import { DollarSign, TrendingUp, Calendar, CreditCard } from "lucide-react";
 import {
   Card,
@@ -20,12 +20,34 @@ export const dynamic = "force-dynamic";
 
 export default function OrganizerPayoutsPage() {
   const { user, isLoading: userLoading } = useDashboardUser("organizer");
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (userLoading || !user) return;
+    const fetchEvents = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`/api/events?organizerId=${user?.id}`);
+        const data = await res.json();
+        setEvents(data.events || []);
+      } catch (err) {
+        console.error("Error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEvents();
+  }, [userLoading, user]);
   
-  if (userLoading || !user) {
+  // Loading state - render AFTER all hooks
+  if (userLoading || !user || loading) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
-  const myEvents = dummyEvents.filter((e) => e.organizerId === user.id);
-  const totalRevenue = myEvents.reduce((sum, e) => sum + (e.revenue || 0), 0);
+  
+  // Compute values after user is loaded
+  const myEvents = events;
+  const totalRevenue = myEvents.reduce((sum: number, e: any) => sum + (e.revenue || 0), 0);
 
   // Get menu sections for organizer role
 

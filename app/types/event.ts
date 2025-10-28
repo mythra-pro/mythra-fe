@@ -1,43 +1,76 @@
 // Event and Ticket Type Definitions
 
 /**
- * Event Status Flow:
+ * Event Status Flow - Complete 9-Stage Lifecycle:
  *
- * 1. DRAFT - Event created by organizer, still being edited (not used in current flow)
+ * 0. DRAFT - Event created by organizer, still being edited
+ *    - Can be saved and edited multiple times before submission
  *
- * 2. PENDING_APPROVAL - Event submitted by organizer, waiting for admin review
+ * 1. PENDING_APPROVAL - Event submitted, waiting for admin review
  *    - Organizer cannot edit after submission
+ *    - Admin can approve or reject
  *
- * 3. APPROVED - Event approved by admin
- *    - Automatically triggers DAO voting
+ * 2. INVESTMENT_WINDOW - Admin approved, accepting investments
+ *    - Investors can contribute SOL to event vault
+ *    - Organizer can set up DAO questions
+ *    - Vault has a cap (vault_cap field)
  *
- * 4. DAO_VOTING - Event is in DAO voting process
- *    - Investors vote on whether to fund/support the event
+ * 3. DAO_PROCESS - Vault full or ready, DAO voting in progress
+ *    - All investors vote on DAO questions
+ *    - Voting power: 1 wallet = 1 vote (democratic)
+ *    - "Start Selling" button HIDDEN during this phase
  *
- * 5. PUBLISHED - DAO voting passed, event is live on platform
- *    - Tickets can be sold (can_sell_tickets = true)
- *    - Event visible on public /events page
+ * 4. SELLING_TICKETS - DAO complete, tickets available for sale
+ *    - Organizer enabled ticket sales
+ *    - Customers can purchase tickets
+ *    - can_sell_tickets = true
  *
- * 6. LIVE/ONGOING - Event is currently happening
- *    - Check-ins active
+ * 5. WAITING_FOR_EVENT - Ticket sales closed, awaiting event day
+ *    - All tickets sold or sales deadline passed
+ *    - Waiting for event start date
  *
- * 7. COMPLETED - Event has ended
+ * 6. EVENT_RUNNING - Event day, check-ins happening
+ *    - Staff scanning QR codes
+ *    - Active check-ins tracked
  *
- * 8. REJECTED - Event rejected by admin OR failed DAO voting
+ * 7. CALCULATING_INCOME - Event done, organizer calculating revenue
+ *    - Organizer inputs revenue and costs
+ *    - Preparing ROI calculations
  *
- * 9. CANCELLED - Event cancelled by organizer or admin
+ * 8. ROI_DISTRIBUTION - Distributing ROI to investors
+ *    - ROI calculated and being transferred
+ *    - Proportional to investment amounts
+ *
+ * 9. COMPLETED - Event lifecycle complete
+ *    - All ROI distributed
+ *    - Event archived
+ *
+ * REJECTED - Event rejected by admin at approval stage
+ * CANCELLED - Event cancelled at any stage
  */
 export enum EventStatus {
+  // Main lifecycle (9 stages)
   DRAFT = "draft",
   PENDING_APPROVAL = "pending_approval",
-  APPROVED = "approved",
-  REJECTED = "rejected",
-  DAO_VOTING = "dao_voting",
-  PUBLISHED = "published",
-  ONGOING = "ongoing",
-  LIVE = "live",
+  INVESTMENT_WINDOW = "investment_window",
+  DAO_PROCESS = "dao_process",
+  SELLING_TICKETS = "selling_tickets",
+  WAITING_FOR_EVENT = "waiting_for_event",
+  EVENT_RUNNING = "event_running",
+  CALCULATING_INCOME = "calculating_income",
+  ROI_DISTRIBUTION = "roi_distribution",
   COMPLETED = "completed",
+  
+  // Edge cases
+  REJECTED = "rejected",
   CANCELLED = "cancelled",
+  
+  // Legacy statuses (deprecated - kept for backwards compatibility)
+  APPROVED = "approved",        // Use INVESTMENT_WINDOW instead
+  DAO_VOTING = "dao_voting",    // Use DAO_PROCESS instead
+  PUBLISHED = "published",      // Use SELLING_TICKETS instead
+  ONGOING = "ongoing",          // Use EVENT_RUNNING instead
+  LIVE = "live",                // Use SELLING_TICKETS or EVENT_RUNNING instead
 }
 
 /**
@@ -109,6 +142,9 @@ export interface EventData {
   revenue?: number;
   poolBalance?: number;
   staffIds?: string[];
+  // Investment tracking
+  vault_cap?: number;
+  current_investment_amount?: number;
   ticketTypes?: Array<{
     id: string;
     name: string;

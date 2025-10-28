@@ -38,14 +38,14 @@ export async function POST(
 
     const supabase = getServiceSupabase();
 
-    // Update event status directly to dao_voting (combines approval + DAO voting start)
+    // Update event status to investment_window (admin approved, ready for investments)
     const { data: event, error } = await supabase
       .from("events")
       .update({
-        status: "dao_voting",
+        status: "investment_window",
         approved_by: adminId,
         approved_at: new Date().toISOString(),
-        dao_voting_started_at: new Date().toISOString(),
+        investment_window_started_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)
@@ -53,15 +53,16 @@ export async function POST(
       .single();
 
     if (error) {
-      console.error("❌ Error approving event and starting DAO voting:", error);
+      console.error("❌ Error approving event:", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    console.log("✅ Event approved and DAO voting started:", event.id);
+    console.log("✅ Event approved, investment window opened:", event.id);
     return NextResponse.json(
       {
+        success: true,
         event,
-        message: "Event approved successfully. DAO voting has been initiated.",
+        message: "Event approved successfully. Investment window is now open.",
       },
       { status: 200 }
     );

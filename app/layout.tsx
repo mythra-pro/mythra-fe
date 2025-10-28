@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
-// import { SolanaProvider } from '@/lib/providers';
-// import '@solana/wallet-adapter-react-ui/styles.css';
+import { SolanaProvider } from '@/lib/providers';
+import '@solana/wallet-adapter-react-ui/styles.css';
 
 const inter = Inter({
   subsets: ["latin"],
@@ -29,7 +29,9 @@ export default function RootLayout({
         className={`${inter.variable} antialiased font-sans`}
         suppressHydrationWarning
       >
-        {children}
+        <SolanaProvider>
+          {children}
+        </SolanaProvider>
         <Analytics />
       </body>
     </html>

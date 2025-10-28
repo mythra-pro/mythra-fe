@@ -25,9 +25,7 @@ export const dynamic = "force-dynamic";
 export default function StaffDashboard() {
   const { user, isLoading: userLoading } = useDashboardUser("staff");
   
-  if (userLoading || !user) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
-  }
+  // IMPORTANT: All hooks must be called BEFORE any conditional returns (Rules of Hooks)
   const [checkins, setCheckins] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,6 +33,8 @@ export default function StaffDashboard() {
 
   // Ensure user exists in DB (non-blocking)
   useEffect(() => {
+    if (userLoading || !user) return;
+    
     fetch("/api/users/upsert", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -49,11 +49,11 @@ export default function StaffDashboard() {
         console.log("✅ User upserted:", data.user?.id);
       })
       .catch((e) => console.error("Failed to upsert user:", e));
-  }, [user.walletAddress, user.name, user.email]);
+  }, [userLoading, user]);
 
   // Fetch check-ins using user.id from useDashboardUser
   useEffect(() => {
-    if (!user.id) {
+    if (userLoading || !user || !user.id) {
       console.error("❌ No user.id available");
       setLoading(false);
       return;
@@ -75,20 +75,25 @@ export default function StaffDashboard() {
       })
       .catch((e) => console.error("Failed to fetch check-ins:", e))
       .finally(() => setLoading(false));
-  }, [user.id]);
+  }, [user?.id]);
 
   // Get menu sections for staff role
   const menuSections = getMenuSectionsForRole("staff");
-
-  const myEvents = events;
-  const upcomingEvents = events.filter((e: any) => new Date(e.start_time) > new Date());
-  const totalCheckins = checkins.length
 
   const handleScan = () => {
     // Mock scan functionality
     alert("Scanning QR Code: " + scanInput);
     setScanInput("");
   };
+
+  // Loading state - render AFTER all hooks
+  if (userLoading || !user) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
+
+  const myEvents = events;
+  const upcomingEvents = events.filter((e: any) => new Date(e.start_time) > new Date());
+  const totalCheckins = checkins.length
 
   return (
     <DashboardLayout user={user} menuSections={menuSections}>

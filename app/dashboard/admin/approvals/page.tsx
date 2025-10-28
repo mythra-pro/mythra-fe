@@ -29,103 +29,132 @@ export const dynamic = "force-dynamic";
 
 export default function AdminApprovalsPage() {
   const { user, isLoading: userLoading } = useDashboardUser("admin");
-  
-  if (userLoading || !user) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
-  }
   const [pendingEvents, setPendingEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [approvedToday, setApprovedToday] = useState(0);
+  const [rejectedToday, setRejectedToday] = useState(0);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const menuSections = getMenuSectionsForRole("admin");
 
-  // Debug: Log user info
+  // Fetch pending events and stats
   useEffect(() => {
-    console.log("👤 Admin user loaded:", {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-    });
-  }, [user]);
+    if (userLoading) return;
 
-  // Fetch pending events
-  useEffect(() => {
-    setLoading(true);
-    fetch("/api/admin/events/pending")
-      .then((res) => res.json())
-      .then((data) => {
-        setPendingEvents(data.events || []);
-      })
-      .catch((e) => console.error("Failed to fetch pending events:", e))
-      .finally(() => setLoading(false));
-  }, []);
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        console.log("🔍 Fetching pending events for approval...");
+        
+        // Fetch pending events
+        const response = await fetch("/api/admin/events/pending");
+        const data = await response.json();
+        
+        console.log("📊 Pending events fetched:", data.events?.length || 0);
+        
+        if (data.events) {
+          setPendingEvents(data.events);
+        }
+
+        // Fetch today's stats
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const allEventsRes = await fetch("/api/events");
+        const allEventsData = await allEventsRes.json();
+        
+        if (allEventsData.success && allEventsData.events) {
+          const todayApproved = allEventsData.events.filter((e: any) => {
+            const approvedDate = e.approved_at ? new Date(e.approved_at) : null;
+            return approvedDate && approvedDate >= today && (
+              e.status === 'investment_window' || 
+              // Legacy status
+              e.status === 'approved'
+            );
+          });
+          const todayRejected = allEventsData.events.filter((e: any) => {
+            const rejectedDate = e.updated_at ? new Date(e.updated_at) : null;
+            return rejectedDate && rejectedDate >= today && e.status === 'rejected';
+          });
+          
+          setApprovedToday(todayApproved.length);
+          setRejectedToday(todayRejected.length);
+        }
+      } catch (err) {
+        console.error("❌ Error fetching data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [userLoading]);
 
   const handleApprove = async (eventId: string) => {
-    console.log("🔔 Approve clicked. User ID:", user.id);
-
-    if (!user.id) {
-      alert("User not authenticated");
-      return;
-    }
-
     try {
+      console.log("✅ Approving event:", eventId);
+      
       const response = await fetch(`/api/admin/events/${eventId}/approve`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ adminId: user.id }),
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminId: user?.id })
       });
-
-      console.log("📤 Approve request sent with adminId:", user.id);
-
+      
+      const data = await response.json();
+      
       if (response.ok) {
-        const data = await response.json();
-        setPendingEvents(pendingEvents.filter((e) => e.id !== eventId));
-        alert(
-          "✅ Event Approved!\n\n" +
-            "The event has been approved and DAO voting has been initiated.\n" +
-            "Investors can now vote on this event.\n\n" +
-            (data.message || "")
-        );
+        console.log("✅ Event approved successfully");
+        // Remove from pending list
+        setPendingEvents(prev => prev.filter(e => e.id !== eventId));
+        setApprovedToday(prev => prev + 1);
+        alert("Event approved successfully!");
       } else {
-        const data = await response.json();
-        alert("Failed to approve event: " + (data.error || "Unknown error"));
+        console.error("❌ Error approving event:", data.error);
+        alert(`Error: ${data.error || 'Failed to approve event'}`);
       }
-    } catch (e: any) {
-      alert("Error: " + e.message);
+    } catch (err) {
+      console.error("❌ Error approving event:", err);
+      alert("Failed to approve event. Please try again.");
     }
   };
 
   const handleReject = async (eventId: string) => {
-    if (!user.id) {
-      alert("User not authenticated");
-      return;
-    }
-
-    const reason = prompt("Please provide a reason for rejection:");
+    const reason = prompt("Please enter rejection reason:");
     if (!reason) return;
-
+    
     try {
+      console.log("❌ Rejecting event:", eventId);
+      
       const response = await fetch(`/api/admin/events/${eventId}/reject`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ adminId: user.id, reason }),
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          adminId: user?.id,
+          reason 
+        })
       });
-
+      
+      const data = await response.json();
+      
       if (response.ok) {
-        setPendingEvents(pendingEvents.filter((e) => e.id !== eventId));
-        alert("Event rejected successfully!");
+        console.log("✅ Event rejected successfully");
+        // Remove from pending list
+        setPendingEvents(prev => prev.filter(e => e.id !== eventId));
+        setRejectedToday(prev => prev + 1);
+        alert("Event rejected successfully.");
       } else {
-        const data = await response.json();
-        alert("Failed to reject event: " + (data.error || "Unknown error"));
+        console.error("❌ Error rejecting event:", data.error);
+        alert(`Error: ${data.error || 'Failed to reject event'}`);
       }
-    } catch (e: any) {
-      alert("Error: " + e.message);
+    } catch (err) {
+      console.error("❌ Error rejecting event:", err);
+      alert("Failed to reject event. Please try again.");
     }
   };
 
-  // Get menu sections for admin role
-  const menuSections = getMenuSectionsForRole("admin");
+  if (userLoading || !user) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
 
   return (
     <DashboardLayout user={user} menuSections={menuSections}>
@@ -156,7 +185,7 @@ export default function AdminApprovalsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm opacity-90">Approved Today</p>
-                  <p className="text-3xl font-bold">12</p>
+                  <p className="text-3xl font-bold">{approvedToday}</p>
                 </div>
                 <CheckCircle className="h-10 w-10 opacity-75" />
               </div>
@@ -167,7 +196,7 @@ export default function AdminApprovalsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm opacity-90">Rejected Today</p>
-                  <p className="text-3xl font-bold">3</p>
+                  <p className="text-3xl font-bold">{rejectedToday}</p>
                 </div>
                 <XCircle className="h-10 w-10 opacity-75" />
               </div>
@@ -187,7 +216,12 @@ export default function AdminApprovalsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {pendingEvents.length === 0 ? (
+            {loading ? (
+              <div className="p-12 text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading pending events...</p>
+              </div>
+            ) : pendingEvents.length === 0 ? (
               <div className="p-12 text-center">
                 <ShieldCheck className="h-16 w-16 mx-auto text-gray-400 mb-4" />
                 <h3 className="text-xl font-semibold text-gray-700 mb-2">
@@ -232,7 +266,7 @@ export default function AdminApprovalsPage() {
                               <div className="flex items-center gap-2 text-sm text-gray-600">
                                 <Users className="h-4 w-4" />
                                 <span className="font-medium">Organizer:</span>
-                                <span>{event.organizerName}</span>
+                                <span>{event.organizer?.display_name || 'Unknown'}</span>
                               </div>
                               <div className="flex items-center gap-2 text-sm text-gray-600">
                                 <Calendar className="h-4 w-4" />
@@ -280,6 +314,10 @@ export default function AdminApprovalsPage() {
                           {/* Actions */}
                           <div className="flex flex-col gap-3 lg:w-40">
                             <Button
+                              onClick={() => {
+                                setSelectedEvent(event);
+                                setShowDetailsModal(true);
+                              }}
                               variant="outline"
                               className="w-full border-[#0077B6] text-[#0077B6] hover:bg-[#0077B6] hover:text-white"
                             >

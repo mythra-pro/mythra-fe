@@ -1,9 +1,9 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
 import { useDashboardUser } from "@/hooks/useDashboardUser";
-import { dummyUsers, dummyEvents } from "@/lib/dummy-data";
 import { Users, UserPlus, Shield, Calendar, DollarSign } from "lucide-react";
 import {
   Card,
@@ -21,12 +21,39 @@ export const dynamic = "force-dynamic";
 
 export default function OrganizerStaffPage() {
   const { user, isLoading: userLoading } = useDashboardUser("organizer");
+  const [events, setEvents] = useState<any[]>([]);
+  const [staff, setStaff] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (userLoading || !user) return;
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const eventsRes = await fetch(`/api/events?organizerId=${user?.id}`);
+        const eventsData = await eventsRes.json();
+        setEvents(eventsData.events || []);
+        
+        const staffRes = await fetch(`/api/users?role=staff`);
+        const staffData = await staffRes.json();
+        setStaff(staffData.users || []);
+      } catch (err) {
+        console.error("Error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [userLoading, user]);
   
-  if (userLoading || !user) {
+  // Loading state - render AFTER all hooks
+  if (userLoading || !user || loading) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
-  const myEvents = dummyEvents.filter((e) => e.organizerId === user.id);
-  const myStaff = dummyUsers.filter((u) => u.role === "staff");
+  
+  // Compute values after user is loaded
+  const myEvents = events;
+  const myStaff = staff;
 
   // Get menu sections for organizer role
   const menuSections = getMenuSectionsForRole("organizer");
