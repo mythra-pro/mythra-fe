@@ -89,11 +89,19 @@ export async function POST(req: Request) {
       );
     }
 
-    // Validate event status - must be approved or dao_voting to accept investments
-    if (event.status !== "approved" && event.status !== "dao_voting") {
+    // Validate event status - must be in investment_window or dao_process to accept investments
+    const validInvestmentStatuses = [
+      "investment_window", 
+      "dao_process",
+      // Legacy statuses (backwards compatibility)
+      "approved", 
+      "dao_voting"
+    ];
+    
+    if (!validInvestmentStatuses.includes(event.status)) {
       console.error("❌ Event not eligible for investments. Status:", event.status);
       return NextResponse.json(
-        { error: `Event is not accepting investments. Status must be 'approved' or 'dao_voting'. Current status: '${event.status}'` },
+        { error: `Event is not accepting investments. Must be in investment window or DAO process. Current status: '${event.status}'` },
         { status: 400 }
       );
     }
@@ -189,6 +197,23 @@ export async function POST(req: Request) {
         { error: error.message },
         { status: 500 }
       );
+    }
+
+    // Update event's current_investment_amount
+    const newTotal = totalInvested + amountSol;
+    const { error: updateError } = await supabase
+      .from("events")
+      .update({ 
+        current_investment_amount: newTotal,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", eventId);
+
+    if (updateError) {
+      console.error("⚠️ Warning: Failed to update event investment total:", updateError);
+      // Don't fail the investment, just log the warning
+    } else {
+      console.log(`✅ Event investment total updated: ${newTotal} SOL (was ${totalInvested})`);
     }
 
     console.log("✅ Investment created:", investment.id);

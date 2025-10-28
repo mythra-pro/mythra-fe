@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { getServiceSupabase } from "@/lib/supabase/server";
 
-// POST /api/events/[id]/start-selling - Start selling tickets after DAO completion
+// POST /api/events/[eventId]/start-selling - Start selling tickets after DAO completion
 export async function POST(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ eventId: string }> }
 ) {
   try {
     const { organizerId } = await req.json();
-    const { id } = await params;
+    const { eventId } = await params;
 
     if (!organizerId) {
       return NextResponse.json(
@@ -23,7 +23,7 @@ export async function POST(
     const { data: event, error: eventError } = await supabase
       .from("events")
       .select("*")
-      .eq("id", id)
+      .eq("id", eventId)
       .eq("organizer_id", organizerId)
       .single();
 
@@ -38,17 +38,17 @@ export async function POST(
     const { data: questions } = await supabase
       .from("dao_questions")
       .select("id")
-      .eq("event_id", id);
+      .eq("event_id", eventId);
 
     const { data: votes } = await supabase
       .from("dao_question_votes")
       .select("investor_id")
-      .eq("event_id", id);
+      .eq("event_id", eventId);
 
     const { data: investors } = await supabase
       .from("investments")
       .select("investor_id")
-      .eq("event_id", id)
+      .eq("event_id", eventId)
       .eq("status", "confirmed");
 
     const totalQuestions = questions?.length || 0;
@@ -83,7 +83,7 @@ export async function POST(
         chain_verified: true,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", id)
+      .eq("id", eventId)
       .select()
       .single();
 
@@ -98,7 +98,7 @@ export async function POST(
     console.log("✅ Event ready for ticket sales:", updatedEvent.id);
     return NextResponse.json({ event: updatedEvent }, { status: 200 });
   } catch (e: any) {
-    console.error("❌ Unexpected error in POST /api/events/[id]/start-selling:", e);
+    console.error("❌ Unexpected error in POST /api/events/[eventId]/start-selling:", e);
     return NextResponse.json(
       { error: e?.message || "Unexpected error" },
       { status: 500 }

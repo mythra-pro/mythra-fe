@@ -80,8 +80,15 @@ export async function GET(req: Request) {
     console.log("✅ Events fetched:", events?.length || 0);
     if (events && events.length > 0) {
       console.log("📊 First event:", events[0]);
+      console.log("📊 Events by status:", {
+        pending_approval: events.filter(e => e.status === "pending_approval").length,
+        approved: events.filter(e => e.status === "approved").length,
+        dao_voting: events.filter(e => e.status === "dao_voting").length,
+        live: events.filter(e => e.status === "live").length,
+        published: events.filter(e => e.status === "published").length,
+      });
     }
-    return NextResponse.json({ events }, { status: 200 });
+    return NextResponse.json({ success: true, events }, { status: 200 });
   } catch (e: any) {
     console.error("❌ Unexpected error in GET /api/events:", e);
     return NextResponse.json(

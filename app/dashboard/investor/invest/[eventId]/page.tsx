@@ -45,6 +45,7 @@ type Event = {
   };
 };
 
+
 type Investment = {
   id: string;
   amount_sol: number;
@@ -57,126 +58,116 @@ export default function InvestPage() {
   const params = useParams();
   const eventId = params.eventId as string;
   const { user, isLoading: userLoading } = useDashboardUser("investor");
-  
-  if (userLoading || !user) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
-  }
-  const { publicKey, signTransaction, connected } = useWallet();
   const { connection } = useConnection();
-
+  const { publicKey, connected } = useWallet();
+  
   const [event, setEvent] = useState<Event | null>(null);
   const [investments, setInvestments] = useState<Investment[]>([]);
-  const [hasInvested, setHasInvested] = useState(false);
   const [userInvestment, setUserInvestment] = useState<Investment | null>(null);
   const [loading, setLoading] = useState(true);
+  const [amount, setAmount] = useState("");
   const [investing, setInvesting] = useState(false);
-  const [amount, setAmount] = useState("10");
-  const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (eventId) {
-      fetchEventDetails();
-      fetchInvestments();
-    }
-  }, [eventId]);
+    if (userLoading || !user || !eventId) return;
+    fetchEventData();
+  }, [userLoading, user, eventId]);
 
-  const fetchEventDetails = async () => {
+  const fetchEventData = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/events/${eventId}`);
-      const data = await res.json();
       
-      if (data.event) {
-        setEvent(data.event);
-      } else {
+      // Fetch event details
+      const eventRes = await fetch(`/api/events/${eventId}`);
+      const eventData = await eventRes.json();
+      
+      if (!eventData.event) {
         setError("Event not found");
+        setLoading(false);
+        return;
       }
-    } catch (e) {
-      console.error("Error fetching event:", e);
-      setError("Failed to load event details");
+      
+      setEvent(eventData.event);
+      
+      // Fetch investments
+      const investmentsRes = await fetch(`/api/investments?eventId=${eventId}`);
+      const investmentsData = await investmentsRes.json();
+      setInvestments(investmentsData.investments || []);
+      
+      // Check if user already invested
+      if (investmentsData.investments && user?.id) {
+        const userInv = investmentsData.investments.find(
+          (inv: Investment) => inv.investor_id === user?.id
+        );
+        if (userInv) {
+          setUserInvestment(userInv);
+        }
+      }
+      
+    } catch (err) {
+      console.error("Error fetching event data:", err);
+      setError("Failed to load event data");
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchInvestments = async () => {
-    try {
-      const res = await fetch(`/api/investments?eventId=${eventId}`);
-      const data = await res.json();
-      const allInvestments = data.investments || [];
-      setInvestments(allInvestments);
-      
-      // Check if current user has already invested
-      if (user?.id) {
-        const myInvestment = allInvestments.find((inv: Investment) => inv.investor_id === user.id);
-        if (myInvestment) {
-          setHasInvested(true);
-          setUserInvestment(myInvestment);
-        }
-      }
-    } catch (e) {
-      console.error("Error fetching investments:", e);
-    }
-  };
-
   const handleInvest = async () => {
-    if (!user?.id) {
-      setError("User not authenticated");
+    if (!amount || parseFloat(amount) < 0.1 || !user || !event) {
+      setError("Please enter a valid amount (minimum 0.1 SOL)");
       return;
     }
-
-    const amountNum = parseFloat(amount);
-    if (isNaN(amountNum) || amountNum <= 0) {
-      setError("Please enter a valid amount");
-      return;
-    }
-
-    setInvesting(true);
-    setError(null);
 
     try {
-      console.log("💰 Recording investment...");
-      
-      // Generate dummy transaction signature for web2 flow
-      const dummySignature = `dummy_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-      const walletAddress = publicKey?.toString() || user.email || "dummy_wallet";
+      setInvesting(true);
+      setError(null);
 
-      // Record investment in database
-      const investmentRes = await fetch("/api/investments", {
+      const response = await fetch("/api/investments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          eventId,
+          eventId: eventId,
           investorId: user.id,
-          investorWallet: walletAddress,
-          amountSol: amountNum,
-          transactionSignature: dummySignature,
+          investorWallet: user.walletAddress,
+          amountSol: parseFloat(amount),
+          transactionSignature: null, // Demo mode
         }),
       });
 
-      if (!investmentRes.ok) {
-        const errorData = await investmentRes.json();
-        throw new Error(errorData.error || "Failed to record investment");
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Check if error is about exceeding vault capacity
+        if (data.error?.includes("exceeds vault capacity") && data.remaining) {
+          // Auto-set to maximum available amount
+          const maxAmount = data.remaining.toFixed(2);
+          setAmount(maxAmount);
+          setError(`💡 Amount adjusted to maximum available: ${maxAmount} SOL. Click Invest again to proceed.`);
+          setInvesting(false);
+          return;
+        }
+        throw new Error(data.error || "Investment failed");
       }
 
-      const investmentData = await investmentRes.json();
-      console.log("✅ Investment recorded:", investmentData.investment.id);
-
       setSuccess(true);
-
-      // Show success message and redirect after 3 seconds
+      
+      // Redirect to voting page after 2 seconds
       setTimeout(() => {
         router.push(`/dashboard/investor/vote/${eventId}`);
-      }, 3000);
-
-    } catch (e: any) {
-      console.error("❌ Investment failed:", e);
-      setError(e.message || "Failed to complete investment");
-    } finally {
+      }, 2000);
+      
+    } catch (err: any) {
+      console.error("Investment error:", err);
+      setError(err.message || "Failed to process investment");
       setInvesting(false);
     }
   };
+
+  if (userLoading || !user) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
 
   if (loading) {
     return (
@@ -200,64 +191,71 @@ export default function InvestPage() {
   }
 
   // Already invested check
-  if (hasInvested && userInvestment) {
+  if (userInvestment) {
     return (
-      <div className="container mx-auto py-8 px-4 max-w-2xl">
-        <Card className="border-green-500 bg-green-50 dark:bg-green-950">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-6 w-6 text-green-600" />
-              <CardTitle>Already Invested</CardTitle>
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4">
+        <Card className="border-0 bg-white/90 backdrop-blur-sm shadow-2xl max-w-2xl w-full overflow-hidden">
+          <div className="bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 p-8 text-center">
+            <div className="flex justify-center mb-4">
+              <div className="h-24 w-24 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                <CheckCircle2 className="h-16 w-16 text-white drop-shadow-lg" />
+              </div>
             </div>
-            <CardDescription>
+            <CardTitle className="text-4xl font-bold text-white mb-2 drop-shadow-md">
+              ✅ Already Invested!
+            </CardTitle>
+            <CardDescription className="text-emerald-50 text-lg">
               You have already invested in this event
             </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
+          </div>
+          
+          <CardContent className="space-y-6 p-8">
+            <Alert className="border-2 border-green-200 bg-green-50">
+              <AlertCircle className="h-5 w-5 text-green-600" />
+              <AlertDescription className="text-green-800 text-base">
                 <strong>One investment per event:</strong> Each investor can only invest once per event. You can now vote on DAO questions!
               </AlertDescription>
             </Alert>
 
-            <div className="p-4 bg-white dark:bg-gray-900 rounded-lg space-y-2">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Event:</span>
-                <span className="font-semibold">{event.name}</span>
+            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-6 space-y-4 border-2 border-blue-100">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600 font-semibold">🎪 Event:</span>
+                <span className="font-bold text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{event.name}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Your Investment:</span>
-                <span className="font-bold text-green-600">{userInvestment.amount_sol} SOL</span>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600 font-semibold">💰 Your Investment:</span>
+                <span className="font-bold text-2xl text-green-600">{userInvestment.amount_sol} SOL</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Investment Date:</span>
-                <span className="text-sm">{new Date(userInvestment.investment_date).toLocaleDateString()}</span>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600 font-semibold">📅 Investment Date:</span>
+                <span className="text-sm font-semibold text-gray-700">{new Date(userInvestment.investment_date).toLocaleDateString()}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Voting Power:</span>
-                <span className="font-semibold">1 vote per question</span>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600 font-semibold">🗳️ Voting Power:</span>
+                <span className="font-bold text-lg text-purple-600">1 vote per question</span>
               </div>
             </div>
 
-            <Alert className="border-blue-500 bg-blue-50 dark:bg-blue-950">
-              <CheckCircle2 className="h-4 w-4 text-blue-600" />
-              <AlertDescription className="text-blue-800 dark:text-blue-200">
-                <strong>Equal voting power:</strong> All investors get 1 vote per question, regardless of investment amount.
+            <Alert className="border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+              <CheckCircle2 className="h-5 w-5 text-blue-600" />
+              <AlertDescription className="text-blue-800 text-base">
+                <strong>⚖️ Equal voting power:</strong> All investors get 1 vote per question, regardless of investment amount.
               </AlertDescription>
             </Alert>
           </CardContent>
-          <CardFooter className="flex gap-2">
+          
+          <CardFooter className="flex gap-4 p-8 pt-0">
             <Button 
               onClick={() => router.push(`/dashboard/investor/vote/${eventId}`)}
-              className="flex-1"
+              className="flex-1 h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 font-semibold shadow-lg text-base"
             >
-              Vote on DAO Questions
-              <ArrowRight className="h-4 w-4 ml-2" />
+              🗳️ Vote on DAO Questions
+              <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
             <Button 
               variant="outline"
               onClick={() => router.push("/dashboard/investor/opportunities")}
+              className="border-2 border-gray-300 hover:bg-gray-50 font-semibold h-12"
             >
               Browse Events
             </Button>
@@ -271,7 +269,8 @@ export default function InvestPage() {
   const investorCount = new Set(investments.map(inv => inv.investor_id)).size;
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-4xl">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50">
+      <div className="container mx-auto py-8 px-4 max-w-4xl">
       {/* Success State */}
       {success && (
         <Alert className="mb-6 border-green-500 bg-green-50">
@@ -291,17 +290,31 @@ export default function InvestPage() {
       )}
 
       {/* Event Details Card */}
-      <Card className="mb-6">
-        <CardHeader>
+      <Card className="mb-8 border-2 border-blue-200 shadow-2xl bg-white/90 backdrop-blur-sm">
+        <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50 border-b-2 border-blue-100">
           <div className="flex items-start justify-between">
-            <div>
-              <CardTitle className="text-2xl">{event.name}</CardTitle>
-              <CardDescription className="mt-2">
+            <div className="flex-1">
+              <CardTitle className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
+                {event.name}
+              </CardTitle>
+              <CardDescription className="mt-2 text-base text-gray-700">
                 {event.description}
               </CardDescription>
             </div>
-            <Badge variant={event.status === "dao_voting" ? "default" : "secondary"}>
-              {event.status}
+            <Badge 
+              className={
+                event.status === "investment_window" || event.status === "approved"
+                  ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 px-4 py-2 text-base shadow-lg"
+                  : event.status === "dao_process" || event.status === "dao_voting"
+                  ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white border-0 px-4 py-2 text-base shadow-lg"
+                  : "bg-gray-500 text-white border-0 px-4 py-2 text-base shadow-lg"
+              }
+            >
+              {event.status === "investment_window" || event.status === "approved"
+                ? "💰 Open for Investment"
+                : event.status === "dao_process" || event.status === "dao_voting"
+                ? "🗳️ DAO Voting"
+                : event.status}
             </Badge>
           </div>
         </CardHeader>
@@ -318,20 +331,20 @@ export default function InvestPage() {
           </div>
 
           {/* Investment Stats */}
-          <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-2 text-2xl font-bold text-primary">
-                <TrendingUp className="h-6 w-6" />
-                {totalInvested.toFixed(2)} SOL
+          <div className="grid grid-cols-2 gap-6 pt-6 border-t-2 border-blue-100">
+            <div className="bg-gradient-to-br from-orange-500 to-yellow-500 text-white rounded-xl p-6 shadow-lg text-center">
+              <div className="flex items-center justify-center gap-2 text-4xl font-bold mb-2">
+                <TrendingUp className="h-8 w-8" />
+                {totalInvested.toFixed(2)}
               </div>
-              <p className="text-sm text-muted-foreground mt-1">Total Invested</p>
+              <p className="text-sm text-orange-100 font-semibold">SOL Total Invested</p>
             </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-2 text-2xl font-bold">
-                <Users className="h-6 w-6" />
+            <div className="bg-gradient-to-br from-purple-500 to-pink-500 text-white rounded-xl p-6 shadow-lg text-center">
+              <div className="flex items-center justify-center gap-2 text-4xl font-bold mb-2">
+                <Users className="h-8 w-8" />
                 {investorCount}
               </div>
-              <p className="text-sm text-muted-foreground mt-1">Investors</p>
+              <p className="text-sm text-purple-100 font-semibold">Active Investors</p>
             </div>
           </div>
 
@@ -375,29 +388,39 @@ export default function InvestPage() {
       </Card>
 
       {/* Investment Form */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Make Your Investment</CardTitle>
-          <CardDescription>
-            Invest in this event and gain voting rights on DAO decisions
+      <Card className="border-2 border-purple-200 shadow-2xl bg-white/90 backdrop-blur-sm">
+        <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 border-b-2 border-purple-100">
+          <CardTitle className="flex items-center gap-3 text-2xl">
+            <div className="h-12 w-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+              <Wallet className="h-7 w-7 text-white" />
+            </div>
+            <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent font-bold">
+              Make Your Investment
+            </span>
+          </CardTitle>
+          <CardDescription className="text-base text-gray-700 mt-2">
+            💰 Invest in this event and gain voting rights on DAO decisions
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Event Status Check */}
-          {event.status !== "approved" && event.status !== "dao_voting" && (
+          {event.status !== "investment_window" && event.status !== "dao_process" && 
+           event.status !== "approved" && event.status !== "dao_voting" && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
                 <strong>Investment Not Available:</strong> This event is not currently accepting investments. 
-                Event status must be 'approved' or 'dao_voting'. Current status: '{event.status}'
+                Event status must be 'investment_window', 'dao_process', 'approved' or 'dao_voting'. Current status: '{event.status}'
               </AlertDescription>
             </Alert>
           )}
           {/* Amount Input */}
-          <div className="space-y-2">
-            <Label htmlFor="amount">Investment Amount (SOL)</Label>
+          <div className="space-y-3">
+            <Label htmlFor="amount" className="text-base font-semibold flex items-center gap-2">
+              <span>💵</span> Investment Amount (SOL)
+            </Label>
             <div className="relative">
-              <DollarSign className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <DollarSign className="absolute left-4 top-4 h-6 w-6 text-purple-400" />
               <Input
                 id="amount"
                 type="number"
@@ -405,21 +428,38 @@ export default function InvestPage() {
                 min="0.1"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="pl-9"
-                placeholder="Enter amount in SOL"
-                disabled={investing || success || (event.status !== "approved" && event.status !== "dao_voting")}
+                className="pl-14 h-14 text-xl font-semibold border-2 border-purple-200 focus:border-purple-400 rounded-xl"
+                placeholder="0.0"
+                disabled={investing || success || (event.status !== "investment_window" && event.status !== "dao_process" && event.status !== "approved" && event.status !== "dao_voting")}
               />
             </div>
-            <p className="text-sm text-muted-foreground">
-              Minimum investment: 0.1 SOL
-            </p>
+            <div className="flex justify-between items-center">
+              <p className="text-sm text-muted-foreground">
+                ℹ️ Minimum: 0.1 SOL
+              </p>
+              {event.vault_cap && (
+                <p className="text-sm font-semibold text-blue-600">
+                  💎 Max: {(event.vault_cap - totalInvested).toFixed(2)} SOL
+                </p>
+              )}
+            </div>
+            {amount && parseFloat(amount) >= 0.1 && parseFloat(amount) <= (event.vault_cap - totalInvested) && (
+              <p className="text-sm font-bold text-green-600 text-center">
+                ✅ Valid amount!
+              </p>
+            )}
+            {amount && parseFloat(amount) > (event.vault_cap - totalInvested) && (
+              <p className="text-sm font-bold text-orange-600 text-center">
+                ⚠️ Amount exceeds vault capacity! Max: {(event.vault_cap - totalInvested).toFixed(2)} SOL
+              </p>
+            )}
           </div>
 
           {/* Quick Amount Buttons */}
-          <div className="flex gap-2">
+          <div className="grid grid-cols-5 gap-3">
             <Button
               variant="outline"
-              size="sm"
+              className="h-12 font-semibold border-2 border-purple-200 hover:bg-purple-50 hover:border-purple-400 transition-all"
               onClick={() => setAmount("5")}
               disabled={investing || success}
             >
@@ -427,7 +467,7 @@ export default function InvestPage() {
             </Button>
             <Button
               variant="outline"
-              size="sm"
+              className="h-12 font-semibold border-2 border-purple-200 hover:bg-purple-50 hover:border-purple-400 transition-all"
               onClick={() => setAmount("10")}
               disabled={investing || success}
             >
@@ -435,7 +475,7 @@ export default function InvestPage() {
             </Button>
             <Button
               variant="outline"
-              size="sm"
+              className="h-12 font-semibold border-2 border-purple-200 hover:bg-purple-50 hover:border-purple-400 transition-all"
               onClick={() => setAmount("25")}
               disabled={investing || success}
             >
@@ -443,11 +483,19 @@ export default function InvestPage() {
             </Button>
             <Button
               variant="outline"
-              size="sm"
+              className="h-12 font-semibold border-2 border-purple-200 hover:bg-purple-50 hover:border-purple-400 transition-all"
               onClick={() => setAmount("50")}
               disabled={investing || success}
             >
               50 SOL
+            </Button>
+            <Button
+              variant="outline"
+              className="h-12 font-bold border-2 border-blue-400 bg-blue-50 hover:bg-blue-100 hover:border-blue-500 text-blue-700 transition-all"
+              onClick={() => setAmount((event.vault_cap - totalInvested).toFixed(2))}
+              disabled={investing || success}
+            >
+              💎 MAX
             </Button>
           </div>
 
@@ -473,38 +521,40 @@ export default function InvestPage() {
             </div>
           )}
         </CardContent>
-        <CardFooter className="flex justify-between">
+        <CardFooter className="flex gap-4 pt-6 border-t-2 border-purple-100 bg-gray-50">
           <Button
             variant="outline"
             onClick={() => router.back()}
             disabled={investing}
+            className="h-12 border-2 border-gray-300 hover:bg-gray-100 font-semibold"
           >
             Cancel
           </Button>
           <Button
             onClick={handleInvest}
-            disabled={investing || success || !amount || parseFloat(amount) <= 0 || (event.status !== "approved" && event.status !== "dao_voting")}
-            className="gap-2"
+            disabled={investing || success || !amount || parseFloat(amount) < 0.1 || (event.status !== "investment_window" && event.status !== "dao_process" && event.status !== "approved" && event.status !== "dao_voting")}
+            className="flex-1 h-12 text-base font-bold bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg hover:shadow-xl transition-all"
           >
             {investing ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-5 w-5 animate-spin mr-2" />
                 Processing...
               </>
             ) : success ? (
               <>
-                <CheckCircle2 className="h-4 w-4" />
-                Invested!
+                <CheckCircle2 className="h-5 w-5 mr-2" />
+                Invested! 
               </>
             ) : (
               <>
-                Invest {amount} SOL
-                <ArrowRight className="h-4 w-4" />
+                Invest {amount || '...'} SOL
+                <ArrowRight className="h-5 w-5 ml-2" />
               </>
             )}
           </Button>
         </CardFooter>
       </Card>
+      </div>
     </div>
   );
 }

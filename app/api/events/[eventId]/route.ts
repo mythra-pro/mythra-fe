@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { getServiceSupabase } from "@/lib/supabase/server";
 
-// GET /api/events/[id] - Get event by ID or slug
+// GET /api/events/[eventId] - Get event by ID or slug
 export async function GET(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ eventId: string }> }
 ) {
   try {
-    const { id } = await params;
+    const { eventId } = await params;
     const supabase = getServiceSupabase();
 
     // Try to find by ID first, then by slug
@@ -22,12 +22,12 @@ export async function GET(
       `);
 
     // Check if ID is UUID format
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(eventId);
 
     if (isUuid) {
-      query = query.eq("id", id);
+      query = query.eq("id", eventId);
     } else {
-      query = query.eq("slug", id);
+      query = query.eq("slug", eventId);
     }
 
     const { data: event, error } = await query.maybeSingle();
@@ -49,13 +49,13 @@ export async function GET(
   }
 }
 
-// PATCH /api/events/[id] - Update event
+// PATCH /api/events/[eventId] - Update event
 export async function PATCH(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ eventId: string }> }
 ) {
   try {
-    const { id } = await params;
+    const { eventId } = await params;
     const body = await req.json();
     const {
       name,
@@ -91,7 +91,7 @@ export async function PATCH(
     const { data: event, error } = await supabase
       .from("events")
       .update(updates)
-      .eq("id", id)
+      .eq("id", eventId)
       .select()
       .single();
 
@@ -108,19 +108,19 @@ export async function PATCH(
   }
 }
 
-// DELETE /api/events/[id] - Delete event
+// DELETE /api/events/[eventId] - Delete event
 export async function DELETE(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ eventId: string }> }
 ) {
   try {
-    const { id } = await params;
+    const { eventId } = await params;
     const supabase = getServiceSupabase();
 
     const { error } = await supabase
       .from("events")
       .delete()
-      .eq("id", id);
+      .eq("id", eventId);
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });

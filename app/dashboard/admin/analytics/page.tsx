@@ -56,7 +56,6 @@ export default function AdminAnalyticsPage() {
   };
 
   // Get menu sections for admin role
-
   const menuSections = getMenuSectionsForRole("admin");
 
   return (

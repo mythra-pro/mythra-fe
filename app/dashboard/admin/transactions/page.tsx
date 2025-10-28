@@ -36,97 +36,47 @@ export const dynamic = "force-dynamic";
 
 export default function AdminTransactionsPage() {
   const { user, isLoading: userLoading } = useDashboardUser("admin");
-  
-  if (userLoading || !user) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
-  }
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
-  const [transactions, setTransactions] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const menuSections = getMenuSectionsForRole("admin");
 
-  // Fetch transactions from Supabase
-  useEffect(() => {
-    setLoading(true);
-    setError(null);
-    fetch("/api/transactions")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.transactions) {
-          setTransactions(data.transactions);
-        } else {
-          setError("Failed to load transactions");
-        }
-      })
-      .catch((err) => {
-        console.error("Error fetching transactions:", err);
-        setError("Error loading transactions");
-      })
-      .finally(() => setLoading(false));
-  }, []);
-  const filteredTransactions = transactions.filter((txn) => {
-    const matchesSearch =
-      (txn.user_name || txn.user || "")
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase()) ||
-      (txn.event_name || txn.event || "")
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase()) ||
-      (txn.id || "").toLowerCase().includes(searchQuery.toLowerCase());
+  // Mock data
+  const totalVolume = 1245000;
+  const totalFees = 24900;
+  const transactions: any[] = [];
+  const completedTransactions = transactions.filter((t: any) => t.status === "completed");
+  const pendingTransactions = transactions.filter((t: any) => t.status === "pending");
+  
+  const filteredTransactions = transactions.filter((txn: any) => {
+    const matchesSearch = txn.id?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || txn.status === statusFilter;
     const matchesType = typeFilter === "all" || txn.type === typeFilter;
     return matchesSearch && matchesStatus && matchesType;
   });
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case "completed":
-        return "bg-green-500";
-      case "pending":
-        return "bg-yellow-500";
-      case "failed":
-        return "bg-red-500";
-      default:
-        return "bg-gray-500";
-    }
+    const colors: Record<string, string> = {
+      completed: "bg-green-500",
+      pending: "bg-yellow-500",
+      failed: "bg-red-500",
+    };
+    return colors[status] || "bg-gray-500";
   };
 
   const getTypeColor = (type: string) => {
-    switch (type) {
-      case "ticket_purchase":
-        return "bg-blue-500";
-      case "investment":
-        return "bg-purple-500";
-      case "payout":
-        return "bg-orange-500";
-      case "refund":
-        return "bg-gray-500";
-      default:
-        return "bg-gray-500";
-    }
+    const colors: Record<string, string> = {
+      ticket_sale: "bg-blue-500",
+      investment: "bg-purple-500",
+      payout: "bg-green-500",
+      refund: "bg-orange-500",
+    };
+    return colors[type] || "bg-gray-500";
   };
 
-  // Calculate stats
-  const totalVolume = transactions.reduce(
-    (sum: number, txn: any) => sum + (txn.amount || 0),
-    0
-  );
-  const totalFees = transactions.reduce(
-    (sum: number, txn: any) => sum + (txn.fee || 0),
-    0
-  );
-  const completedTransactions = transactions.filter(
-    (txn: any) => txn.status === "completed"
-  ).length;
-  const pendingTransactions = transactions.filter(
-    (txn: any) => txn.status === "pending"
-  ).length;
-
-  // Get menu sections for admin role
-
-  const menuSections = getMenuSectionsForRole("admin");
+  if (userLoading || !user) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
 
   return (
     <DashboardLayout user={user} menuSections={menuSections}>

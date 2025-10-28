@@ -37,68 +37,76 @@ export const dynamic = "force-dynamic";
 
 export default function AdminEventsPage() {
   const { user, isLoading: userLoading } = useDashboardUser("admin");
-  
-  if (userLoading || !user) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
-  }
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const menuSections = getMenuSectionsForRole("admin");
 
-  // Fetch events from Supabase
+  // Fetch all events (admin can see everything)
   useEffect(() => {
-    setLoading(true);
-    setError(null);
-    fetch("/api/events")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.events) {
-          setEvents(data.events);
-        } else {
-          setError("Failed to load events");
-        }
-      })
-      .catch((err) => {
-        console.error("Error fetching events:", err);
-        setError("Error loading events");
-      })
-      .finally(() => setLoading(false));
-  }, []);
+    if (userLoading) return;
 
-  const filteredEvents = events.filter((event) => {
-    const matchesSearch = (event.name || event.title || "")
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || event.status === statusFilter;
+    const fetchEvents = async () => {
+      try {
+        setLoading(true);
+        console.log("🔍 Admin fetching all events...");
+        
+        const response = await fetch("/api/events");
+        const data = await response.json();
+        
+        console.log("📊 Fetched events:", data.events?.length || 0);
+        console.log("🔍 Events with pending_approval:", 
+          data.events?.filter((e: any) => e.status === "pending_approval").length || 0
+        );
+        
+        if (data.success) {
+          setEvents(data.events || []);
+        } else {
+          setError(data.error || "Failed to fetch events");
+        }
+      } catch (err) {
+        console.error("❌ Error fetching events:", err);
+        setError("Failed to load events");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, [userLoading]);
+
+  // Filter events
+  const filteredEvents = events.filter((event: any) => {
+    const matchesSearch = event.name?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === "all" || event.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
-  const handleDeleteEvent = (eventId: string) => {
-    if (confirm("Are you sure you want to delete this event?")) {
-      setEvents(events.filter((e) => e.id !== eventId));
-    }
-  };
-
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case "published":
-        return "bg-green-500";
-      case "draft":
-        return "bg-yellow-500";
-      case "cancelled":
-        return "bg-red-500";
-      case "completed":
-        return "bg-blue-500";
-      default:
-        return "bg-gray-500";
-    }
+    const colors: Record<string, string> = {
+      draft: "bg-gray-500",
+      pending_approval: "bg-yellow-500",
+      pending: "bg-yellow-500",
+      approved: "bg-blue-500",
+      dao_voting: "bg-purple-500",
+      published: "bg-green-500",
+      live: "bg-green-500",
+      rejected: "bg-red-500",
+    };
+    return colors[status] || "bg-gray-500";
   };
 
-  // Get menu sections for admin role
-  const menuSections = getMenuSectionsForRole("admin");
+  const handleDeleteEvent = async (eventId: string) => {
+    if (!confirm("Are you sure you want to delete this event?")) return;
+    alert(`Deleting event ${eventId}`);
+    // TODO: Implement delete logic
+  };
+
+  if (userLoading || !user) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
 
   return (
     <DashboardLayout user={user} menuSections={menuSections}>
@@ -132,9 +140,9 @@ export default function AdminEventsPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm opacity-90">Pending</p>
+                  <p className="text-sm opacity-90">Pending Approval</p>
                   <p className="text-3xl font-bold">
-                    {events.filter((e) => e.status === "draft").length}
+                    {events.filter((e) => e.status === "pending_approval").length}
                   </p>
                 </div>
                 <Calendar className="h-10 w-10 opacity-75" />
@@ -189,6 +197,18 @@ export default function AdminEventsPage() {
                   <SelectItem value="all" className="rounded-lg">
                     All Status
                   </SelectItem>
+                  <SelectItem value="pending_approval" className="rounded-lg">
+                    Pending Approval
+                  </SelectItem>
+                  <SelectItem value="approved" className="rounded-lg">
+                    Approved
+                  </SelectItem>
+                  <SelectItem value="dao_voting" className="rounded-lg">
+                    DAO Voting
+                  </SelectItem>
+                  <SelectItem value="live" className="rounded-lg">
+                    Live
+                  </SelectItem>
                   <SelectItem value="published" className="rounded-lg">
                     Published
                   </SelectItem>
@@ -197,6 +217,9 @@ export default function AdminEventsPage() {
                   </SelectItem>
                   <SelectItem value="completed" className="rounded-lg">
                     Completed
+                  </SelectItem>
+                  <SelectItem value="rejected" className="rounded-lg">
+                    Rejected
                   </SelectItem>
                   <SelectItem value="cancelled" className="rounded-lg">
                     Cancelled

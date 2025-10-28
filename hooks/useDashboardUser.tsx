@@ -27,46 +27,79 @@ export const useDashboardUser = (expectedRole: UserRole) => {
   const router = useRouter();
   const [user, setUser] = useState<DashboardUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
   
   useEffect(() => {
-    // Get user from localStorage
-    const userId = localStorage.getItem("userId");
-    const userEmail = localStorage.getItem("userEmail");
-    const displayName = localStorage.getItem("displayName");
-    const walletAddress = localStorage.getItem("walletAddress");
-    const userRole = localStorage.getItem("userRole");
-    const isAuthenticated = localStorage.getItem("isAuthenticated");
+    // Reset loading state on each check
+    setIsLoading(true);
+    setUser(null);
 
-    if (isAuthenticated !== "true" || !userId || !userEmail) {
-      // Not authenticated - redirect to login
-      router.push("/login");
-      return;
-    }
+    // Small delay to ensure localStorage is updated
+    const timeoutId = setTimeout(() => {
+      // Get user from localStorage
+      const userId = localStorage.getItem("userId");
+      const userEmail = localStorage.getItem("userEmail");
+      const displayName = localStorage.getItem("displayName");
+      const walletAddress = localStorage.getItem("walletAddress");
+      const userRole = localStorage.getItem("userRole");
+      const isAuthenticated = localStorage.getItem("isAuthenticated");
 
-    // Note: We don't check wallet mismatch here because dashboard pages
-    // don't have WalletProvider. Wallet mismatch is checked in login flow.
+      console.log("🔐 useDashboardUser check:", {
+        expectedRole,
+        userRole,
+        isAuthenticated,
+        userId,
+      });
 
-    if (!userRole || userRole !== expectedRole) {
-      // Wrong role - redirect to correct dashboard
-      router.push(`/dashboard/${userRole || "customer"}`);
-      return;
-    }
+      if (isAuthenticated !== "true" || !userId || !userEmail) {
+        // Not authenticated - redirect to login
+        console.log("❌ Not authenticated - redirecting to login");
+        router.push("/login");
+        return;
+      }
 
-    // Authenticated and correct role
-    const isWalletAuth = !!walletAddress;
-    setUser({
-      id: userId,
-      name: displayName || "Unknown User", // Map displayName to name
-      email: userEmail,
-      displayName: displayName || "Unknown User",
-      walletAddress: walletAddress || undefined,
-      avatar: undefined, // Optional field
-      role: userRole as UserRole,
-      createdAt: new Date(), // Set to current date (could be fetched from DB)
-      isWalletAuth,
-    });
-    setIsLoading(false);
-  }, [expectedRole, router]);
+      // Note: We don't check wallet mismatch here because dashboard pages
+      // don't have WalletProvider. Wallet mismatch is checked in login flow.
+
+      if (!userRole || userRole !== expectedRole) {
+        // Wrong role - redirect to correct dashboard
+        console.log("🔄 Wrong role - redirecting to", userRole);
+        router.push(`/dashboard/${userRole || "customer"}`);
+        return;
+      }
+
+      // Authenticated and correct role
+      console.log("✅ Authenticated with correct role");
+      const isWalletAuth = !!walletAddress;
+      setUser({
+        id: userId,
+        name: displayName || "Unknown User", // Map displayName to name
+        email: userEmail,
+        displayName: displayName || "Unknown User",
+        walletAddress: walletAddress || undefined,
+        avatar: undefined, // Optional field
+        role: userRole as UserRole,
+        createdAt: new Date(), // Set to current date (could be fetched from DB)
+        isWalletAuth,
+      });
+      setIsLoading(false);
+    }, 100); // 100ms delay to ensure localStorage is synced
+
+    return () => clearTimeout(timeoutId);
+  }, [expectedRole, router, refreshKey]);
+
+  // Listen for storage events (role switches in other tabs)
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "userRole") {
+        console.log("🔄 Storage change detected - refreshing user");
+        setRefreshKey((prev) => prev + 1);
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   return { user, isLoading };
 }

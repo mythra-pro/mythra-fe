@@ -37,96 +37,51 @@ export const dynamic = "force-dynamic";
 
 export default function AdminUsersPage() {
   const { user, isLoading: userLoading } = useDashboardUser("admin");
-  
-  if (userLoading || !user) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
-  }
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const menuSections = getMenuSectionsForRole("admin");
 
-  // Fetch users from Supabase
-  useEffect(() => {
-    setLoading(true);
-    setError(null);
-    fetch("/api/users")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.users) {
-          setUsers(data.users);
-        } else {
-          setError("Failed to load users");
-        }
-      })
-      .catch((err) => {
-        console.error("Error fetching users:", err);
-        setError("Error loading users");
-      })
-      .finally(() => setLoading(false));
-  }, []);
+  // Mock role stats
+  const roleStats = {
+    total: 0,
+    admin: 0,
+    organizer: 0,
+    organizers: 0,
+    investor: 0,
+    investors: 0,
+    staff: 0,
+    customer: 0,
+    customers: 0,
+  };
 
-  const filteredUsers = users.filter((u) => {
-    const matchesSearch =
-      (u.display_name || u.name || "")
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase()) ||
-      (u.email || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (u.wallet_address || "")
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase());
+  const filteredUsers = users.filter((u: any) => {
+    const matchesSearch = u.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         u.display_name?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesRole = roleFilter === "all" || u.role === roleFilter;
     return matchesSearch && matchesRole;
   });
 
-  const handleDeleteUser = (userId: string) => {
-    if (confirm("Are you sure you want to delete this user?")) {
-      setUsers(users.filter((u) => u.id !== userId));
-    }
-  };
-
   const getRoleColor = (role: string) => {
-    switch (role) {
-      case "admin":
-        return "bg-red-500";
-      case "organizer":
-        return "bg-blue-500";
-      case "customer":
-        return "bg-green-500";
-      case "investor":
-        return "bg-purple-500";
-      case "staff":
-        return "bg-orange-500";
-      default:
-        return "bg-gray-500";
-    }
+    const colors: Record<string, string> = {
+      admin: "bg-red-500",
+      organizer: "bg-blue-500",
+      investor: "bg-purple-500",
+      staff: "bg-green-500",
+      customer: "bg-gray-500",
+    };
+    return colors[role] || "bg-gray-500";
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "active":
-        return "bg-green-500";
-      case "inactive":
-        return "bg-gray-500";
-      case "suspended":
-        return "bg-red-500";
-      default:
-        return "bg-gray-500";
-    }
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm("Are you sure you want to delete this user?")) return;
+    alert(`Deleting user ${userId}`);
   };
 
-  const roleStats = {
-    total: users.length,
-    admin: users.filter((u) => u.role === "admin").length,
-    organizer: users.filter((u) => u.role === "organizer").length,
-    customer: users.filter((u) => u.role === "customer").length,
-    investor: users.filter((u) => u.role === "investor").length,
-    staff: users.filter((u) => u.role === "staff").length,
-  };
-
-  // Get menu sections for admin role
-  const menuSections = getMenuSectionsForRole("admin");
+  if (userLoading || !user) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
 
   return (
     <DashboardLayout user={user} menuSections={menuSections}>

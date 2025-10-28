@@ -21,14 +21,12 @@ export const dynamic = "force-dynamic";
 export default function OrganizerCreatePage() {
   const router = useRouter();
   const { user, isLoading: userLoading } = useDashboardUser("organizer");
-  
-  if (userLoading || !user) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
-  }
   const menuSections = getMenuSectionsForRole("organizer");
 
   // Ensure user exists in DB on mount
   useEffect(() => {
+    if (!user) return; // Guard clause inside effect
+
     const upsertUser = async () => {
       try {
         await fetch("/api/users/upsert", {
@@ -45,7 +43,12 @@ export default function OrganizerCreatePage() {
       }
     };
     upsertUser();
-  }, [user.walletAddress, user.name, user.email]);
+  }, [user]);
+
+  // Show loading state AFTER all hooks
+  if (userLoading || !user) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
 
   return (
     <DashboardLayout user={user} menuSections={menuSections}>

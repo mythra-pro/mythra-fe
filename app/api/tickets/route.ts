@@ -141,7 +141,14 @@ export async function POST(req: Request) {
     }
 
     // Check if event can sell tickets
-    if (event.status !== "live" && !event.can_sell_tickets) {
+    const canSell = 
+      event.status === "live" || 
+      event.status === "selling_tickets" || 
+      event.status === "waiting_for_event" ||
+      event.status === "event_running" ||
+      event.can_sell_tickets === true;
+    
+    if (!canSell) {
       return NextResponse.json(
         { error: "This event is not currently selling tickets" },
         { status: 400 }

@@ -28,6 +28,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 export default function EventDetailPage({
   params,
@@ -35,6 +36,7 @@ export default function EventDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const { publicKey, connected } = useWallet();
   const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -49,10 +51,17 @@ export default function EventDetailPage({
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
   const [purchaseSuccess, setPurchaseSuccess] = useState(false);
   
-  // User info for ticket purchase
+  // User info for ticket purchase - Auto-fill wallet from connected wallet
   const [ownerWallet, setOwnerWallet] = useState("");
   const [ownerName, setOwnerName] = useState("");
   const [ownerEmail, setOwnerEmail] = useState("");
+
+  // Auto-fill wallet address when wallet is connected
+  useEffect(() => {
+    if (connected && publicKey) {
+      setOwnerWallet(publicKey.toBase58());
+    }
+  }, [connected, publicKey]);
 
   useEffect(() => {
     const fetchEventData = async () => {
@@ -608,41 +617,20 @@ export default function EventDetailPage({
                 </div>
               </div>
 
-              {/* Wallet Address */}
+              {/* Wallet Address - Auto-filled from connected wallet */}
               <div className="space-y-2">
-                <Label htmlFor="wallet">Wallet Address or Email *</Label>
+                <Label htmlFor="wallet">Wallet Address *</Label>
                 <Input
                   id="wallet"
-                  placeholder="0x... or your@email.com"
+                  placeholder={connected ? "Auto-filled from your wallet" : "Connect wallet to auto-fill"}
                   value={ownerWallet}
                   onChange={(e) => setOwnerWallet(e.target.value)}
-                  disabled={purchasing}
+                  disabled={purchasing || connected}
+                  className={connected ? "bg-green-50 border-green-300 text-green-900" : ""}
                 />
-              </div>
-
-              {/* Name (Optional) */}
-              <div className="space-y-2">
-                <Label htmlFor="name">Name (Optional)</Label>
-                <Input
-                  id="name"
-                  placeholder="John Doe"
-                  value={ownerName}
-                  onChange={(e) => setOwnerName(e.target.value)}
-                  disabled={purchasing}
-                />
-              </div>
-
-              {/* Email (Optional) */}
-              <div className="space-y-2">
-                <Label htmlFor="email">Email (Optional)</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="john@example.com"
-                  value={ownerEmail}
-                  onChange={(e) => setOwnerEmail(e.target.value)}
-                  disabled={purchasing}
-                />
+                {connected && (
+                  <p className="text-xs text-green-600">✅ Using your connected wallet address</p>
+                )}
               </div>
 
               {/* Price Summary */}

@@ -4,7 +4,6 @@ import { DashboardLayout } from "@/components/dashboard-layout";
 import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
 import { CampaignCard } from "@/components/campaign-card";
 import { useDashboardUser } from "@/hooks/useDashboardUser";
-import { dummyUsers, dummyCampaigns } from "@/lib/dummy-data";
 import { Target, Search, Filter, TrendingUp } from "lucide-react";
 import {
   Card,
@@ -29,37 +28,18 @@ export const dynamic = "force-dynamic";
 
 export default function InvestorCampaignsPage() {
   const { user, isLoading: userLoading } = useDashboardUser("investor");
-  
-  if (userLoading || !user) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
-  }
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
-
-  const filteredCampaigns = dummyCampaigns
-    .filter((campaign) => {
-      const matchesSearch =
-        campaign.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        campaign.eventName.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesStatus =
-        statusFilter === "all" || campaign.status === statusFilter;
-      return matchesSearch && matchesStatus;
-    })
-    .sort((a, b) => {
-      if (sortBy === "newest") {
-        return new Date(b.endDate).getTime() - new Date(a.endDate).getTime();
-      } else if (sortBy === "funding") {
-        return b.currentAmount - a.currentAmount;
-      } else if (sortBy === "deadline") {
-        return new Date(a.endDate).getTime() - new Date(b.endDate).getTime();
-      }
-      return 0;
-    });
-
-  // Get menu sections for investor role
-
   const menuSections = getMenuSectionsForRole("investor");
+
+  // Mock data
+  const campaigns: any[] = [];
+  const filteredCampaigns = campaigns;
+
+  if (userLoading || !user) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
 
   return (
     <DashboardLayout user={user} menuSections={menuSections}>

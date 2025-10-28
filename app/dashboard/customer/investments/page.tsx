@@ -1,10 +1,10 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { getMenuSectionsForRole } from "@/app/utils/dashboardMenus";
 import { CampaignCard } from "@/components/campaign-card";
 import { useDashboardUser } from "@/hooks/useDashboardUser";
-import { dummyUsers, dummyCampaigns, dummyInvestments } from "@/lib/dummy-data";
 import { Target, DollarSign, TrendingUp, Award } from "lucide-react";
 import {
   Card,
@@ -21,19 +21,38 @@ export const dynamic = "force-dynamic";
 
 export default function CustomerInvestmentsPage() {
   const { user, isLoading: userLoading } = useDashboardUser("customer");
+  const [investments, setInvestments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (userLoading || !user) return;
+    fetchInvestments();
+  }, [userLoading, user]);
+
+  const fetchInvestments = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`/api/investments?investorId=${user?.id}`);
+      const data = await res.json();
+      setInvestments(data.investments || []);
+    } catch (err) {
+      console.error("Error fetching investments:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
   
-  if (userLoading || !user) {
+  // Loading state - render AFTER all hooks
+  if (userLoading || !user || loading) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
-  const myInvestments = dummyInvestments.filter(
-    (i) => i.investorId === user.id
-  );
-  const availableCampaigns = dummyCampaigns.filter(
-    (c) => c.status === "active"
-  );
+  
+  // Compute values after user is loaded
+  const myInvestments = investments;
+  const availableCampaigns: any[] = []; // No campaigns feature yet
 
-  const totalInvested = myInvestments.reduce((sum, i) => sum + i.amount, 0);
-  const totalDaoTokens = myInvestments.reduce((sum, i) => sum + i.daoTokens, 0);
+  const totalInvested = myInvestments.reduce((sum, i) => sum + parseFloat(i.amount_sol || 0), 0);
+  const totalDaoTokens = 0; // TODO: Calculate from investments
 
   // Get menu sections for customer role
   const menuSections = getMenuSectionsForRole("customer");
@@ -111,15 +130,14 @@ export default function CustomerInvestmentsPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {myInvestments.map((investment, idx) => {
-                  const campaign = dummyCampaigns.find(
-                    (c) => c.id === investment.campaignId
-                  )!;
-                  const reward = campaign.rewards.find(
-                    (r) => r.id === investment.rewardId
-                  );
-
-                  return (
+                {myInvestments.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500">
+                    <Target className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                    <p className="text-lg font-semibold">No Investments Yet</p>
+                    <p className="text-sm">Start investing to support events</p>
+                  </div>
+                ) : (
+                  myInvestments.map((investment, idx) => (
                     <motion.div
                       key={investment.id}
                       initial={{ opacity: 0, y: 20 }}
@@ -131,10 +149,10 @@ export default function CustomerInvestmentsPage() {
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex-1">
                               <h3 className="text-lg font-bold text-[#03045E] mb-1">
-                                {campaign.eventName}
+                                Investment #{investment.id.slice(0, 8)}
                               </h3>
                               <p className="text-sm text-gray-600">
-                                {campaign.title}
+                                Event Investment
                               </p>
                             </div>
                             <Badge className="bg-green-500 text-white">
@@ -146,7 +164,7 @@ export default function CustomerInvestmentsPage() {
                             <div className="p-2 bg-white rounded-lg">
                               <p className="text-xs text-gray-600">Invested</p>
                               <p className="text-lg font-bold text-[#0077B6]">
-                                ${investment.amount}
+                                {investment.amount_sol} SOL
                               </p>
                             </div>
                             <div className="p-2 bg-white rounded-lg">
@@ -159,45 +177,26 @@ export default function CustomerInvestmentsPage() {
                             </div>
                             <div className="p-2 bg-white rounded-lg">
                               <p className="text-xs text-gray-600">
-                                Reward Tier
+                                Status
                               </p>
                               <p className="text-sm font-semibold text-[#03045E] truncate">
-                                {reward?.title || "N/A"}
+                                {investment.status}
                               </p>
                             </div>
                             <div className="p-2 bg-white rounded-lg">
                               <p className="text-xs text-gray-600">Date</p>
                               <p className="text-sm font-semibold text-[#03045E]">
                                 {new Date(
-                                  investment.investedAt
+                                  investment.investment_date
                                 ).toLocaleDateString()}
                               </p>
                             </div>
                           </div>
-
-                          {reward && (
-                            <div className="mt-3 p-3 bg-gradient-to-r from-[#48CAE4]/20 to-[#90E0EF]/20 rounded-lg border border-[#48CAE4]">
-                              <p className="text-xs font-semibold text-[#03045E] mb-1">
-                                Reward Benefits:
-                              </p>
-                              <div className="flex flex-wrap gap-1">
-                                {reward.benefits.map((benefit, i) => (
-                                  <Badge
-                                    key={i}
-                                    variant="outline"
-                                    className="text-xs"
-                                  >
-                                    {benefit}
-                                  </Badge>
-                                ))}
-                              </div>
-                            </div>
-                          )}
                         </CardContent>
                       </Card>
                     </motion.div>
-                  );
-                })}
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>

@@ -58,7 +58,11 @@ export async function POST(
     }
 
     console.log("✅ Event rejected:", event.id);
-    return NextResponse.json({ event }, { status: 200 });
+    return NextResponse.json({ 
+      success: true, 
+      event,
+      message: "Event rejected successfully."
+    }, { status: 200 });
   } catch (e: any) {
     console.error(
       "❌ Unexpected error in POST /api/admin/events/[id]/reject:",
