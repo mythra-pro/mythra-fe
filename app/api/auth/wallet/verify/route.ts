@@ -244,20 +244,36 @@ export async function POST(req: Request) {
 
     console.log("✅ User created:", newUser.id);
 
+    // Always link user to customer role
+    const { data: customerRole, error: customerRoleError } = await supabase
+      .from("roles")
+      .select("id")
+      .eq("name", "customer")
+      .maybeSingle();
+
+    if (customerRoleError || !customerRole) {
+      console.error("❌ Customer role error:", customerRoleError);
+      // Continue anyway - user is created
+    }
+
+    // Assign primary rolw + customer role
+    const rolesToAssign = [{ user_id: newUser.id, roles_id: roleData.id}]
+    if (customerRole) {
+      rolesToAssign.push({ user_id: newUser.id, roles_id: customerRole.id})
+    }
+
     // Link user to role
     const { error: linkError } = await supabase
       .from("user_roles")
-      .insert({
-        users_id: newUser.id,
-        roles_id: roleData.id,
-      });
+      .insert(rolesToAssign);
 
     if (linkError) {
       console.error("⚠️ Role linking error:", linkError);
       // Continue anyway - user is created
-    } else {
-      console.log("✅ User linked to role:", selectedRole);
     }
+    //  else {
+    //   console.log("✅ User linked to role:", selectedRole);
+    // }
 
     // Clear rate limit on successful registration
     clearRateLimit(clientId, 'auth');
