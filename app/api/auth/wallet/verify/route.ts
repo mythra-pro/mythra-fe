@@ -257,9 +257,9 @@ export async function POST(req: Request) {
     }
 
     // Assign primary rolw + customer role
-    const rolesToAssign = [{ users_id: newUser.id, roles_id: roleData.id}]
+    const rolesToAssign = [{ user_id: newUser.id, role_id: roleData.id}]
     if (customerRole) {
-      rolesToAssign.push({ users_id: newUser.id, roles_id: customerRole.id})
+      rolesToAssign.push({ user_id: newUser.id, role_id: customerRole.id})
     }
 
     // Link user to role
