@@ -63,7 +63,7 @@ export default function EnableSellingPage() {
       alert("🎉 SUCCESS! Ticket selling enabled!\n\n" +
             "The event is now:\n" +
             "✅ can_sell_tickets = true\n" +
-            "✅ status = live\n" +
+            "✅ status = selling_tickets\n" +
             "✅ verified = true\n" +
             "✅ Ready for customers!");
       

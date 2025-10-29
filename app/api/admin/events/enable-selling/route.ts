@@ -21,8 +21,8 @@ export async function POST(req: Request) {
       .update({
         can_sell_tickets: true,
         dao_completed: true,
-        selling_started_at: new Date().toISOString(),
-        status: "live",
+        ticket_sales_started_at: new Date().toISOString(),
+        status: "selling_tickets",
         verified: true,
         chain_verified: true,
         updated_at: new Date().toISOString(),
