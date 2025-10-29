@@ -257,9 +257,9 @@ export async function POST(req: Request) {
     }
 
     // Assign primary rolw + customer role
-    const rolesToAssign = [{ user_id: newUser.id, roles_id: roleData.id}]
+    const rolesToAssign = [{ users_id: newUser.id, roles_id: roleData.id}]
     if (customerRole) {
-      rolesToAssign.push({ user_id: newUser.id, roles_id: customerRole.id})
+      rolesToAssign.push({ users_id: newUser.id, roles_id: customerRole.id})
     }
 
     // Link user to role
@@ -269,7 +269,16 @@ export async function POST(req: Request) {
 
     if (linkError) {
       console.error("⚠️ Role linking error:", linkError);
-      // Continue anyway - user is created
+      // Rollback user creation
+      await supabase
+        .from("users")
+        .delete()
+        .eq("id", newUser.id);
+      
+      return NextResponse.json(
+        { error: "Role assignment failed: " + linkError.message },
+        { status: 500 }
+      );
     }
     //  else {
     //   console.log("✅ User linked to role:", selectedRole);
