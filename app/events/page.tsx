@@ -34,7 +34,7 @@ export default function EventsPage() {
       
       try {
         // Fetch live events where ticket sales are enabled
-        const eventsRes = await fetch("/api/events?status=live");
+        const eventsRes = await fetch("/api/events?status=live,selling_ticket");
         const eventsData = await eventsRes.json();
         
         if (!eventsData.events) {
