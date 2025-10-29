@@ -18,6 +18,7 @@ import {
   Briefcase,
   Building,
   CheckCircle,
+  Ticket,
 } from "lucide-react";
 import { MenuSection } from "@/components/dashboard-layout";
 import { UserRole } from "@/app/types/user";
@@ -44,6 +45,11 @@ export function getMenuSectionsForRole(role: UserRole): MenuSection[] {
         {
           title: "Management",
           items: [
+            {
+              title: "Enable Ticket Selling",
+              href: "/dashboard/admin/enable-selling",
+              icon: Ticket,
+            },
             {
               title: "Users",
               href: "/dashboard/admin/users",

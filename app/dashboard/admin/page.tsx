@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   TrendingUp,
   Database,
+  Ticket,
 } from "lucide-react";
 import {
   Card,
@@ -248,6 +249,17 @@ export default function AdminDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-4">
+            <Link href="/dashboard/admin/enable-selling">
+              <Button
+                variant="outline"
+                className="w-full h-20 border-green-600 hover:bg-green-600 hover:text-white transition-all"
+              >
+                <div className="text-center">
+                  <Ticket className="h-6 w-6 mx-auto mb-2" />
+                  <span className="font-semibold">Enable Ticket Selling</span>
+                </div>
+              </Button>
+            </Link>
             <Link href="/dashboard/admin/events">
               <Button
                 variant="outline"
@@ -278,17 +290,6 @@ export default function AdminDashboard() {
                 <div className="text-center">
                   <DollarSign className="h-6 w-6 mx-auto mb-2" />
                   <span>Transactions</span>
-                </div>
-              </Button>
-            </Link>
-            <Link href="/dashboard/admin/analytics">
-              <Button
-                variant="outline"
-                className="w-full h-20 border-[#0077B6] hover:bg-[#0077B6] hover:text-white"
-              >
-                <div className="text-center">
-                  <TrendingUp className="h-6 w-6 mx-auto mb-2" />
-                  <span>Analytics</span>
                 </div>
               </Button>
             </Link>
