@@ -66,9 +66,9 @@ export default function HeroSection() {
                 Get Started
               </button>
             </Link>
-            <Link href="/">
+            <Link href="https://mythra-2.gitbook.io/mythra-docs-1/" target="_blank" rel="noopener noreferrer">
               <button className="w-full sm:w-auto px-8 py-4 bg-blue-500 text-white font-bold rounded-full border-2 border-blue-400 hover:bg-blue-700 transition-all duration-300 cursor-pointer">
-                Read Our Docs
+                Docs
               </button>
             </Link>
           </div>
